@@ -1,0 +1,16 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.skeleton__line {
+  width: 100%;
+  height: var(--space-4);
+}
+
+.skeleton__line--title {
+  width: 42%;
+  height: var(--space-5);
+}

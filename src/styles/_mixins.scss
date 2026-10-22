@@ -1,0 +1,38 @@
+@mixin elevation($level: 1) {
+  @if $level == 1 {
+    box-shadow: var(--elevation-1);
+  } @else if $level == 2 {
+    box-shadow: var(--elevation-2);
+  } @else {
+    box-shadow: var(--elevation-3);
+  }
+}
+
+@mixin card($level: 1) {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  @include elevation($level);
+}
+
+@mixin focus-ring {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--space-1);
+}
+
+@mixin lift {
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+
+  &:hover {
+    transform: translateY(var(--lift));
+    box-shadow: var(--elevation-2);
+  }
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

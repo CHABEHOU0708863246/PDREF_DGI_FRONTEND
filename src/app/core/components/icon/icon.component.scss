@@ -1,0 +1,19 @@
+:host {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.pd-icon {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.pd-icon--sm {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.pd-icon--lg {
+  width: var(--space-6);
+  height: var(--space-6);
+}

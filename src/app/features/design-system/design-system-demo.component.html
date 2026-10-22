@@ -1,0 +1,376 @@
+<div class="demo" [class.demo--reduced]="reducedDemo()">
+  <main id="main-content" class="pd-container pd-page">
+    <pdref-breadcrumb [items]="breadcrumbs" />
+
+    <pdref-page-header
+      title="Design system PDREF"
+      subtitle="Demonstration uniquement : donnees fictives, aucun appel metier, aucun NCC reel."
+    >
+      <pdref-theme-toggle />
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="showErrorToast()">
+        Afficher une erreur
+      </button>
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="showSuccessToast()">
+        Afficher un succes
+      </button>
+      <a class="pd-btn pd-btn--ghost" routerLink="/dashboard">Accueil</a>
+    </pdref-page-header>
+
+    <section class="demo-hero" aria-labelledby="demo-hero-title">
+      <div>
+        <span class="pd-chip">L2 — fondations</span>
+        <h2 id="demo-hero-title">Un langage visuel commun, sobre et accessible</h2>
+        <p class="pd-muted">
+          Tokens, profondeur legere, etats explicites et composants reutilisables. La 3D reste
+          decorative et legere, jamais WebGL.
+        </p>
+        <div class="pd-cluster">
+          <button type="button" class="pd-btn pd-btn--primary" (click)="theme.setMode('light')">
+            Theme clair
+          </button>
+          <button type="button" class="pd-btn pd-btn--ghost" (click)="theme.setMode('dark')">
+            Theme sombre
+          </button>
+          <button type="button" class="pd-btn pd-btn--ghost" (click)="theme.setMode('system')">
+            Systeme
+          </button>
+          <button
+            type="button"
+            class="pd-btn pd-btn--ghost"
+            [attr.aria-pressed]="reducedDemo()"
+            (click)="reducedDemo.set(!reducedDemo())"
+          >
+            Simuler reduced motion
+          </button>
+        </div>
+      </div>
+      <div class="demo-hero__art" aria-hidden="true">
+        <span class="demo-hero__layer demo-hero__layer--back"></span>
+        <span class="demo-hero__layer demo-hero__layer--middle"></span>
+        <span class="demo-hero__layer demo-hero__layer--front">
+          <pdref-icon name="layout" size="lg" />
+        </span>
+      </div>
+    </section>
+
+    <section class="demo-section" aria-labelledby="tokens-title">
+      <h2 id="tokens-title">Tokens</h2>
+      <div class="token-grid">
+        <article class="pd-card">
+          <h3>Couleurs</h3>
+          <div class="swatches">
+            <span class="swatch swatch--primary">Primaire</span>
+            <span class="swatch swatch--secondary">Secondaire</span>
+            <span class="swatch swatch--success">Succes</span>
+            <span class="swatch swatch--warning">Alerte</span>
+            <span class="swatch swatch--danger">Erreur</span>
+            <span class="swatch swatch--info">Info</span>
+          </div>
+        </article>
+
+        <article class="pd-card">
+          <h3>Typographie</h3>
+          <p class="type-display">Sora — titre</p>
+          <p class="type-body">Inter — corps de texte lisible.</p>
+          <p class="pd-muted">Echelle 12 / 14 / 16 / 20 / 24 / 32 / 40 / 56.</p>
+        </article>
+
+        <article class="pd-card">
+          <h3>Espacements</h3>
+          <div class="space-demo"><span class="space-bar space-bar--1"></span><span>4</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--2"></span><span>8</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--3"></span><span>12</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--4"></span><span>16</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--5"></span><span>24</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--6"></span><span>32</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--7"></span><span>48</span></div>
+          <div class="space-demo"><span class="space-bar space-bar--8"></span><span>64</span></div>
+        </article>
+
+        <article class="pd-card">
+          <h3>Rayons et elevation</h3>
+          <div class="radius-demo">
+            <span class="radius-demo__item radius-demo__item--sm">8</span>
+            <span class="radius-demo__item radius-demo__item--md">12</span>
+            <span class="radius-demo__item radius-demo__item--lg">20</span>
+            <span class="radius-demo__item radius-demo__item--pill">999</span>
+          </div>
+          <div class="elevation-demo">
+            <span class="pd-surface pd-elevation-1">1</span>
+            <span class="pd-surface pd-elevation-2">2</span>
+            <span class="pd-surface pd-elevation-3">3</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="demo-section" aria-labelledby="status-title">
+      <h2 id="status-title">Statuts</h2>
+      <p class="pd-muted">
+        Couleur + icone + libelle : l'information ne depend jamais de la couleur seule.
+      </p>
+      <div class="pd-cluster">
+        @for (code of statusCodes; track code) {
+          <pdref-status-badge [status]="code" />
+        }
+        <pdref-status-badge status="DEMO_WARNING" [pulse]="true" />
+      </div>
+    </section>
+
+    <section class="demo-section" aria-labelledby="buttons-title">
+      <h2 id="buttons-title">Boutons</h2>
+      <div class="pd-cluster">
+        <button type="button" class="pd-btn pd-btn--primary">Action primaire</button>
+        <button type="button" class="pd-btn pd-btn--secondary">Action secondaire</button>
+        <button type="button" class="pd-btn pd-btn--ghost">Action discrete</button>
+        <button type="button" class="pd-btn pd-btn--danger">Action sensible</button>
+        <button type="button" class="pd-btn pd-btn--primary" disabled>Desactive</button>
+      </div>
+    </section>
+
+    @defer (on viewport) {
+      <section class="demo-section" aria-labelledby="states-title">
+        <h2 id="states-title">Etats systemiques</h2>
+        <div class="states-grid">
+          <article class="pd-card">
+            <h3>Vide</h3>
+            <pdref-state-panel
+              state="empty"
+              title="Aucun element"
+              message="Illustration 3D legere, message et action."
+              actionLabel="Actualiser"
+            />
+          </article>
+          <article class="pd-card">
+            <h3>Chargement</h3>
+            <pdref-state-panel state="loading" title="Chargement" message="Squelette anime." />
+          </article>
+          <article class="pd-card">
+            <h3>Succes</h3>
+            <pdref-state-panel
+              state="success"
+              title="Operation reussie"
+              message="Transition douce."
+            />
+          </article>
+          <article class="pd-card">
+            <h3>Erreur</h3>
+            <pdref-state-panel
+              state="error"
+              title="Exemple d erreur"
+              message="Code, trace et reference sont affiches pour le support."
+              [problem]="problem"
+              actionLabel="Reessayer"
+            />
+            <pdref-error-footer [problem]="problem" />
+          </article>
+        </div>
+      </section>
+    } @placeholder (minimum 200ms) {
+      <p class="pd-muted">Faites defiler pour charger les etats.</p>
+    }
+
+    @defer (on viewport) {
+      <section class="demo-section" aria-labelledby="forms-title">
+        <h2 id="forms-title">Formulaires</h2>
+        <div class="forms-grid">
+          <form class="pd-card form-demo" [formGroup]="demoForm">
+            <h3>Champs et guide</h3>
+            <div class="pd-field">
+              <label class="pd-label" for="demo-name">Nom du formulaire</label>
+              <input id="demo-name" class="pd-input" formControlName="name" />
+            </div>
+            <div class="pd-field">
+              <label class="pd-label" for="demo-reference">Reference</label>
+              <input id="demo-reference" class="pd-input" formControlName="reference" />
+            </div>
+            <pdref-phone-input formControlName="phone" label="Telephone" />
+            <pdref-contribuable-select formControlName="contribuable" label="Contribuable (demo)" />
+            <pdref-form-guide
+              [form]="demoForm"
+              [steps]="guideSteps"
+              title="Progression du formulaire"
+            />
+          </form>
+
+          <div class="pd-card upload-demo">
+            <h3>Pieces jointes</h3>
+            <p class="pd-muted">
+              Exemple de demonstration : limites passees en proprietes, pas en dur dans le
+              composant.
+            </p>
+            <pdref-upload-field
+              label="Documents"
+              hint="PDF, JPEG ou PNG — exemple de demonstration."
+              accept="application/pdf,image/jpeg,image/png"
+              [maxFiles]="3"
+              [maxSizeBytes]="5000000"
+            />
+            <div class="pd-cluster">
+              <button type="button" class="pd-btn pd-btn--ghost" (click)="simulateUpload()">
+                Simuler un envoi
+              </button>
+              <pdref-amount-fcfa value="1234567.5" size="lg" />
+              <pdref-amount-fcfa value="-45000" tone="negative" />
+            </div>
+            <pdref-skeleton [lines]="3" label="Exemple de chargement" />
+          </div>
+        </div>
+      </section>
+    } @placeholder (minimum 200ms) {
+      <p class="pd-muted">Faites defiler pour charger les formulaires.</p>
+    }
+
+    @defer (on viewport) {
+      <section class="demo-section" aria-labelledby="table-title">
+        <h2 id="table-title">Tableau de donnees</h2>
+        <div class="table-toolbar">
+          <div class="pd-field table-toolbar__search">
+            <label class="pd-label" for="demo-search">Recherche (non PII)</label>
+            <input
+              id="demo-search"
+              class="pd-input"
+              type="search"
+              placeholder="Reference ou libelle de demonstration"
+              (input)="onSearch($event)"
+            />
+          </div>
+          <div class="pd-cluster">
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost pd-btn--sm"
+              (click)="setTableVariant('success')"
+            >
+              Succes
+            </button>
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost pd-btn--sm"
+              (click)="setTableVariant('loading')"
+            >
+              Chargement
+            </button>
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost pd-btn--sm"
+              (click)="setTableVariant('empty')"
+            >
+              Vide
+            </button>
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost pd-btn--sm"
+              (click)="setTableVariant('error')"
+            >
+              Erreur
+            </button>
+          </div>
+        </div>
+
+        <pdref-data-table
+          [columns]="columns"
+          [rows]="tableRows()"
+          [state]="tableState()"
+          [totalCount]="tableTotal()"
+          [loading]="tableLoading()"
+          [problem]="tableProblem()"
+          [rowKey]="rowKey"
+          (stateChange)="onTableState($event)"
+          (retry)="resetTable()"
+        />
+      </section>
+    } @placeholder (minimum 200ms) {
+      <p class="pd-muted">Faites defiler pour charger le tableau.</p>
+    }
+
+    @defer (on viewport) {
+      <section class="demo-section" aria-labelledby="kpi-title">
+        <h2 id="kpi-title">Indicateurs</h2>
+        <div class="kpi-grid">
+          @for (kpi of kpis; track kpi.label) {
+            <pdref-kpi-card
+              [label]="kpi.label"
+              [value]="kpi.value"
+              format="fcfa"
+              [trend]="{ direction: kpi.direction, label: kpi.trend }"
+              icon="clipboard"
+            />
+          }
+          <pdref-kpi-card label="Chargement" state="loading" />
+          <pdref-kpi-card label="Vide" state="empty" hint="Aucune donnee de demonstration." />
+          <pdref-kpi-card label="Erreur" state="error" [problem]="problem" />
+        </div>
+      </section>
+    } @placeholder (minimum 200ms) {
+      <p class="pd-muted">Faites defiler pour charger les indicateurs.</p>
+    }
+
+    @defer (on viewport) {
+      <section class="demo-section" aria-labelledby="notifications-title">
+        <h2 id="notifications-title">Notifications</h2>
+        <div class="pd-card notification-demo">
+          <div>
+            <h3>Centre de notifications</h3>
+            <p class="pd-muted">Cloche, compteur, panneau, etat vide et lecture.</p>
+          </div>
+          <pdref-notification-center />
+        </div>
+        <div class="pd-cluster">
+          <button type="button" class="pd-btn pd-btn--ghost" (click)="showSuccessToast()">
+            Toast succes
+          </button>
+          <button type="button" class="pd-btn pd-btn--ghost" (click)="showErrorToast()">
+            Toast erreur (problem+json)
+          </button>
+        </div>
+      </section>
+    } @placeholder (minimum 200ms) {
+      <p class="pd-muted">Faites defiler pour charger les notifications.</p>
+    }
+
+    <section class="demo-section" aria-labelledby="dialogs-title">
+      <h2 id="dialogs-title">Dialogues</h2>
+      <div class="pd-cluster">
+        <button type="button" class="pd-btn pd-btn--danger" (click)="confirmOpen.set(true)">
+          Ouvrir la confirmation
+        </button>
+        <button type="button" class="pd-btn pd-btn--primary" (click)="confirmInputOpen.set(true)">
+          Ouvrir la saisie de motif
+        </button>
+      </div>
+    </section>
+
+    <section class="demo-section" aria-labelledby="responsive-title">
+      <h2 id="responsive-title">Responsive et accessibilite</h2>
+      <div class="pd-cluster">
+        <span class="pd-chip">360 px</span>
+        <span class="pd-chip">768 px</span>
+        <span class="pd-chip">1280 px</span>
+      </div>
+      <p class="pd-muted">
+        Navigation clavier, focus visible, labels, aria-describedby, contrastes WCAG AA, etats
+        vides/chargement/erreur/succes et prefers-reduced-motion.
+      </p>
+      <pdref-empty-illustration />
+    </section>
+  </main>
+
+  <pdref-confirm-dialog
+    [(open)]="confirmOpen"
+    title="Confirmer l action"
+    message="Cette action de demonstration ne modifie aucune donnee."
+    details="Aucun appel API n'est effectue."
+    (confirmed)="onConfirmed()"
+    (cancelled)="confirmOpen.set(false)"
+  />
+
+  <pdref-confirm-dialog-with-input
+    [(open)]="confirmInputOpen"
+    title="Motif obligatoire"
+    message="Saisissez un motif d'au moins 10 caracteres."
+    inputLabel="Motif"
+    [minLength]="10"
+    (confirmed)="onInputConfirmed($event)"
+    (cancelled)="confirmInputOpen.set(false)"
+  />
+</div>

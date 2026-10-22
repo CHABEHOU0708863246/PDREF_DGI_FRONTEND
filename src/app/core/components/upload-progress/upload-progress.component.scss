@@ -1,0 +1,14 @@
+.upload-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-toast);
+  height: var(--space-1);
+  background: var(--color-surface-muted);
+}
+
+.upload-progress__bar {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--motion-fast) var(--ease-out);
+}

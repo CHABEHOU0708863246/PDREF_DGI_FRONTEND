@@ -1,0 +1,110 @@
+.form-guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.form-guide__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.form-guide__head h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.form-guide__pct {
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
+}
+
+.form-guide__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.progress {
+  width: 100%;
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+}
+
+.progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+  transition: width var(--motion-base) var(--ease-out);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.step__dot {
+  width: var(--space-3);
+  height: var(--space-3);
+  margin-top: var(--space-1);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  flex: 0 0 auto;
+}
+
+.step__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.step__body small {
+  color: var(--color-text-muted);
+}
+
+.step--current {
+  background: var(--color-info-bg);
+}
+
+.step--current .step__dot {
+  border-color: var(--color-info);
+  background: var(--color-info);
+}
+
+.step--done .step__dot {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+.step--error .step__dot {
+  border-color: var(--color-error);
+  background: var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress__fill {
+    transition: none;
+  }
+}

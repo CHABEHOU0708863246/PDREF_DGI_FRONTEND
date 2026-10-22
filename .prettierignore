@@ -1,0 +1,10 @@
+dist
+coverage
+node_modules
+.angular
+playwright-report
+test-results
+lighthouse-report
+package-lock.json
+.lighthouseci
+lighthouse-desktop.json

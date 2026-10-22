@@ -1,0 +1,156 @@
+:root {
+  color-scheme: light;
+
+  --color-primary: #0b3d91;
+  --color-primary-hover: #092f70;
+  --color-on-primary: #ffffff;
+  --color-secondary: #c9a227;
+  --color-secondary-hover: #b18d1c;
+  --color-on-secondary: #0b1f4d;
+
+  --color-bg: #f6f8fc;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #eef2f8;
+  --color-overlay: rgba(15, 23, 42, 0.52);
+
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: #d7deea;
+  --color-border-strong: #64748b;
+
+  --color-success: #1b7f3a;
+  --color-success-text: #14642d;
+  --color-success-bg: #e6f4ea;
+  --color-warning: #c77700;
+  --color-warning-text: #7a4a00;
+  --color-warning-bg: #fff4e0;
+  --color-error: #b3261e;
+  --color-error-text: #8c1d18;
+  --color-error-bg: #fdecea;
+  --color-info: #0b6bcb;
+  --color-info-text: #084c91;
+  --color-info-bg: #e7f1fb;
+  --color-neutral-bg: #e2e8f0;
+  --color-neutral-text: #334155;
+
+  --color-focus: #0b6bcb;
+  --color-on-focus: #ffffff;
+
+  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Sora Variable', 'Sora', var(--font-body);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: 3.5rem;
+  --leading-tight: 1.4;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  --elevation-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --elevation-2: 0 4px 8px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.08);
+  --elevation-3: 0 12px 24px rgba(15, 23, 42, 0.1), 0 24px 48px rgba(15, 23, 42, 0.12);
+  --shadow-focus: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus);
+
+  --motion-fast: 200ms;
+  --motion-base: 250ms;
+  --motion-slow: 300ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --border-width: 1px;
+  --focus-width: 2px;
+  --lift: -2px;
+
+  --page-margin: var(--space-4);
+  --grid-gutter: var(--space-5);
+  --content-max: 90rem;
+  --sidebar-width: 16.5rem;
+  --topbar-height: 4rem;
+  --size-preview: 14rem;
+  --size-dialog-sm: 28rem;
+  --size-dialog-md: 36rem;
+  --size-empty: 12rem;
+
+  --z-sticky: 100;
+  --z-drawer: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-primary: #6c9bff;
+  --color-primary-hover: #8ab1ff;
+  --color-on-primary: #071426;
+  --color-secondary: #e0b84b;
+  --color-secondary-hover: #f0c95f;
+  --color-on-secondary: #1a1300;
+
+  --color-bg: #0b1220;
+  --color-surface: #121b2e;
+  --color-surface-raised: #17223a;
+  --color-surface-muted: #1b2942;
+  --color-overlay: rgba(0, 0, 0, 0.7);
+
+  --color-text: #e6edf8;
+  --color-text-muted: #a9b7cc;
+  --color-border: #2a3a57;
+  --color-border-strong: #8ea4c4;
+
+  --color-success: #5fd08a;
+  --color-success-text: #8ce5aa;
+  --color-success-bg: #153324;
+  --color-warning: #f3b44e;
+  --color-warning-text: #ffd38a;
+  --color-warning-bg: #3a2a10;
+  --color-error: #ff8a80;
+  --color-error-text: #ffb4ab;
+  --color-error-bg: #3a1715;
+  --color-info: #7fb8ff;
+  --color-info-text: #a9d0ff;
+  --color-info-bg: #132a44;
+  --color-neutral-bg: #24344f;
+  --color-neutral-text: #d7e2f3;
+
+  --color-focus: #8ab4ff;
+
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.45);
+  --elevation-2: 0 4px 8px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.5);
+  --elevation-3: 0 12px 24px rgba(0, 0, 0, 0.5), 0 24px 48px rgba(0, 0, 0, 0.6);
+  --shadow-focus: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus);
+}
+
+@media (min-width: 37.5rem) {
+  :root {
+    --page-margin: var(--space-6);
+  }
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --page-margin: var(--space-7);
+  }
+}

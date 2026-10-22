@@ -1,0 +1,77 @@
+<div class="shell" [class.shell--collapsed]="collapsed()" [class.shell--mobile-open]="mobileOpen()">
+  <aside class="shell__sidebar" [class.shell__sidebar--open]="mobileOpen()">
+    <a class="brand" routerLink="/dashboard" aria-label="PDREF, accueil">
+      <span class="brand__mark" aria-hidden="true">P</span>
+      <span class="brand__text">PDREF<span>DGI</span></span>
+    </a>
+
+    <nav class="nav" aria-label="Navigation principale">
+      <ul>
+        @for (item of navigation; track item.route) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
+              (click)="closeMobile()"
+            >
+              <pdref-icon [name]="item.icon" />
+              <span class="nav__label">{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="shell__foot">
+      <span class="pd-chip">L2 — fondations</span>
+    </div>
+  </aside>
+
+  @if (mobileOpen()) {
+    <button
+      type="button"
+      class="shell__backdrop"
+      aria-label="Fermer la navigation"
+      (click)="closeMobile()"
+    ></button>
+  }
+
+  <div class="shell__main">
+    <header class="topbar">
+      <button
+        type="button"
+        class="pd-icon-btn"
+        [attr.aria-label]="collapsed() ? 'Deplier la navigation' : 'Reduire la navigation'"
+        (click)="toggleSidebar()"
+      >
+        <pdref-icon name="menu" />
+      </button>
+
+      <pdref-breadcrumb [items]="breadcrumbs.items()" />
+
+      <div class="topbar__actions">
+        <pdref-theme-toggle />
+        <pdref-notification-center />
+        @if (user(); as currentUser) {
+          <span class="topbar__user">
+            <pdref-icon name="user" size="sm" />
+            <span class="topbar__user-name">{{ currentUser.displayName }}</span>
+          </span>
+          <button type="button" class="pd-icon-btn" aria-label="Se deconnecter" (click)="logout()">
+            <pdref-icon name="logout" />
+          </button>
+        }
+      </div>
+    </header>
+
+    <main id="main-content" class="content" tabindex="-1">
+      <router-outlet />
+    </main>
+
+    <footer class="shell__footer">
+      <span>PDREF v2 — L2</span>
+      <span class="pd-muted">Direction Generale des Impots — Cote d'Ivoire</span>
+    </footer>
+  </div>
+</div>

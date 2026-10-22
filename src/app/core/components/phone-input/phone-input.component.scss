@@ -1,0 +1,30 @@
+.phone-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.phone-input__row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.phone-input__country {
+  flex: 0 0 auto;
+  max-width: 45%;
+}
+
+.phone-input__number {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 37.4375rem) {
+  .phone-input__row {
+    flex-direction: column;
+  }
+
+  .phone-input__country {
+    max-width: none;
+  }
+}

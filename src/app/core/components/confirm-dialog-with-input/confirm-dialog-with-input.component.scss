@@ -1,0 +1,67 @@
+.dialog {
+  width: min(var(--size-dialog-md), calc(100vw - var(--space-5)));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+  backdrop-filter: blur(var(--space-1));
+}
+
+.dialog__card {
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-3);
+}
+
+.dialog__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.dialog__head h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+.dialog__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.dialog p {
+  margin: var(--space-4) 0;
+}
+
+.confirm-input {
+  min-height: var(--space-8);
+}
+
+textarea.confirm-input {
+  min-height: calc(var(--space-8) * 2);
+  padding-block: var(--space-2);
+  resize: vertical;
+}
+
+@media (max-width: 37.4375rem) {
+  .dialog {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    align-self: end;
+  }
+}
