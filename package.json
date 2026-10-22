@@ -1,10 +1,10 @@
 {
   "name": "pdref-frontend",
-  "version": "2.0.0-l2",
+  "version": "2.0.0-l3",
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 4200",
+    "start": "cross-env API_ORIGIN=http://localhost:5080 ng serve --port 4200",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
@@ -58,6 +58,7 @@
     "@types/node": "20.17.19",
     "@vitest/coverage-v8": "4.0.18",
     "angular-eslint": "21.4.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "10.1.8",
     "jsdom": "27.1.0",

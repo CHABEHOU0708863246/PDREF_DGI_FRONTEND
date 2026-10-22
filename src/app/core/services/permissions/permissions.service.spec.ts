@@ -8,6 +8,7 @@ describe('PermissionsService', () => {
     const service = TestBed.inject(PermissionsService);
     service.load({
       id: 'u1',
+      login: 'demo',
       displayName: 'Demo',
       roles: ['AUDITEUR'],
       permissions: ['Demandes_Read', 'Rapports_Read'],
@@ -29,7 +30,14 @@ describe('PermissionsService', () => {
     expect(service.ready()).toBe(false);
     expect(service.hasPermission('X')).toBe(false);
 
-    service.load({ id: 'u', displayName: 'u', roles: ['R'], permissions: ['P'] });
+    service.load({
+      id: 'u',
+      login: 'u',
+      displayName: 'u',
+      roles: ['R'],
+      permissions: ['P'],
+      mustChangePassword: false,
+    });
     service.clear();
     expect(service.ready()).toBe(false);
     expect(service.hasPermission('P')).toBe(false);

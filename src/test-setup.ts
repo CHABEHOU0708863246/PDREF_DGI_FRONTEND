@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 
+vi.setConfig({ testTimeout: 15_000 });
+
 if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

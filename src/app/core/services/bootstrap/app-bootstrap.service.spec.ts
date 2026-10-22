@@ -10,15 +10,22 @@ import { AUTH_BOOTSTRAP_MODE } from './auth-bootstrap-mode';
 const session = {
   accessToken: 'a',
   expiresAt: new Date(Date.now() + 60_000).toISOString(),
-  user: { id: 'u', displayName: 'u', roles: [], permissions: [] },
+  user: {
+    id: 'u',
+    login: 'u',
+    displayName: 'u',
+    roles: [],
+    permissions: [],
+    mustChangePassword: false,
+  },
 };
 
 function setup(
-  refresh: () => unknown,
+  restore: () => unknown,
   platform: 'browser' | 'server' = 'browser',
   mode: 'http' | 'demo' = 'http',
 ) {
-  const auth = { refresh: vi.fn(refresh), applySession: vi.fn() };
+  const auth = { restoreSession: vi.fn(restore) };
   const permissions = { markReady: vi.fn() };
 
   TestBed.configureTestingModule({
@@ -35,12 +42,11 @@ function setup(
 }
 
 describe('AppBootstrapService', () => {
-  it('charge la session puis marque les permissions pretes', async () => {
+  it('refresh puis me puis permissions pretes', async () => {
     const { service, auth, permissions } = setup(() => of(session));
     await service.initialize();
 
-    expect(auth.refresh).toHaveBeenCalledOnce();
-    expect(auth.applySession).toHaveBeenCalledWith(session);
+    expect(auth.restoreSession).toHaveBeenCalledOnce();
     expect(permissions.markReady).toHaveBeenCalledOnce();
   });
 
@@ -53,14 +59,14 @@ describe('AppBootstrapService', () => {
   it('ne fait aucun appel cote serveur', async () => {
     const { service, auth, permissions } = setup(() => of(session), 'server');
     await service.initialize();
-    expect(auth.refresh).not.toHaveBeenCalled();
+    expect(auth.restoreSession).not.toHaveBeenCalled();
     expect(permissions.markReady).toHaveBeenCalledOnce();
   });
 
   it('ne fait aucun appel en mode demo', async () => {
     const { service, auth, permissions } = setup(() => of(session), 'browser', 'demo');
     await service.initialize();
-    expect(auth.refresh).not.toHaveBeenCalled();
+    expect(auth.restoreSession).not.toHaveBeenCalled();
     expect(permissions.markReady).toHaveBeenCalledOnce();
   });
 });

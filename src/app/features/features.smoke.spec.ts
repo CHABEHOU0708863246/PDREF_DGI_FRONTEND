@@ -11,7 +11,6 @@ import { ProblemStore } from '../core/services/errors/problem.store';
 import { StorageService } from '../core/services/storage/storage.service';
 import { ThemeService } from '../core/services/theme/theme.service';
 import { UploadProgressService } from '../core/services/upload/upload-progress.service';
-import { AuthPlaceholderComponent } from './auth/auth-placeholder.component';
 import { DashboardHomeComponent } from './dashboard/home/dashboard-home.component';
 import { DashboardShellComponent } from './dashboard/shell/dashboard-shell.component';
 import { DesignSystemDemoComponent } from './design-system/design-system-demo.component';
@@ -97,16 +96,6 @@ describe('features — smoke', () => {
     component.onResize();
     component.logout();
     expect(logoutAndRedirect).toHaveBeenCalledOnce();
-  });
-
-  it('AuthPlaceholder', () => {
-    TestBed.configureTestingModule({
-      imports: [AuthPlaceholderComponent],
-      providers: baseProviders(),
-    });
-    const fixture = TestBed.createComponent(AuthPlaceholderComponent);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('L3');
   });
 
   it('PortailPublic', () => {

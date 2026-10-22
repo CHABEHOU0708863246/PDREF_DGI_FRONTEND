@@ -1,72 +1,65 @@
-# Securite front-end
+# Securite front-end L3
 
 ## Session et jetons
 
-- Refresh token : cookie `HttpOnly` emis par le backend, jamais lu par le front.
-- Access token : uniquement en memoire (`TokenStore`), avec marge d'expiration de
-  5 secondes. Aucun `localStorage`/`sessionStorage` pour un jeton.
-- Sur `401` : un seul refresh concurrent, rejeu de la requete, sinon session videe
-  et redirection vers `/auth/login`.
-- Déconnexion : appel serveur, puis nettoyage local dans `finalize`.
-- Le mode L2 est `demo` : aucun appel d'authentification reel.
+- Refresh token : cookie `HttpOnly; Secure; SameSite=Strict;
+Path=/api/v1/auth` emis par le backend L3.
+- Access token : uniquement en memoire (`TokenStore`), marge d'expiration 5 s.
+  Aucun `localStorage`/`sessionStorage` pour un jeton.
+- Bootstrap : `refresh -> GET /me -> permissions -> ready`. Aucun appel metier
+  avant la fin de cette chaine.
+- Sur `401`, l'intercepteur tente **un seul refresh** partage entre appels
+  concurrents, rejoue une fois, puis vide la session et redirige vers login.
+- Logout : appel serveur, nettoyage local dans `finalize`, cookie expire.
+
+## Contrainte SameSite
+
+Le front et l'API doivent etre sur le meme site (sous-domaines ou reverse proxy).
+Le backend refuse de demarrer en Production si `Auth:PublicOrigin` n'est pas
+same-site avec les origines CORS. Cette contrainte est documentee dans le README.
 
 ## Donnees personnelles
 
-- Pas de PII dans les URL, les parametres de navigation, les journaux ou le cache.
-- Le `returnUrl` est nettoye (`sanitizeReturnUrl`) et ne conserve pas les query
-  strings sensibles.
-- Les modeles utilisateur se limitent a `id`, `displayName`, `roles`,
-  `permissions`, `mustChangePassword` (pas d'email ni de telephone).
-- Les messages de log ne contiennent ni jeton, ni PII, ni corps de requete.
+- Aucune PII dans les URL, journaux, cache ou stockage navigateur.
+- `returnUrl` nettoye : chemin interne uniquement, query strings supprimees.
+- Le token de reset est un secret a usage unique, transmis dans le lien email ;
+  il n'est jamais journalise.
+- Les logs ne contiennent ni jeton, ni mot de passe, ni corps de requete.
 
-## En-tetes et CSP
+## CSP et en-tetes
 
-`src/server.ts` applique sur chaque reponse :
+`src/server.ts` applique :
 
-- `Content-Security-Policy` : `default-src 'self'`, `script-src 'self'`,
+- `default-src 'self'`, `script-src 'self'`,
   `style-src 'self' 'unsafe-inline'`, `font-src 'self'`, `img-src 'self' data:`,
-  `connect-src 'self'` (+ `API_ORIGIN` si configure), `frame-ancestors 'none'`,
+  `connect-src 'self'` + `API_ORIGIN`, `frame-ancestors 'none'`,
   `base-uri 'self'`, `form-action 'self'`.
-- `X-Content-Type-Options: nosniff`
-- `Referrer-Policy: no-referrer`
-- `Permissions-Policy`
-- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
+  `Permissions-Policy`, `X-Frame-Options: DENY`,
+  `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy`, HSTS.
 
-La CSP interdit les scripts inline. Le build desactive `inlineCritical` pour
-eviter le handler `onload` genere par Angular. Les styles de composants sont
-injectes via l'exception `style-src 'unsafe-inline'`, limitee aux styles.
+Le build desactive `inlineCritical` pour supprimer le handler `onload` inline
+incompatible avec la CSP. En developpement, `API_ORIGIN` autorise
+`http://localhost:5080` ; en production, il doit valoir l'origine API exacte.
 
-En L3, ajouter l'origine API exacte a `connect-src` et adapter `form-action` si
-un flux de formulaire externe est necessaire.
+## Permissions
 
-## Navigation et permissions
+- Le backend resout les permissions a chaque requete ; le JWT ne les porte pas.
+- Le front utilise `/me` pour l'affichage et les guards ; un `403` serveur reste
+  l'autorite finale.
+- `mustChangePasswordGuard` force le changement initial avant tout ecran metier.
+- `authGuard`, `accessGuard` et `mustChangePasswordGuard` couvrent les routes
+  protegees.
 
-- `authGuard` protege les routes privees ; SSR laisse passer puis hydrate.
-- `accessGuard` verifie `permissions`, `allPermissions` et `roles` avant
-  activation ; echec vers `/unauthorized`.
-- `unsavedChangesGuard` protege les formulaires non sauvegardes.
-- Les routes publiques sont limitees a `/auth`, `/portail-public`, `/error`,
-  `/unauthorized` et `/design-system-demo`.
+## Mots de passe
 
-## Fichiers et uploads
+- Minimum 12 caracteres, controle des mots de passe compromis cote backend.
+- Argon2id par defaut, PBKDF2-SHA512 en repli.
+- Show/hide accessible, caps lock signale, messages sans detail technique.
+- Reset a usage unique, expiration 30 min, revocation des sessions.
 
-- Types et tailles sont valides avant envoi ; limites passees en proprietes.
-- Le nom de fichier n'est jamais injecte dans le DOM sans echappement.
-- L'URL d'objet est revoquee apres usage.
-- Le backend reste l'autorite finale (type MIME, taille, antivirus).
+## Limites L3
 
-## Dependances et chaine CI
-
-- `npm audit --omit=dev` doit rester sans vulnerabilite de production.
-- Les vulnerabilites de developpement (LHCI, outillage) sont suivies et ne sont
-  pas embarquees dans le bundle.
-- Gates : lint, format, typecheck, tests, couverture, budgets, tokens,
-  architecture, build sans warning, e2e + axe, Lighthouse.
-- Aucun secret dans le depot ; les variables d'environnement sont injectees par
-  la plateforme.
-
-## Limites L2
-
-Le front ne peut pas garantir seul la securite de l'authentification : le backend
-doit emettre les cookies avec les bons attributs, valider l'origine CORS, limiter
-les tentatives et journaliser sans PII. Ces points sont des prerequis L3.
+- MFA : structure backend prete, aucune UI ni obligation avant L20.
+- Le front ne peut pas garantir seul les attributs du cookie, le CORS, le
+  rate limiting ou l'audit : ces controles sont cote backend L3.

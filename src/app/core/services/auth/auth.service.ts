@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
-import { catchError, finalize, of, shareReplay, tap } from 'rxjs';
-import type { AuthSession, LoginCredentials } from '../../models/auth/auth.model';
+import { catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
+import type { AuthSession, AuthTokens, LoginCredentials } from '../../models/auth/auth.model';
 import { PermissionsService } from '../permissions/permissions.service';
 import { TokenStore } from '../token/token.store';
 import { AUTH_GATEWAY } from './auth.gateway';
@@ -22,17 +22,22 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.tokenStore.hasValidAccessToken());
 
   login(credentials: LoginCredentials): Observable<AuthSession> {
-    return this.gateway.login(credentials).pipe(tap((session) => this.applySession(session)));
+    return this.gateway.login(credentials).pipe(switchMap((tokens) => this.loadProfile(tokens)));
+  }
+
+  /** Refresh cookie puis /me : jamais de metier avant le retour de cette chaine. */
+  restoreSession(): Observable<AuthSession> {
+    return this.refreshOnce();
   }
 
   refresh(): Observable<AuthSession> {
-    return this.gateway.refresh().pipe(tap((session) => this.applySession(session)));
+    return this.gateway.refresh().pipe(switchMap((tokens) => this.loadProfile(tokens)));
   }
 
   refreshOnce(): Observable<AuthSession> {
     if (!this.refreshInFlight) {
       this.refreshInFlight = this.gateway.refresh().pipe(
-        tap((session) => this.applySession(session)),
+        switchMap((tokens) => this.loadProfile(tokens)),
         finalize(() => {
           this.refreshInFlight = null;
         }),
@@ -42,10 +47,35 @@ export class AuthService {
     return this.refreshInFlight;
   }
 
-  applySession(session: AuthSession): void {
+  forgotPassword(login: string): Observable<void> {
+    return this.gateway.forgotPassword(login);
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.gateway.resetPassword(token, newPassword);
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.gateway.changePassword(currentPassword, newPassword);
+  }
+
+  markPasswordChanged(): void {
+    const current = this.sessionState();
+    if (!current) {
+      return;
+    }
+
+    const user = { ...current.user, mustChangePassword: false };
+    this.sessionState.set({ ...current, user });
+    this.permissions.load(user);
+  }
+
+  applySession(tokens: AuthTokens, user: AuthSession['user']): AuthSession {
+    const session: AuthSession = { ...tokens, user };
     this.sessionState.set(session);
-    this.tokenStore.set(session);
-    this.permissions.load(session.user);
+    this.tokenStore.set(tokens);
+    this.permissions.load(user);
+    return session;
   }
 
   clearSession(): void {
@@ -75,5 +105,14 @@ export class AuthService {
         void this.router.navigate(['/auth/login']);
       },
     });
+  }
+
+  private loadProfile(tokens: AuthTokens): Observable<AuthSession> {
+    return this.gateway.me().pipe(
+      map((user) => this.applySession(tokens, user)),
+      tap({
+        error: () => this.clearSession(),
+      }),
+    );
   }
 }

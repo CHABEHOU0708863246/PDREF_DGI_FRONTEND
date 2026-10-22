@@ -312,3 +312,68 @@
     animation: none;
   }
 }
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.auth-message {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.auth-message--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.auth-message--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.auth-message--info {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.auth-links a {
+  color: var(--color-primary);
+}
+
+.auth-form-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.pd-field__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.pd-field__error {
+  margin: 0;
+  color: var(--color-error-text);
+  font-size: var(--text-xs);
+}

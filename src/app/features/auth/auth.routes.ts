@@ -1,28 +1,36 @@
 import type { Routes } from '@angular/router';
-import { loginGuard } from '../../core/guards/auth.guard';
+import { authGuard, loginGuard } from '../../core/guards/auth.guard';
 
 export const AUTH_ROUTES: Routes = [
   {
     path: 'login',
-    loadComponent: () =>
-      import('./auth-placeholder.component').then((module) => module.AuthPlaceholderComponent),
+    loadComponent: () => import('./login/login.component').then((module) => module.LoginComponent),
     canActivate: [loginGuard],
-    title: 'Connexion — PDREF',
-    data: { mode: 'Connexion' },
+    title: 'Connexion - PDREF',
   },
   {
     path: 'forgot-password',
     loadComponent: () =>
-      import('./auth-placeholder.component').then((module) => module.AuthPlaceholderComponent),
-    title: 'Mot de passe oublie — PDREF',
-    data: { mode: 'Mot de passe oublie' },
+      import('./forgot-password/forgot-password.component').then(
+        (module) => module.ForgotPasswordComponent,
+      ),
+    title: 'Mot de passe oublie - PDREF',
   },
   {
     path: 'reset-password',
     loadComponent: () =>
-      import('./auth-placeholder.component').then((module) => module.AuthPlaceholderComponent),
-    title: 'Reinitialisation — PDREF',
-    data: { mode: 'Reinitialisation du mot de passe' },
+      import('./reset-password/reset-password.component').then(
+        (module) => module.ResetPasswordComponent,
+      ),
+    title: 'Reinitialisation - PDREF',
+  },
+  {
+    path: 'my-profile',
+    loadComponent: () =>
+      import('./my-profile/my-profile.component').then((module) => module.MyProfileComponent),
+    canActivate: [authGuard],
+    title: 'Mon profil - PDREF',
+    data: { breadcrumb: 'Mon profil' },
   },
   {
     path: '',

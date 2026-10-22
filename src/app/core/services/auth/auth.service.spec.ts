@@ -7,23 +7,30 @@ import { TokenStore } from '../token/token.store';
 import { AUTH_GATEWAY } from './auth.gateway';
 import { AuthService } from './auth.service';
 
-const session = {
+const tokens = {
   accessToken: 'access-1',
   expiresAt: new Date(Date.now() + 60_000).toISOString(),
-  user: {
-    id: 'u1',
-    displayName: 'Demo',
-    roles: ['AUDITEUR'],
-    permissions: ['Demandes_Read'],
-  },
 };
 
-function setup(refresh = vi.fn(() => of(session))) {
+const user = {
+  id: 'u1',
+  login: 'demo',
+  displayName: 'Demo',
+  roles: ['AUDITEUR'],
+  permissions: ['CAN_READ_OWN_PROFILE'],
+  mustChangePassword: false,
+};
+
+function setup(refresh = vi.fn(() => of(tokens))) {
   const router = { navigate: vi.fn().mockResolvedValue(true) };
   const gateway = {
-    login: vi.fn(() => of(session)),
+    login: vi.fn(() => of(tokens)),
     refresh,
     logout: vi.fn(() => of(void 0)),
+    me: vi.fn(() => of(user)),
+    forgotPassword: vi.fn(() => of(void 0)),
+    resetPassword: vi.fn(() => of(void 0)),
+    changePassword: vi.fn(() => of(void 0)),
   };
 
   TestBed.configureTestingModule({
@@ -40,19 +47,21 @@ function setup(refresh = vi.fn(() => of(session))) {
 }
 
 describe('AuthService', () => {
-  it('applique la session apres login', () => {
+  it('charge le profil apres login et applique les permissions', () => {
     const { service, gateway } = setup();
     service.login({ login: 'demo', password: 'secret' }).subscribe();
 
     expect(gateway.login).toHaveBeenCalledOnce();
+    expect(gateway.me).toHaveBeenCalledOnce();
     expect(service.isAuthenticated()).toBe(true);
     expect(service.currentUser()?.displayName).toBe('Demo');
+    expect(TestBed.inject(PermissionsService).hasPermission('CAN_READ_OWN_PROFILE')).toBe(true);
     expect(TestBed.inject(TokenStore).getAccessToken()).toBe('access-1');
   });
 
   it('vide la session a la deconnexion', () => {
     const { service, gateway } = setup();
-    service.applySession(session);
+    service.applySession(tokens, user);
     service.logout().subscribe();
 
     expect(gateway.logout).toHaveBeenCalledOnce();
@@ -62,7 +71,7 @@ describe('AuthService', () => {
 
   it('redirige vers login quand la session expire', () => {
     const { service, router } = setup();
-    service.applySession(session);
+    service.applySession(tokens, user);
     service.expireSession();
 
     expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
@@ -71,7 +80,7 @@ describe('AuthService', () => {
   });
 
   it('ne lance qu un seul refresh pour des appels paralleles', () => {
-    const subject = new Subject<typeof session>();
+    const subject = new Subject<typeof tokens>();
     const refresh = vi.fn(() => subject.asObservable());
     const { service } = setup(refresh);
     let first = 0;
@@ -81,7 +90,7 @@ describe('AuthService', () => {
     service.refreshOnce().subscribe(() => (second += 1));
 
     expect(refresh).toHaveBeenCalledOnce();
-    subject.next(session);
+    subject.next(tokens);
     subject.complete();
 
     expect(first).toBe(1);
@@ -91,7 +100,7 @@ describe('AuthService', () => {
   it('vide la session meme si le logout reseau echoue', () => {
     const { service, gateway } = setup();
     gateway.logout.mockImplementation(() => throwError(() => new Error('reseau')));
-    service.applySession(session);
+    service.applySession(tokens, user);
 
     service.logout().subscribe();
 
@@ -110,5 +119,14 @@ describe('AuthService', () => {
     });
 
     expect(failed).toBe(true);
+  });
+
+  it('leve mustChangePassword apres changement', () => {
+    const { service } = setup();
+    service.applySession(tokens, { ...user, mustChangePassword: true });
+    service.markPasswordChanged();
+
+    expect(service.currentUser()?.mustChangePassword).toBe(false);
+    expect(TestBed.inject(PermissionsService).mustChangePassword()).toBe(false);
   });
 });

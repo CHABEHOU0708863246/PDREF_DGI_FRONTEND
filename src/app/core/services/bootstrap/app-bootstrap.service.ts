@@ -6,8 +6,8 @@ import { PermissionsService } from '../permissions/permissions.service';
 import { AUTH_BOOTSTRAP_MODE } from './auth-bootstrap-mode';
 
 /**
- * Bootstrap unique : charge la session (cookie HttpOnly) et les permissions
- * AVANT toute navigation ou appel metier. En mode demo, aucun appel reseau.
+ * Bootstrap unique : refresh cookie -> /me -> permissions -> ready.
+ * Aucun endpoint metier n'est appele avant la fin de cette chaine.
  */
 @Injectable({ providedIn: 'root' })
 export class AppBootstrapService {
@@ -17,24 +17,35 @@ export class AppBootstrapService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   async initialize(): Promise<void> {
-    if (!this.isBrowser || this.mode === 'demo') {
+    if (!this.isBrowser || this.mode === 'demo' || isPublicPage()) {
       this.permissions.markReady();
       return;
     }
 
     try {
-      const session = await firstValueFrom(
-        this.auth.refresh().pipe(
+      await firstValueFrom(
+        this.auth.restoreSession().pipe(
           timeout(5_000),
           catchError(() => of(null)),
         ),
       );
-
-      if (session) {
-        this.auth.applySession(session);
-      }
     } finally {
       this.permissions.markReady();
     }
   }
+}
+
+function isPublicPage(): boolean {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  const path = window.location.pathname;
+  return (
+    path === '/design-system-demo' ||
+    path.startsWith('/auth') ||
+    path.startsWith('/portail-public') ||
+    path === '/error' ||
+    path === '/unauthorized'
+  );
 }

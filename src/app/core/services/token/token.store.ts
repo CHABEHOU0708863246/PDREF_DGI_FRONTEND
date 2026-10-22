@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import type { AuthSession } from '../../models/auth/auth.model';
+import type { AuthTokens } from '../../models/auth/auth.model';
 
 const CLOCK_SKEW_MS = 5_000;
 
@@ -14,9 +14,9 @@ export class TokenStore {
 
   readonly hasToken = computed(() => this.token() !== null);
 
-  set(session: AuthSession): void {
-    this.token.set(session.accessToken);
-    const expiresAt = Date.parse(session.expiresAt);
+  set(tokens: AuthTokens): void {
+    this.token.set(tokens.accessToken);
+    const expiresAt = Date.parse(tokens.expiresAt);
     this.expiry.set(Number.isNaN(expiresAt) ? null : expiresAt);
   }
 

@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   apiUrl: 'https://api.pdref.dgi.ci',
-  authMode: 'demo' as 'http' | 'demo',
+  authMode: 'http' as 'http' | 'demo',
   showDesignSystemDemo: true,
-  appVersion: '2.0.0-l2',
+  appVersion: '2.0.0-l3',
 };

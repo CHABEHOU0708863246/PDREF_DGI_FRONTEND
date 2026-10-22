@@ -1,16 +1,14 @@
-# Contrat API front-end / back-end
+# Contrat API front-end / back-end L3
 
-Le front L2 ne consomme aucun endpoint metier. Les contrats ci-dessous preparent
-le lot L3 et doivent rester alignes avec le backend L1.
-
-## Base et transport
+## Transport
 
 - Base : `environment.apiUrl` + `/api/v1`.
-- JSON UTF-8, `Content-Type: application/json`.
-- Erreurs : `Content-Type: application/problem+json`.
-- Cookies d'authentification : `HttpOnly`, `Secure`, `SameSite` adapte au domaine,
-  jamais lisibles par JavaScript.
-- CORS : origine du front explicitement autorisee, `credentials: true`.
+- JSON UTF-8 ; erreurs `application/problem+json`.
+- Cookies d'authentification : `HttpOnly; Secure; SameSite=Strict;
+Path=/api/v1/auth`, emis par le backend.
+- CORS : origine exacte, `AllowCredentials`, sans wildcard.
+- Front et API doivent etre **same-site** ; sinon le refresh cookie n'est jamais
+  envoye.
 
 ## Enveloppe de succes
 
@@ -24,19 +22,41 @@ le lot L3 et doivent rester alignes avec le backend L1.
 }
 ```
 
-`PagedResponse<T>` :
+Les gateways front lisent `data`. Aucun `refreshToken` n'est present dans une
+reponse.
+
+## Authentification
+
+| Endpoint                     | Requete                            | Reponse                                       |
+| ---------------------------- | ---------------------------------- | --------------------------------------------- |
+| `POST /auth/login`           | `{ login, password }`              | `{ accessToken, expiresAt }` + cookie         |
+| `POST /auth/refresh`         | cookie                             | `{ accessToken, expiresAt }` + cookie tourne  |
+| `POST /auth/logout`          | cookie                             | `204` + cookie expire                         |
+| `POST /auth/forgot-password` | `{ login }`                        | `202`, meme corps que le compte existe ou non |
+| `POST /auth/reset-password`  | `{ token, newPassword }`           | `200`                                         |
+| `GET /me`                    | Bearer                             | `MeResponse`                                  |
+| `POST /me/change-password`   | `{ currentPassword, newPassword }` | `200`                                         |
+
+`MeResponse` :
 
 ```json
 {
-  "items": [],
-  "pageNumber": 1,
-  "pageSize": 20,
-  "totalCount": 0,
-  "totalPages": 0
+  "id": "u-1",
+  "login": "agent",
+  "displayName": "Agent DGI",
+  "email": "agent@dgi.ci",
+  "directionId": "GUDEF",
+  "directionCode": "GUDEF",
+  "mustChangePassword": false,
+  "roles": ["AGENT_GUDEF"],
+  "permissions": ["CAN_READ_OWN_PROFILE", "CAN_CHANGE_PASSWORD"]
 }
 ```
 
-## Erreur `problem+json` (RFC 9457)
+Le front enchaîne **refresh -> /me -> permissions -> ready** au démarrage des
+routes protégées. Aucun endpoint métier n'est appelé avant `permissions.ready()`.
+
+## Erreur problem+json
 
 ```json
 {
@@ -52,10 +72,6 @@ le lot L3 et doivent rester alignes avec le backend L1.
 }
 ```
 
-Le front lit `code`, `traceId`, `reference` et `errors[]`. Il ne suppose jamais
-un message serveur en francais : le message utilisateur est local, le detail
-technique reste dans `error-footer`.
-
 Codes connus : `UNAUTHENTICATED`, `SESSION_EXPIRED`, `PERMISSION_DENIED`,
 `VALIDATION_FAILED`, `NOT_FOUND`, `DUPLICATE`, `CONFLICT`,
 `CONCURRENCY_CONFLICT`, `PRECONDITION_FAILED`, `BUSINESS_RULE`,
@@ -63,56 +79,17 @@ Codes connus : `UNAUTHENTICATED`, `SESSION_EXPIRED`, `PERMISSION_DENIED`,
 `INTEGRATION_NOT_CONFIGURED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`,
 `NETWORK_ERROR`, `METHOD_NOT_ALLOWED`.
 
-## Authentification (contrat L3)
-
-| Endpoint             | Requete               | Reponse                        |
-| -------------------- | --------------------- | ------------------------------ |
-| `POST /auth/login`   | `{ login, password }` | `AuthSession` + cookie refresh |
-| `POST /auth/refresh` | vide, cookie          | `AuthSession`                  |
-| `POST /auth/logout`  | vide, cookie          | `204` + cookie expire          |
-
-`AuthSession` :
-
-```json
-{
-  "accessToken": "jwt",
-  "expiresAt": "2026-10-22T12:00:00Z",
-  "user": {
-    "id": "u-1",
-    "displayName": "Agent DGI",
-    "roles": ["AGENT"],
-    "permissions": ["Demandes_Read"],
-    "mustChangePassword": false
-  }
-}
-```
-
-Regles :
-
-- Le refresh token n'apparait jamais dans le JSON, le stockage navigateur, les
-  URL ou les journaux.
-- L'access token vit uniquement en memoire (`TokenStore`).
-- Tous les appels d'authentification utilisent `withCredentials: true`.
-- Sur `401`, l'intercepteur `auth` tente un seul refresh, partage entre appels
-  concurrents, puis rejoue la requete. En cas d'echec : session videe et
-  redirection `/auth/login`.
-- Les routes publiques (`/auth/login`, `/portail-public`) ne recoivent pas de
-  Bearer et ne declenchent pas de refresh en boucle.
-
 ## Intercepteurs
 
-Ordre impose : `correlation -> error -> auth`.
+Ordre : `correlation -> error -> auth`.
 
-- `correlation` : ajoute `X-Correlation-Id` et conserve le dernier identifiant.
-- `error` : normalise les erreurs reseau/HTTP en `ApiProblemDetails`.
-- `auth` : Bearer, refresh unique, rejeu, expiration.
+- `correlation` : `X-Correlation-Id`.
+- `error` : normalise et affiche `problem+json` ; les routes `/auth/*` laissent
+  le formulaire gérer son erreur.
+- `auth` : Bearer, un seul refresh partagé sur 401, rejeu une fois, puis
+  expiration et redirection login.
 
-## L2 : mode demo
+## L2 historique
 
-`environment.authMode = 'demo'` en L2. `AppBootstrapService` ne fait aucun appel
-reseau et marque les permissions pretes. Le passage en L3 consiste a :
-
-1. passer `authMode` a `'http'` ;
-2. brancher les endpoints reels et le CORS/cookie ;
-3. ajouter l'origine API a `connect-src` dans la CSP ;
-4. remplacer les gateways de demonstration par les implementations HTTP.
+Le lot L2 fonctionnait en `authMode='demo'` sans appel réseau. Ce mode reste
+disponible pour les tests, mais la configuration L3 est `'http'`.

@@ -11,9 +11,11 @@ function setup(ready = true) {
   if (ready) {
     permissions.load({
       id: 'u',
+      login: 'u',
       displayName: 'u',
       roles: ['AUDITEUR'],
       permissions: ['Demandes_Read', 'Rapports_Read'],
+      mustChangePassword: false,
     });
   }
 

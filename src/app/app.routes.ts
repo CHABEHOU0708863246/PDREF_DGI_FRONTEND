@@ -1,5 +1,6 @@
 import type { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { mustChangePasswordGuard } from './core/guards/must-change-password.guard';
 
 export const routes: Routes = [
   {
@@ -36,7 +37,7 @@ export const routes: Routes = [
     path: 'dashboard',
     loadChildren: () =>
       import('./features/dashboard/dashboard.routes').then((module) => module.DASHBOARD_ROUTES),
-    canActivate: [authGuard],
+    canActivate: [authGuard, mustChangePasswordGuard],
     data: { breadcrumb: 'Tableau de bord' },
   },
   {

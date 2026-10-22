@@ -11,18 +11,30 @@ import { PermissionsService } from '../services/permissions/permissions.service'
 import { TokenStore } from '../services/token/token.store';
 import { authInterceptor } from './auth.interceptor';
 
-const refreshed = {
+const tokens = {
   accessToken: 'new-token',
   expiresAt: new Date(Date.now() + 60_000).toISOString(),
-  user: { id: 'u', displayName: 'u', roles: [], permissions: [] },
 };
 
-function setup(refresh = vi.fn(() => of(refreshed))) {
+const user = {
+  id: 'u',
+  login: 'u',
+  displayName: 'u',
+  roles: [],
+  permissions: [],
+  mustChangePassword: false,
+};
+
+function setup(refresh = vi.fn(() => of(tokens))) {
   const router = { navigate: vi.fn().mockResolvedValue(true) };
   const gateway = {
     login: vi.fn(),
     refresh,
     logout: vi.fn(() => of(void 0)),
+    me: vi.fn(() => of(user)),
+    forgotPassword: vi.fn(),
+    resetPassword: vi.fn(),
+    changePassword: vi.fn(),
   };
 
   TestBed.configureTestingModule({
@@ -49,7 +61,7 @@ function setup(refresh = vi.fn(() => of(refreshed))) {
 describe('authInterceptor', () => {
   it('ajoute le Bearer sur une route protegee', () => {
     const { http, controller } = setup();
-    TestBed.inject(AuthService).applySession(refreshed);
+    TestBed.inject(AuthService).applySession(tokens, user);
 
     http.get('/api/v1/demandes').subscribe();
     const request = controller.expectOne('/api/v1/demandes');
@@ -71,6 +83,7 @@ describe('authInterceptor', () => {
 
     const retry = controller.expectOne('/api/v1/demandes');
     expect(gateway.refresh).toHaveBeenCalledOnce();
+    expect(gateway.me).toHaveBeenCalledOnce();
     expect(retry.request.headers.get('Authorization')).toBe('Bearer new-token');
     retry.flush({});
   });
