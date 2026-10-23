@@ -58,6 +58,14 @@ incompatible avec la CSP. En developpement, `API_ORIGIN` autorise
 - Show/hide accessible, caps lock signale, messages sans detail technique.
 - Reset a usage unique, expiration 30 min, revocation des sessions.
 
+## Audit L4
+
+- L'ecran /dashboard/audit est en lecture seule : aucun bouton ou appel de mutation.
+- Audit_Read controle la consultation ; Audit_Export controle l'export.
+- Les filtres et le curseur ne contiennent aucune PII obligatoire ; l'export reprend les valeurs deja masquees par le backend.
+- Le menu Audit est filtre par permission ; un role sans droit n'a ni menu ni API.
+- Le backend audite les refus ACCESS.DENIED ; un echec d'audit produit un 503, jamais un 403 silencieux.
+
 ## Limites L3
 
 - MFA : structure backend prete, aucune UI ni obligation avant L20.

@@ -1,9 +1,14 @@
-import { inject } from '@angular/core';
+import { PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import type { CanActivateFn } from '@angular/router';
 import { Router } from '@angular/router';
 import { PermissionsService } from '../services/permissions/permissions.service';
 
 export const accessGuard: CanActivateFn = (route) => {
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) {
+    return true;
+  }
+
   const permissions = inject(PermissionsService);
   const router = inject(Router);
 

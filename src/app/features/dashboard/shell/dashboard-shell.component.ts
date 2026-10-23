@@ -14,18 +14,27 @@ import { ThemeToggleComponent } from '../../../core/components/theme-toggle/them
 import type { IconName } from '../../../core/models/common/icon.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb/breadcrumb.service';
+import { PermissionsService } from '../../../core/services/permissions/permissions.service';
 
 interface NavigationItem {
   label: string;
   route: string;
   icon: IconName;
   exact: boolean;
+  permission?: string;
 }
 
 const NAVIGATION: readonly NavigationItem[] = [
   { label: 'Accueil', route: '/dashboard', icon: 'home', exact: true },
   { label: 'Design system', route: '/design-system-demo', icon: 'layout', exact: false },
   { label: 'Portail public', route: '/portail-public/suivi', icon: 'external-link', exact: false },
+  {
+    label: 'Audit',
+    route: '/dashboard/audit',
+    icon: 'clipboard',
+    exact: false,
+    permission: 'Audit_Read',
+  },
 ];
 
 @Component({
@@ -46,9 +55,14 @@ const NAVIGATION: readonly NavigationItem[] = [
 })
 export class DashboardShellComponent {
   private readonly auth = inject(AuthService);
+  private readonly permissions = inject(PermissionsService);
   readonly breadcrumbs = inject(BreadcrumbService);
   readonly user = computed(() => this.auth.currentUser());
-  readonly navigation = NAVIGATION;
+  readonly navigation = computed(() =>
+    NAVIGATION.filter(
+      (item) => !item.permission || this.permissions.hasPermission(item.permission),
+    ),
+  );
 
   readonly collapsed = signal(false);
   readonly mobileOpen = signal(false);

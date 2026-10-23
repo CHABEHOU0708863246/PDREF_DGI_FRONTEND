@@ -1,13 +1,13 @@
 <div class="shell" [class.shell--collapsed]="collapsed()" [class.shell--mobile-open]="mobileOpen()">
   <aside class="shell__sidebar" [class.shell__sidebar--open]="mobileOpen()">
-    <a class="brand" routerLink="/dashboard" aria-label="PDREF, accueil">
+    <a class="brand" routerLink="/dashboard">
       <span class="brand__mark" aria-hidden="true">P</span>
       <span class="brand__text">PDREF<span>DGI</span></span>
     </a>
 
     <nav class="nav" aria-label="Navigation principale">
       <ul>
-        @for (item of navigation; track item.route) {
+        @for (item of navigation(); track item.route) {
           <li>
             <a
               [routerLink]="item.route"

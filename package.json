@@ -1,6 +1,6 @@
 {
   "name": "pdref-frontend",
-  "version": "2.0.0-l3",
+  "version": "2.0.0-l4",
   "private": true,
   "scripts": {
     "ng": "ng",

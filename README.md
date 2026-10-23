@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L3
+# PDREF Frontend - Lot L4
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L3 ajoute l'identite et l'acces reels :
+Financiers (DGI Cote d'Ivoire). Le lot L4 ajoute l'audit en lecture seule, la collecte append-only et les permissions Audit_Read/Audit_Export.
 connexion, renouvellement de session, mot de passe oublie/reinitialisation,
 profil, permissions et garde de changement obligatoire.
 
@@ -12,7 +12,7 @@ profil, permissions et garde de changement obligatoire.
 - Authentification par cookie HttpOnly, access token en memoire uniquement.
 - Bootstrap strict : refresh -> `GET /me` -> permissions -> application prete.
 - Intercepteurs `correlation -> error -> auth` et guards auth/permissions.
-- Ecrans login, forgot-password, reset-password et my-profile.
+- Ecrans authentification L3 et journal d'audit L4 en lecture seule.
 - Qualite : lint, format, typage, tests, couverture, budgets, tokens,
   architecture, e2e Playwright + axe, Lighthouse.
 
@@ -54,7 +54,7 @@ sites differents ne recevront jamais le cookie de refresh.
 | `npm run serve:ssr`          | Sert le build sur 4000                   |
 | `npm test`                   | Tests unitaires et composants            |
 | `npm run test:coverage`      | Tests + couverture                       |
-| `npm run e2e`                | Playwright + axe (design system + auth)  |
+| `npm run e2e`                | Playwright + axe (design, auth, audit)   |
 | `npm run lighthouse`         | LHCI sur `/design-system-demo` (desktop) |
 | `npm run verify`             | Chaine qualite hors e2e/Lighthouse       |
 | `npm run check:budgets`      | Budget gzip initial et features          |
@@ -122,11 +122,11 @@ Voir [docs/api-contract.md](docs/api-contract.md),
 
 ## Etat de livraison
 
-Resultats de reference L3 (details dans `docs/lot-L3.md`) :
+Resultats de reference L4 (details dans `docs/lot-L4.md`) :
 
-- Tests unitaires/composants : **163 tests** (couverture conforme 70/80).
-- E2E : **14 tests** Playwright (design system + auth), axe 0.
-- Budget initial et chunks feature conformes.
+- Tests unitaires/composants : **167 tests**, couverture **76,90 % lignes / 78,57 % branches / 70,35 % fonctions**.
+- E2E : **18 tests** Playwright (design system + auth + audit), axe 0.
+- Budget initial **43,07 KiB gzip**, plus gros chunk lazy **57,03 KiB**.
 - Lighthouse desktop design system : performance 0,99 / accessibilite 1,00.
 - Build production sans warning.
 

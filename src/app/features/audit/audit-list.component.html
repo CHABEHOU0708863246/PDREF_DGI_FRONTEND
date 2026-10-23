@@ -1,0 +1,129 @@
+<pdref-page-header
+  title="Journal d'audit"
+  subtitle="Lecture seule : qui a fait quoi, quand, comment et pourquoi. Aucune modification n'est possible depuis cet ecran."
+/>
+
+<section class="audit-card pd-card" aria-labelledby="audit-filters-title">
+  <h2 id="audit-filters-title">Filtres</h2>
+  <form class="audit-filters" [formGroup]="filters" (ngSubmit)="apply()">
+    <div class="pd-field">
+      <label class="pd-label" for="audit-event">Evenement</label>
+      <select id="audit-event" class="pd-input" formControlName="eventCode">
+        <option value="">Tous</option>
+        @for (code of eventCodes; track code) {
+          <option [value]="code">{{ code }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-user">Utilisateur</label>
+      <input id="audit-user" class="pd-input" formControlName="userId" autocomplete="off" />
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-request">Demande / correlation</label>
+      <input id="audit-request" class="pd-input" formControlName="requestId" autocomplete="off" />
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-from">Du</label>
+      <input id="audit-from" class="pd-input" type="date" formControlName="from" />
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-to">Au</label>
+      <input id="audit-to" class="pd-input" type="date" formControlName="to" />
+    </div>
+
+    <div class="audit-actions">
+      <button type="submit" class="pd-btn pd-btn--primary" [disabled]="loading()">Appliquer</button>
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>
+      @if (canExport()) {
+        <button type="button" class="pd-btn pd-btn--ghost" (click)="export('csv')">
+          Exporter CSV
+        </button>
+        <button type="button" class="pd-btn pd-btn--ghost" (click)="export('json')">
+          Exporter JSON
+        </button>
+      }
+    </div>
+  </form>
+</section>
+
+@if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement de l'audit" />
+} @else if (problem(); as issue) {
+  <pdref-state-panel
+    state="error"
+    title="Journal indisponible"
+    message="Impossible de charger le journal d'audit."
+    [problem]="issue"
+  />
+} @else if (items().length === 0) {
+  <pdref-state-panel
+    state="empty"
+    title="Aucun evenement"
+    message="Aucun evenement ne correspond aux filtres."
+  />
+} @else {
+  <section class="audit-card pd-card" aria-labelledby="audit-results-title">
+    <div class="audit-results-head">
+      <h2 id="audit-results-title">Evenements</h2>
+      <span class="pd-muted">{{ items().length }} evenement(s) affiche(s)</span>
+    </div>
+
+    <div class="audit-table-wrap" tabindex="0" role="region" aria-label="Journal d'audit defilable">
+      <table class="audit-table">
+        <caption>
+          Journal d'audit, lecture seule
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Evenement</th>
+            <th scope="col">Resultat</th>
+            <th scope="col">Utilisateur</th>
+            <th scope="col">Cible</th>
+            <th scope="col">Demande</th>
+            <th scope="col">Trace</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.occurredAt | date: 'short' }}</td>
+              <td>
+                <code>{{ item.eventCode }}</code>
+              </td>
+              <td>{{ item.result }}</td>
+              <td>{{ item.actorUserId || '-' }}</td>
+              <td>{{ item.targetType || '-' }} / {{ item.targetId || '-' }}</td>
+              <td>{{ item.requestId || '-' }}</td>
+              <td>
+                <code>{{ item.traceId }}</code>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (nextCursor()) {
+      <div class="audit-actions">
+        <button
+          type="button"
+          class="pd-btn pd-btn--ghost"
+          [disabled]="loadingMore()"
+          (click)="loadMore()"
+        >
+          @if (loadingMore()) {
+            Chargement...
+          } @else {
+            Charger la suite
+          }
+        </button>
+      </div>
+    }
+  </section>
+}

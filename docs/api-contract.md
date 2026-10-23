@@ -89,6 +89,14 @@ Ordre : `correlation -> error -> auth`.
 - `auth` : Bearer, un seul refresh partagé sur 401, rejeu une fois, puis
   expiration et redirection login.
 
+## Audit L4
+
+- GET /api/v1/audit/events : policy Audit_Read, filtres eventCode, userId,
+  equestId, correlationId, rom, o, curseur.
+- GET /api/v1/audit/events/export?format=csv|json : policy Audit_Export.
+- Aucun endpoint PUT/PATCH/DELETE ; le journal est append-only.
+- Le front affiche uniquement lecture, filtres, curseur et export conditionne par Audit_Export.
+
 ## L2 historique
 
 Le lot L2 fonctionnait en `authMode='demo'` sans appel réseau. Ce mode reste
