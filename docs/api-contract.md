@@ -101,3 +101,13 @@ Ordre : `correlation -> error -> auth`.
 
 Le lot L2 fonctionnait en `authMode='demo'` sans appel réseau. Ce mode reste
 disponible pour les tests, mais la configuration L3 est `'http'`.
+
+## Administration L5
+
+- GET/POST/PUT `/api/v1/admin/directions`, `/exercices`, `/listes-valeurs`,
+  `/modeles-notifications` ; activation/desactivation par `POST .../{id}/activate|deactivate`.
+- GET `/api/v1/admin/parametres`, GET `/parametres/{cle}/history`,
+  POST `/parametres/{cle}/versions`.
+- Permissions : `Directions_*`, `Exercices_*`, `Listes_*`, `Parametres_*`,
+  `ModelesNotifications_*`, reservees a Admin/DSI.
+- Aucun DELETE physique ; les listes legacy restent visibles avec `selectable=false`.

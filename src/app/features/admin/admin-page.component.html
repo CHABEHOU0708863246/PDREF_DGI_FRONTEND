@@ -1,0 +1,462 @@
+<pdref-page-header [title]="title()" [subtitle]="description()" />
+
+<section class="admin-toolbar" aria-label="Filtres">
+  <div class="admin-toolbar__filters">
+    <label class="pd-field">
+      <span class="pd-label">Recherche</span>
+      <input class="pd-input" [formControl]="filters.controls.search" (keyup.enter)="load(1)" />
+    </label>
+    @if (screen === 'listes-valeurs') {
+      <label class="pd-field">
+        <span class="pd-label">Liste</span>
+        <select class="pd-input" [formControl]="filters.controls.listeCode" (change)="load(1)">
+          <option value="">Toutes</option>
+          @for (item of listCodes; track item.code) {
+            <option [value]="item.code">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+      <label class="pd-field">
+        <span class="pd-label">Legacy</span>
+        <select class="pd-input" [formControl]="filters.controls.legacy" (change)="load(1)">
+          <option value="">Tous</option>
+          <option value="false">Non legacy</option>
+          <option value="true">Legacy</option>
+        </select>
+      </label>
+    }
+    <label class="pd-field">
+      <span class="pd-label">Etat</span>
+      <select class="pd-input" [formControl]="filters.controls.active" (change)="load(1)">
+        <option value="">Tous</option>
+        <option value="true">Actifs</option>
+        <option value="false">Inactifs</option>
+      </select>
+    </label>
+  </div>
+  <div class="pd-actions">
+    <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>
+    @if (canManage()) {
+      <button type="button" class="pd-btn pd-btn--primary" (click)="openCreate()">Ajouter</button>
+    }
+  </div>
+</section>
+
+@if (problem(); as currentProblem) {
+  <pdref-state-panel
+    state="error"
+    [problem]="currentProblem"
+    actionLabel="Reessayer"
+    (retry)="load()"
+  />
+} @else if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement des referentiels" />
+} @else if (items().length === 0) {
+  <pdref-state-panel
+    state="empty"
+    title="Aucune donnee"
+    message="Aucun element ne correspond aux filtres."
+  />
+} @else {
+  <div class="admin-table-wrap" tabindex="0" role="region" aria-label="Tableau d'administration">
+    <table class="admin-table">
+      <caption class="pd-sr-only">
+        {{
+          title()
+        }}
+      </caption>
+      <thead>
+        <tr>
+          @switch (screen) {
+            @case ('directions') {
+              <th scope="col">Code</th>
+              <th scope="col">Libelle</th>
+              <th scope="col">Fonction</th>
+              <th scope="col">Etat</th>
+              <th scope="col">Provenance</th>
+              <th scope="col">Actions</th>
+            }
+            @case ('exercices') {
+              <th scope="col">Annee</th>
+              <th scope="col">Libelle</th>
+              <th scope="col">Ouverture</th>
+              <th scope="col">Cloture</th>
+              <th scope="col">Etat</th>
+              <th scope="col">Actions</th>
+            }
+            @case ('listes-valeurs') {
+              <th scope="col">Liste</th>
+              <th scope="col">Code</th>
+              <th scope="col">Libelle</th>
+              <th scope="col">Ordre</th>
+              <th scope="col">Selection</th>
+              <th scope="col">Actions</th>
+            }
+            @case ('parametres') {
+              <th scope="col">Cle</th>
+              <th scope="col">Libelle</th>
+              <th scope="col">Type</th>
+              <th scope="col">Valeur courante</th>
+              <th scope="col">Etat</th>
+              <th scope="col">Actions</th>
+            }
+            @case ('modeles-notifications') {
+              <th scope="col">Code</th>
+              <th scope="col">Canal</th>
+              <th scope="col">Langue</th>
+              <th scope="col">Sujet</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Actions</th>
+            }
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            @switch (screen) {
+              @case ('directions') {
+                <td>{{ $any(item).code }}</td>
+                <td>{{ $any(item).libelle }}</td>
+                <td>{{ $any(item).fonctionCircuit || '—' }}</td>
+                <td>
+                  <span class="pd-chip" [class.pd-chip--muted]="!$any(item).isActive">{{
+                    $any(item).isActive ? 'Active' : 'Inactive'
+                  }}</span>
+                </td>
+                <td>
+                  @if ($any(item).provisional) {
+                    <span class="pd-chip pd-chip--warning">Provisoire</span>
+                  }
+                </td>
+                <td class="admin-actions">
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="edit(item)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="toggle(item)"
+                    >
+                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
+                    </button>
+                  }
+                </td>
+              }
+              @case ('exercices') {
+                <td>{{ $any(item).annee }}</td>
+                <td>{{ $any(item).libelle }}</td>
+                <td>{{ $any(item).dateOuverture | slice: 0 : 10 }}</td>
+                <td>{{ $any(item).dateCloture | slice: 0 : 10 }}</td>
+                <td>
+                  <span class="pd-chip" [class.pd-chip--muted]="!$any(item).isActive">{{
+                    $any(item).isActive ? 'Actif' : 'Inactif'
+                  }}</span>
+                </td>
+                <td class="admin-actions">
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="edit(item)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="toggle(item)"
+                    >
+                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
+                    </button>
+                  }
+                </td>
+              }
+              @case ('listes-valeurs') {
+                <td>{{ $any(item).listeCode }}</td>
+                <td>{{ $any(item).code }}</td>
+                <td>{{ $any(item).libelle }}</td>
+                <td>{{ $any(item).ordre }}</td>
+                <td>
+                  @if ($any(item).legacy) {
+                    <span class="pd-chip pd-chip--warning">Legacy · non selectionnable</span>
+                  } @else {
+                    <span class="pd-chip">{{
+                      $any(item).selectable ? 'Selectionnable' : 'Inactif'
+                    }}</span>
+                  }
+                </td>
+                <td class="admin-actions">
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="edit(item)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="toggle(item)"
+                    >
+                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
+                    </button>
+                  }
+                </td>
+              }
+              @case ('parametres') {
+                <td>
+                  <code>{{ $any(item).cle }}</code>
+                </td>
+                <td>{{ $any(item).libelle }}</td>
+                <td>{{ $any(item).type }}</td>
+                <td>{{ formatValue($any(item)) }}</td>
+                <td>
+                  @if ($any(item).provisional) {
+                    <span class="pd-chip pd-chip--warning">Provisoire</span>
+                  }
+                </td>
+                <td class="admin-actions">
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="edit(item)"
+                    >
+                      Nouvelle version
+                    </button>
+                  }
+                </td>
+              }
+              @case ('modeles-notifications') {
+                <td>{{ $any(item).code }}</td>
+                <td>{{ $any(item).canal }}</td>
+                <td>{{ $any(item).langue }}</td>
+                <td>{{ $any(item).sujet }}</td>
+                <td>{{ $any(item).statut }}</td>
+                <td class="admin-actions">
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="edit(item)"
+                    >
+                      Modifier
+                    </button>
+                  }
+                </td>
+              }
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-pagination">
+    <span>{{ total() }} element(s)</span>
+    <div class="pd-actions">
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [disabled]="page() === 1"
+        (click)="previousPage()"
+      >
+        Precedent
+      </button>
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [disabled]="page() * 25 >= total()"
+        (click)="nextPage()"
+      >
+        Suivant
+      </button>
+    </div>
+  </div>
+}
+
+@if (showForm()) {
+  <section class="admin-form" aria-label="Formulaire d'administration">
+    <h2>{{ editingId() ? 'Modifier' : 'Ajouter' }} — {{ title() }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      @switch (screen) {
+        @case ('directions') {
+          <div class="admin-form__grid">
+            <label class="pd-field"
+              ><span class="pd-label">Code</span
+              ><input class="pd-input" formControlName="code" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Libelle</span
+              ><input class="pd-input" formControlName="libelle" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Type</span>
+              <select class="pd-input" formControlName="type">
+                <option value="">Non renseigne</option>
+                <option value="CENTRALE">Centrale</option>
+                <option value="REGIONALE">Regionale</option>
+                <option value="SERVICE">Service</option>
+              </select>
+            </label>
+            <label class="pd-field"
+              ><span class="pd-label">Fonction circuit</span>
+              <select class="pd-input" formControlName="fonctionCircuit">
+                <option value="">Non renseignee</option>
+                @for (item of functions; track item) {
+                  <option [value]="item">{{ item }}</option>
+                }
+              </select>
+            </label>
+            <label class="pd-field"
+              ><span class="pd-label">Direction parente</span
+              ><input class="pd-input" formControlName="parentDirectionCode"
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Email</span
+              ><input class="pd-input" type="email" formControlName="email"
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Telephone</span
+              ><input class="pd-input" formControlName="telephone"
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Adresse</span
+              ><input class="pd-input" formControlName="adresse"
+            /></label>
+          </div>
+        }
+        @case ('exercices') {
+          <div class="admin-form__grid">
+            <label class="pd-field"
+              ><span class="pd-label">Annee</span
+              ><input class="pd-input" type="number" formControlName="annee" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Libelle</span
+              ><input class="pd-input" formControlName="libelle" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Ouverture</span
+              ><input class="pd-input" type="date" formControlName="dateOuverture" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Cloture</span
+              ><input class="pd-input" type="date" formControlName="dateCloture" required
+            /></label>
+          </div>
+        }
+        @case ('listes-valeurs') {
+          <div class="admin-form__grid">
+            <label class="pd-field"
+              ><span class="pd-label">Liste</span>
+              <select class="pd-input" formControlName="listeCode">
+                @for (item of listCodes; track item.code) {
+                  <option [value]="item.code">{{ item.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="pd-field"
+              ><span class="pd-label">Code</span
+              ><input class="pd-input" formControlName="code" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Libelle</span
+              ><input class="pd-input" formControlName="libelle" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Ordre</span
+              ><input class="pd-input" type="number" formControlName="ordre"
+            /></label>
+            <label class="admin-check"
+              ><input type="checkbox" formControlName="legacy" /> Valeur legacy (non
+              selectionnable)</label
+            >
+          </div>
+        }
+        @case ('parametres') {
+          <p class="admin-hint">
+            {{ selectedParameter()?.cle }} — {{ selectedParameter()?.libelle }}. La valeur courante
+            n’est jamais modifiee : une nouvelle version est creee.
+          </p>
+          <div class="admin-form__grid">
+            <label class="pd-field"
+              ><span class="pd-label">Valeur (JSON)</span
+              ><textarea class="pd-input" rows="3" formControlName="valeurJson" required></textarea>
+            </label>
+            <label class="pd-field"
+              ><span class="pd-label">Date d’effet</span
+              ><input class="pd-input" type="date" formControlName="effectiveFrom" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Motif obligatoire</span
+              ><textarea class="pd-input" rows="3" formControlName="motif" required></textarea>
+            </label>
+          </div>
+          @if (history().length > 0) {
+            <h3>Historique</h3>
+            <ul class="admin-history">
+              @for (version of history(); track version.id) {
+                <li>
+                  <strong>v{{ version.versionNumber }}</strong> — {{ version.valeurJson }} —
+                  {{ version.motifChangement }}
+                </li>
+              }
+            </ul>
+          }
+        }
+        @case ('modeles-notifications') {
+          <div class="admin-form__grid">
+            <label class="pd-field"
+              ><span class="pd-label">Code</span
+              ><input class="pd-input" formControlName="code" required
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Canal</span>
+              <select class="pd-input" formControlName="canal">
+                <option>EMAIL</option>
+                <option>SMS</option>
+                <option>IN_APP</option>
+              </select>
+            </label>
+            <label class="pd-field"
+              ><span class="pd-label">Langue</span><input class="pd-input" formControlName="langue"
+            /></label>
+            <label class="pd-field"
+              ><span class="pd-label">Statut</span>
+              <select class="pd-input" formControlName="statut">
+                <option>BROUILLON</option>
+                <option>ACTIVE</option>
+                <option>REMPLACEE</option>
+              </select>
+            </label>
+            <label class="pd-field admin-form__wide"
+              ><span class="pd-label">Sujet</span><input class="pd-input" formControlName="sujet"
+            /></label>
+            <label class="pd-field admin-form__wide"
+              ><span class="pd-label">Corps</span
+              ><textarea class="pd-input" rows="5" formControlName="corps"></textarea>
+            </label>
+            <label class="pd-field admin-form__wide"
+              ><span class="pd-label">Variables autorisees (separees par virgule)</span
+              ><input class="pd-input" formControlName="variables"
+            /></label>
+          </div>
+        }
+      }
+      <div class="pd-actions">
+        <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
+        <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}

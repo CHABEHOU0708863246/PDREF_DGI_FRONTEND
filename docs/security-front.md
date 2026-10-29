@@ -71,3 +71,10 @@ incompatible avec la CSP. En developpement, `API_ORIGIN` autorise
 - MFA : structure backend prete, aucune UI ni obligation avant L20.
 - Le front ne peut pas garantir seul les attributs du cookie, le CORS, le
   rate limiting ou l'audit : ces controles sont cote backend L3.
+
+## Administration L5
+
+- Menu et routes filtres par les permissions de lecture Admin.
+- Les boutons de mutation ne sont affiches qu'avec la permission Manage correspondante ; le serveur reste l'autorite.
+- Aucune suppression physique dans l'interface, seulement activation/desactivation.
+- Les valeurs legacy sont rendues non selectionnables et signalees explicitement.

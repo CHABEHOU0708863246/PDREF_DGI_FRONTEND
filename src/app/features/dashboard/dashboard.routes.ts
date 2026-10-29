@@ -14,6 +14,54 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'PDREF - Fondations',
       },
       {
+        path: 'admin/directions',
+        loadComponent: () =>
+          import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Directions_Read'], screen: 'directions', breadcrumb: 'Directions' },
+        title: 'Directions - Administration PDREF',
+      },
+      {
+        path: 'admin/exercices',
+        loadComponent: () =>
+          import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Exercices_Read'], screen: 'exercices', breadcrumb: 'Exercices' },
+        title: 'Exercices fiscaux - Administration PDREF',
+      },
+      {
+        path: 'admin/listes-valeurs',
+        loadComponent: () =>
+          import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Listes_Read'],
+          screen: 'listes-valeurs',
+          breadcrumb: 'Listes de valeurs',
+        },
+        title: 'Listes de valeurs - Administration PDREF',
+      },
+      {
+        path: 'admin/parametres',
+        loadComponent: () =>
+          import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Parametres_Read'], screen: 'parametres', breadcrumb: 'Parametres' },
+        title: 'Parametres - Administration PDREF',
+      },
+      {
+        path: 'admin/modeles-notifications',
+        loadComponent: () =>
+          import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['ModelesNotifications_Read'],
+          screen: 'modeles-notifications',
+          breadcrumb: 'Modeles de notification',
+        },
+        title: 'Modeles de notification - Administration PDREF',
+      },
+      {
         path: 'audit',
         loadComponent: () =>
           import('../audit/audit-list.component').then((module) => module.AuditListComponent),

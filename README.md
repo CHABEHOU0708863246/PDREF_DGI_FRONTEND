@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L4
+# PDREF Frontend - Lot L5
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L4 ajoute l'audit en lecture seule, la collecte append-only et les permissions Audit_Read/Audit_Export.
+Financiers (DGI Cote d'Ivoire). Le lot L5 ajoute l'administration des referentiels : directions, exercices, listes de valeurs, parametres et modeles de notification.
 connexion, renouvellement de session, mot de passe oublie/reinitialisation,
 profil, permissions et garde de changement obligatoire.
 
@@ -124,8 +124,8 @@ Voir [docs/api-contract.md](docs/api-contract.md),
 
 Resultats de reference L4 (details dans `docs/lot-L4.md`) :
 
-- Tests unitaires/composants : **167 tests**, couverture **76,90 % lignes / 78,57 % branches / 70,35 % fonctions**.
-- E2E : **18 tests** Playwright (design system + auth + audit), axe 0.
+- Tests unitaires/composants : **183 tests**, couverture **77,42 % lignes / 78,41 % branches / 70,61 % fonctions**.
+- E2E : **22 tests** Playwright (design system + auth + audit + admin), axe 0.
 - Budget initial **43,07 KiB gzip**, plus gros chunk lazy **57,03 KiB**.
 - Lighthouse desktop design system : performance 0,99 / accessibilite 1,00.
 - Build production sans warning.

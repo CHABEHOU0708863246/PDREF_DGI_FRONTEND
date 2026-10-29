@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: end;
+  justify-content: space-between;
+  margin-block-end: var(--space-5);
+}
+
+.admin-toolbar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.admin-toolbar__filters .pd-field {
+  min-inline-size: 12rem;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-1);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: var(--space-3);
+  border-block-end: var(--border-width) solid var(--color-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--color-surface-muted);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.admin-form {
+  margin-block-start: var(--space-6);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-1);
+}
+
+.admin-form h2,
+.admin-form h3 {
+  margin-block-start: 0;
+}
+
+.admin-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.admin-form__wide {
+  grid-column: 1 / -1;
+}
+
+.admin-check {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.admin-hint {
+  color: var(--color-text-muted);
+}
+
+.admin-history {
+  padding-inline-start: var(--space-5);
+}
+
+@media (max-width: 47.9375rem) {
+  .admin-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-toolbar,
+  .admin-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
