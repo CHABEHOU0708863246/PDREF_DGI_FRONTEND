@@ -16,6 +16,9 @@ export interface AuditEvent {
   reason?: string | null;
   changes?: Record<string, string> | null;
   entryHash: string;
+  actorDisplayName?: string | null;
+  actorLogin?: string | null;
+  targetDisplayName?: string | null;
 }
 
 export interface AuditPage {

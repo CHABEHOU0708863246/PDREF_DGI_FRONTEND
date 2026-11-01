@@ -97,8 +97,22 @@
                 <code>{{ item.eventCode }}</code>
               </td>
               <td>{{ item.result }}</td>
-              <td>{{ item.actorUserId || '-' }}</td>
-              <td>{{ item.targetType || '-' }} / {{ item.targetId || '-' }}</td>
+              <td>
+                @if (item.actorDisplayName) {
+                  <span>{{ item.actorDisplayName }}</span
+                  ><br /><small class="pd-muted">{{ item.actorLogin || item.actorUserId }}</small>
+                } @else {
+                  {{ item.actorUserId || '-' }}
+                }
+              </td>
+              <td>
+                @if (item.targetDisplayName) {
+                  <span>{{ item.targetDisplayName }}</span
+                  ><br /><small class="pd-muted">{{ item.targetType }} / {{ item.targetId }}</small>
+                } @else {
+                  {{ item.targetType || '-' }} / {{ item.targetId || '-' }}
+                }
+              </td>
               <td>{{ item.requestId || '-' }}</td>
               <td>
                 <code>{{ item.traceId }}</code>

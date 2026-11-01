@@ -64,6 +64,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'ModelesNotifications_Read',
   },
   {
+    label: 'Fichiers',
+    route: '/dashboard/files',
+    icon: 'file',
+    exact: false,
+    permission: 'Files_Read',
+  },
+  {
     label: 'Audit',
     route: '/dashboard/audit',
     icon: 'clipboard',

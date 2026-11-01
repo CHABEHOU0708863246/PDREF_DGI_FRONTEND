@@ -108,6 +108,7 @@ export class AuthService {
   }
 
   private loadProfile(tokens: AuthTokens): Observable<AuthSession> {
+    this.tokenStore.set(tokens);
     return this.gateway.me().pipe(
       map((user) => this.applySession(tokens, user)),
       tap({

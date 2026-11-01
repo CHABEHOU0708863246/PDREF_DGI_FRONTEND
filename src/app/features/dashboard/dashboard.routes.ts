@@ -62,6 +62,14 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Modeles de notification - Administration PDREF',
       },
       {
+        path: 'files',
+        loadComponent: () =>
+          import('../files/files-page.component').then((module) => module.FilesPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Files_Read'], breadcrumb: 'Fichiers' },
+        title: 'Fichiers - PDREF',
+      },
+      {
         path: 'audit',
         loadComponent: () =>
           import('../audit/audit-list.component').then((module) => module.AuditListComponent),

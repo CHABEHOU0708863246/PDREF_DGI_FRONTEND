@@ -1,9 +1,9 @@
-# PDREF Frontend - Lot L5
+# PDREF Frontend - Lot L6
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L5 ajoute l'administration des referentiels : directions, exercices, listes de valeurs, parametres et modeles de notification.
-connexion, renouvellement de session, mot de passe oublie/reinitialisation,
-profil, permissions et garde de changement obligatoire.
+Financiers (DGI Cote d'Ivoire). Le lot L6 ajoute la gestion des fichiers : politique issue des parametres, upload, versions, telechargement securise et suppression logique.
+Le socle L3 conserve la connexion, le renouvellement de session, le mot de passe
+oublie/reinitialisation, le profil, les permissions et la garde de changement obligatoire.
 
 ## Perimetre
 
@@ -117,18 +117,16 @@ ecrans `/auth/*` sont publics et ne declenchent pas le bootstrap reseau.
 
 Voir [docs/api-contract.md](docs/api-contract.md),
 [docs/security-front.md](docs/security-front.md),
-[docs/design-system.md](docs/design-system.md) et
-[docs/lot-L3.md](docs/lot-L3.md).
+[docs/design-system.md](docs/design-system.md),
+[docs/lot-L3.md](docs/lot-L3.md) et [docs/lot-L6.md](docs/lot-L6.md).
 
 ## Etat de livraison
 
-Resultats de reference L4 (details dans `docs/lot-L4.md`) :
+Resultats de reference L6 (details dans `docs/lot-L6.md`) :
 
-- Tests unitaires/composants : **183 tests**, couverture **77,42 % lignes / 78,41 % branches / 70,61 % fonctions**.
-- E2E : **22 tests** Playwright (design system + auth + audit + admin), axe 0.
-- Budget initial **43,07 KiB gzip**, plus gros chunk lazy **57,03 KiB**.
-- Lighthouse desktop design system : performance 0,99 / accessibilite 1,00.
-- Build production sans warning.
+- Tests unitaires/composants : **190 tests**, couverture **77,16 % lignes / 78,34 % branches / 70,87 % fonctions**.
+- E2E : **26 tests** Playwright (design system + auth + audit + admin + fichiers), axe 0.
+- Build production sans warning, budgets, tokens et architecture conformes.
 
 ## Limites assumees
 

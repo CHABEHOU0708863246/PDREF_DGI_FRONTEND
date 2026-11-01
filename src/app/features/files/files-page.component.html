@@ -1,0 +1,122 @@
+<pdref-page-header
+  title="Fichiers"
+  subtitle="Bac a sable technique : upload, liste, telechargement, remplacement versionne et suppression logique."
+/>
+
+@if (problem(); as issue) {
+  <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+} @else if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement des fichiers" />
+} @else {
+  <section class="files-card pd-card" aria-labelledby="files-upload-title">
+    <h2 id="files-upload-title">Ajouter des fichiers</h2>
+    @if (policy(); as currentPolicy) {
+      <p class="pd-muted">
+        Maximum {{ currentPolicy.maximumFiles }} fichier(s),
+        {{ formatSize(currentPolicy.maximumFileSizeBytes) }} par fichier,
+        {{ formatSize(currentPolicy.maximumTotalSizeBytes) }} au total.
+      </p>
+      <pdref-upload-field
+        label="Pieces jointes"
+        hint="PDF, JPEG ou PNG. Le serveur verifie le vrai type, la taille et l antivirus."
+        [accept]="currentPolicy.allowedContentTypes.join(',')"
+        [multiple]="true"
+        [maxFiles]="currentPolicy.maximumFiles"
+        [maxSizeBytes]="currentPolicy.maximumFileSizeBytes"
+        [disabled]="uploading()"
+        (filesSelected)="select($event)"
+      />
+    }
+    <pdref-upload-progress />
+    <div class="pd-actions">
+      <button
+        type="button"
+        class="pd-btn pd-btn--primary"
+        [disabled]="!canUpload() || uploading() || selectedCount() === 0"
+        (click)="upload()"
+      >
+        {{ uploading() ? 'Envoi...' : 'Envoyer' }}
+      </button>
+    </div>
+    @if (message()) {
+      <p class="pd-muted" role="status" aria-live="polite">{{ message() }}</p>
+    }
+  </section>
+
+  <section class="files-card pd-card" aria-labelledby="files-list-title">
+    <div class="files-head">
+      <h2 id="files-list-title">Fichiers</h2>
+      <span class="pd-muted">{{ files().length }} fichier(s)</span>
+    </div>
+
+    @if (files().length === 0) {
+      <pdref-state-panel
+        state="empty"
+        title="Aucun fichier"
+        message="Aucun fichier n a encore ete televerse."
+      />
+    } @else {
+      <div class="files-table-wrap" tabindex="0" role="region" aria-label="Liste des fichiers">
+        <table class="files-table">
+          <caption>
+            Fichiers televerses
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Nom</th>
+              <th scope="col">Version</th>
+              <th scope="col">Type</th>
+              <th scope="col">Taille</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (group of files(); track group.id) {
+              @if (group.currentFile; as file) {
+                <tr>
+                  <td>{{ file.originalName }}</td>
+                  <td>v{{ file.versionNumber }}</td>
+                  <td>{{ file.detectedContentType }}</td>
+                  <td>{{ formatSize(file.sizeBytes) }}</td>
+                  <td>
+                    <span class="pd-chip">{{ file.status }}</span>
+                  </td>
+                  <td class="files-actions">
+                    @if (file.status !== 'SUPPRIMEE') {
+                      <button
+                        type="button"
+                        class="pd-btn pd-btn--ghost pd-btn--sm"
+                        [pdrefSecureDownload]="file.id"
+                      >
+                        Telecharger
+                      </button>
+                      <label class="pd-btn pd-btn--ghost pd-btn--sm">
+                        Remplacer
+                        <input
+                          class="pd-visually-hidden"
+                          type="file"
+                          [attr.accept]="policy()?.allowedContentTypes?.join(',')"
+                          (change)="replace(group, $event)"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        class="pd-btn pd-btn--ghost pd-btn--sm"
+                        (click)="remove(group)"
+                      >
+                        Supprimer
+                      </button>
+                    } @else {
+                      <span class="pd-muted">Aucune action</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

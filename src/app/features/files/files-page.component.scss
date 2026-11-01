@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.files-card {
+  margin-block-end: var(--space-5);
+}
+
+.files-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.files-table-wrap {
+  max-inline-size: 100%;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.files-table {
+  min-inline-size: 0;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.files-table th,
+.files-table td {
+  padding: var(--space-3);
+  border-block-end: var(--border-width) solid var(--color-border);
+  text-align: start;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.files-table th {
+  color: var(--color-text-muted);
+}
+
+.files-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (max-width: 47.9375rem) {
+  .files-head {
+    flex-direction: column;
+  }
+}
