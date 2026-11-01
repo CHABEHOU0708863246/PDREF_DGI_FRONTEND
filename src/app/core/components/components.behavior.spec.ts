@@ -20,6 +20,7 @@ import type { DataTableColumn, TableState } from '../models/table/table.model';
 import type { ApiProblemDetails } from '../models/common/api-problem.model';
 import { CONTRIBUABLE_LOOKUP } from '../services/lookup/contribuable-lookup';
 import { NotificationCenterService } from '../services/notifications/notification-center.service';
+import { NotificationsGateway } from '../services/notifications/notifications.gateway';
 import { NotificationService } from '../services/notifications/notification.service';
 
 interface Row {
@@ -280,7 +281,18 @@ describe('composants core — comportement', () => {
   it('NotificationCenter ouvre, marque et ferme', () => {
     TestBed.configureTestingModule({
       imports: [NotificationCenterComponent],
-      providers: [NotificationCenterService],
+      providers: [
+        NotificationCenterService,
+        {
+          provide: NotificationsGateway,
+          useValue: {
+            list: () => of({ items: [], page: 1, pageSize: 10, totalCount: 0 }),
+            unreadCount: () => of(0),
+            markRead: () => of({}),
+            markAllRead: () => of({ count: 1 }),
+          },
+        },
+      ],
     });
     const fixture = TestBed.createComponent(NotificationCenterComponent);
     const component = fixture.componentInstance;

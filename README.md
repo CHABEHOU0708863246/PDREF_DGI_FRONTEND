@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L6
+# PDREF Frontend - Lot L7
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L6 ajoute la gestion des fichiers : politique issue des parametres, upload, versions, telechargement securise et suppression logique.
+Financiers (DGI Cote d'Ivoire). Le lot L7 ajoute les notifications : cloche, panneau accessible, page Mes notifications et donnees de demonstration strictement locales.
 Le socle L3 conserve la connexion, le renouvellement de session, le mot de passe
 oublie/reinitialisation, le profil, les permissions et la garde de changement obligatoire.
 
@@ -118,15 +118,17 @@ ecrans `/auth/*` sont publics et ne declenchent pas le bootstrap reseau.
 Voir [docs/api-contract.md](docs/api-contract.md),
 [docs/security-front.md](docs/security-front.md),
 [docs/design-system.md](docs/design-system.md),
-[docs/lot-L3.md](docs/lot-L3.md) et [docs/lot-L6.md](docs/lot-L6.md).
+[docs/lot-L3.md](docs/lot-L3.md), [docs/lot-L6.md](docs/lot-L6.md) et
+[docs/lot-L7.md](docs/lot-L7.md).
 
 ## Etat de livraison
 
-Resultats de reference L6 (details dans `docs/lot-L6.md`) :
+Resultats de reference L7 (details dans `docs/lot-L7.md`) :
 
-- Tests unitaires/composants : **190 tests**, couverture **77,16 % lignes / 78,34 % branches / 70,87 % fonctions**.
-- E2E : **26 tests** Playwright (design system + auth + audit + admin + fichiers), axe 0.
+- Tests unitaires/composants : **199 tests**, couverture **75,83 % lignes / 77,06 % branches / 71,91 % fonctions**.
+- E2E : **31 tests** Playwright (design system + auth + audit + admin + fichiers + notifications), axe 0.
 - Build production sans warning, budgets, tokens et architecture conformes.
+- Lighthouse notifications : performance **0,97** / accessibilite **1,00** sur la page et la cloche ouverte.
 
 ## Limites assumees
 
@@ -134,3 +136,12 @@ Resultats de reference L6 (details dans `docs/lot-L6.md`) :
 - MFA : structure backend prete, aucune UI ni obligation L3 (L20).
 - Le profil Lighthouse desktop est la reference ; le mobile est couvert par
   Playwright/axe a 360 px.
+
+## Lot L7 - Notifications
+
+- Cloche accessible avec panneau glissant 3D leger et badge pulse respectant reduced motion.
+- Page `/dashboard/my-notifications` paginee, filtree et marquable comme lue.
+- Etats vide/chargement/erreur/liste, responsive 360/768/1280, axe 0.
+- Aucune PII, aucun montant et aucun contenu d avis.
+- Donnees de demonstration limitees au developpement/e2e ; API reelle en production.
+- Lighthouse execute sur la page et la cloche ouverte.

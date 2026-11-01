@@ -71,6 +71,12 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Files_Read',
   },
   {
+    label: 'Mes notifications',
+    route: '/dashboard/my-notifications',
+    icon: 'bell',
+    exact: false,
+  },
+  {
     label: 'Audit',
     route: '/dashboard/audit',
     icon: 'clipboard',

@@ -70,6 +70,14 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Fichiers - PDREF',
       },
       {
+        path: 'my-notifications',
+        loadComponent: () =>
+          import('../notifications/my-notifications-page.component').then(
+            (module) => module.MyNotificationsPageComponent,
+          ),
+        title: 'Mes notifications - PDREF',
+      },
+      {
         path: 'audit',
         loadComponent: () =>
           import('../audit/audit-list.component').then((module) => module.AuditListComponent),

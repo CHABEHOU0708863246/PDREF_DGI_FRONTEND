@@ -3,5 +3,6 @@ export const environment = {
   apiUrl: 'https://api.pdref.dgi.ci',
   authMode: 'http' as 'http' | 'demo',
   showDesignSystemDemo: true,
-  appVersion: '2.0.0-l5',
+  demoNotifications: false,
+  appVersion: '2.0.0-l7',
 };

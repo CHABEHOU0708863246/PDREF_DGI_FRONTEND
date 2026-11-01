@@ -5,7 +5,9 @@ import {
   HostListener,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AbidjanDatePipe } from '../../pipes/abidjan-date.pipe';
 import { NotificationCenterService } from '../../services/notifications/notification-center.service';
 import { IconComponent } from '../icon/icon.component';
@@ -14,11 +16,12 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
 @Component({
   selector: 'pdref-notification-center',
   standalone: true,
-  imports: [AbidjanDatePipe, IconComponent, StatePanelComponent],
+  imports: [RouterLink, AbidjanDatePipe, IconComponent, StatePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="notification-center" #root>
       <button
+        #trigger
         type="button"
         class="pd-icon-btn notification-center__button"
         [attr.aria-label]="'Notifications, ' + service.unreadCount() + ' non lue(s)'"
@@ -27,7 +30,7 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
         (click)="toggle()"
       >
         <pdref-icon name="bell" />
-        @if (service.unreadCount() > 0) {
+        @if (service.hasUnread()) {
           <span class="notification-center__badge" aria-hidden="true">
             {{ service.unreadCount() }}
           </span>
@@ -38,19 +41,29 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
         <section
           id="notification-panel"
           class="notification-panel"
-          role="region"
+          role="dialog"
           aria-label="Notifications"
+          aria-modal="false"
         >
           <header class="notification-panel__head">
             <h2>Notifications</h2>
-            @if (service.unreadCount() > 0) {
+            @if (service.hasUnread()) {
               <button type="button" class="pd-btn pd-btn--ghost pd-btn--sm" (click)="markAllRead()">
                 Tout marquer comme lu
               </button>
             }
           </header>
 
-          @if (service.items().length === 0) {
+          @if (service.loading()) {
+            <pdref-state-panel state="loading" title="Chargement des notifications" />
+          } @else if (service.problem(); as issue) {
+            <pdref-state-panel
+              state="error"
+              [problem]="issue"
+              actionLabel="Reessayer"
+              (retry)="service.load()"
+            />
+          } @else if (service.items().length === 0) {
             <pdref-state-panel
               state="empty"
               title="Aucune notification"
@@ -82,6 +95,13 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
                 </li>
               }
             </ul>
+            <a
+              class="notification-panel__link"
+              routerLink="/dashboard/my-notifications"
+              (click)="close()"
+            >
+              Voir toutes les notifications
+            </a>
           }
         </section>
       }
@@ -91,15 +111,31 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
 })
 export class NotificationCenterComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
   readonly service = inject(NotificationCenterService);
   readonly open = signal(false);
 
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const query = new URLSearchParams(window.location.search);
+      if (query.get('notificationCenter') === 'open') {
+        this.open.set(true);
+      }
+    }
+    this.service.load();
+  }
+
   toggle(): void {
-    this.open.update((value) => !value);
+    const next = !this.open();
+    this.open.set(next);
+    if (next) {
+      this.service.load();
+    }
   }
 
   close(): void {
     this.open.set(false);
+    this.trigger()?.nativeElement.focus();
   }
 
   markRead(id: string): void {

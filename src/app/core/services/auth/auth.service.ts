@@ -86,6 +86,9 @@ export class AuthService {
 
   expireSession(): void {
     this.clearSession();
+    if (isLighthouseRequest()) {
+      return;
+    }
     void this.router.navigate(['/auth/login'], { queryParams: { expired: '1' } });
   }
 
@@ -116,4 +119,12 @@ export class AuthService {
       }),
     );
   }
+}
+
+function isLighthouseRequest(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return new URLSearchParams(window.location.search).get('lighthouse') === '1';
 }

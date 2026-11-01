@@ -1,6 +1,6 @@
 {
   "name": "pdref-frontend",
-  "version": "2.0.0-l6",
+  "version": "2.0.0-l7",
   "private": true,
   "scripts": {
     "ng": "ng",
@@ -63,6 +63,7 @@
     "eslint-config-prettier": "10.1.8",
     "jsdom": "27.1.0",
     "prettier": "3.9.10",
+    "puppeteer-core": "^24.43.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.0",
     "vitest": "4.0.18"

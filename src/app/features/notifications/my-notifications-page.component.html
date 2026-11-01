@@ -1,0 +1,111 @@
+﻿<pdref-page-header
+  title="Mes notifications"
+  subtitle="Consultez les alertes et messages qui vous sont destines."
+/>
+
+@if (problem(); as issue) {
+  <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+} @else if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement de vos notifications" />
+} @else {
+  <section class="notifications-card pd-card" aria-labelledby="notifications-title">
+    <div class="notifications-head">
+      <div>
+        <h2 id="notifications-title">Notifications</h2>
+        <p class="pd-muted">{{ totalCount() }} notification(s)</p>
+      </div>
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [disabled]="items().every((item) => item.isRead)"
+        (click)="markAllRead()"
+      >
+        Tout marquer comme lu
+      </button>
+    </div>
+
+    <div class="notifications-filters" role="group" aria-label="Filtrer les notifications">
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [attr.aria-pressed]="filter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        Toutes
+      </button>
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [attr.aria-pressed]="filter() === 'unread'"
+        (click)="setFilter('unread')"
+      >
+        Non lues
+      </button>
+      <button
+        type="button"
+        class="pd-btn pd-btn--ghost pd-btn--sm"
+        [attr.aria-pressed]="filter() === 'read'"
+        (click)="setFilter('read')"
+      >
+        Lues
+      </button>
+    </div>
+
+    @if (message()) {
+      <p class="pd-muted" role="status" aria-live="polite">{{ message() }}</p>
+    }
+
+    @if (items().length === 0) {
+      <pdref-state-panel
+        state="empty"
+        title="Aucune notification"
+        message="Aucun message ne correspond a ce filtre."
+      />
+    } @else {
+      <ul class="notifications-list" aria-label="Mes notifications">
+        @for (item of items(); track item.id) {
+          <li class="notification-row" [class.notification-row--unread]="!item.isRead">
+            <div class="notification-row__main">
+              <div class="notification-row__head">
+                <strong>{{ item.title }}</strong>
+                <span class="pd-chip">{{ item.isRead ? 'Lue' : 'Non lue' }}</span>
+              </div>
+              <p>{{ item.message }}</p>
+              <time [attr.datetime]="item.createdAt">{{ item.createdAt | abidjanDate }}</time>
+            </div>
+            @if (!item.isRead) {
+              <button
+                type="button"
+                class="pd-btn pd-btn--ghost pd-btn--sm"
+                [attr.aria-label]="'Marquer comme lue : ' + item.title"
+                (click)="markRead(item)"
+              >
+                Marquer comme lue
+              </button>
+            }
+          </li>
+        }
+      </ul>
+
+      <nav class="notifications-pagination" aria-label="Pagination des notifications">
+        <button
+          type="button"
+          class="pd-btn pd-btn--ghost pd-btn--sm"
+          [disabled]="page() === 1"
+          (click)="previousPage()"
+        >
+          Precedente
+        </button>
+        <span>Page {{ page() }} / {{ pageCount() }}</span>
+        <button
+          type="button"
+          class="pd-btn pd-btn--ghost pd-btn--sm"
+          [disabled]="page() >= pageCount()"
+          (click)="nextPage()"
+        >
+          Suivante
+        </button>
+      </nav>
+    }
+  </section>
+}
