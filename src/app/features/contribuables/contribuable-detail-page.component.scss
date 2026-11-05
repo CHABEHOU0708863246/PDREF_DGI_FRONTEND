@@ -1,0 +1,26 @@
+﻿.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-block-end: var(--space-3);
+}
+.detail-grid article {
+  padding: var(--space-4);
+}
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+dt {
+  color: var(--color-text-muted);
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 47.9375rem) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

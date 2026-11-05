@@ -6,6 +6,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { NotificationsGateway } from '../../core/services/notifications/notifications.gateway';
+import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 
 type ReadFilter = 'all' | 'unread' | 'read';
@@ -61,7 +62,7 @@ export class MyNotificationsPageComponent {
       return;
     }
 
-    if (isLighthouse()) {
+    if (isLighthouseEnabled()) {
       this.items.set(LIGHTHOUSE_NOTIFICATIONS);
       this.totalCount.set(LIGHTHOUSE_NOTIFICATIONS.length);
       this.page.set(1);
@@ -135,12 +136,4 @@ export class MyNotificationsPageComponent {
   pageCount(): number {
     return Math.max(1, Math.ceil(this.totalCount() / this.pageSize));
   }
-}
-
-function isLighthouse(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return new URLSearchParams(window.location.search).get('lighthouse') === '1';
 }

@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L7
+# PDREF Frontend - Lot L8
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L7 ajoute les notifications : cloche, panneau accessible, page Mes notifications et donnees de demonstration strictement locales.
+Financiers (DGI Cote d'Ivoire). Le lot L8 ajoute la gestion des contribuables : liste, formulaire, fiche, selection, export et qualite.
 Le socle L3 conserve la connexion, le renouvellement de session, le mot de passe
 oublie/reinitialisation, le profil, les permissions et la garde de changement obligatoire.
 
@@ -119,7 +119,7 @@ Voir [docs/api-contract.md](docs/api-contract.md),
 [docs/security-front.md](docs/security-front.md),
 [docs/design-system.md](docs/design-system.md),
 [docs/lot-L3.md](docs/lot-L3.md), [docs/lot-L6.md](docs/lot-L6.md) et
-[docs/lot-L7.md](docs/lot-L7.md).
+[docs/lot-L7.md](docs/lot-L7.md) et [docs/lot-L8.md](docs/lot-L8.md).
 
 ## Etat de livraison
 
@@ -145,3 +145,12 @@ Resultats de reference L7 (details dans `docs/lot-L7.md`) :
 - Aucune PII, aucun montant et aucun contenu d avis.
 - Donnees de demonstration limitees au developpement/e2e ; API reelle en production.
 - Lighthouse execute sur la page et la cloche ouverte.
+
+## Lot L8 - Contribuables
+
+- Liste filtrable et paginee, qualite, formulaire et fiche masquee.
+- Revelation PII tracee avec `Contribuables_ReadPii`.
+- Selection contribuable HTTP/ARIA, export CSV/Excel sans PII.
+- Responsive 360/768/1280 et axe 0.
+- Tests front : **213/213** ; e2e **35/35** ; couverture **78,14 % lignes / 76,60 % branches**.
+- Lighthouse contribuables : performance **0,96** / accessibilite **1,00**.

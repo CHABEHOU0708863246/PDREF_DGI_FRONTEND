@@ -23,3 +23,11 @@
 - Tests front : **199/199**, couverture **75,83 % lignes / 77,06 % branches / 71,91 % fonctions**.
 - E2E : **31/31**, axe 0 aux 3 largeurs.
 - Lighthouse : performance **0,97** et accessibilite **1,00** sur la page et la cloche ouverte.
+
+## Blocage du jeu de demonstration
+
+`?lighthouse=1` est strictement reserve au developpement et aux tests locaux.
+Le helper `isLighthouseEnabled()` retourne toujours `false` lorsque
+`environment.production` est vrai : aucun bypass d'authentification et aucune
+donnee de demonstration ne sont servis en production, meme sur `localhost`.
+Le harness Lighthouse utilise un build de test non-production optimise.

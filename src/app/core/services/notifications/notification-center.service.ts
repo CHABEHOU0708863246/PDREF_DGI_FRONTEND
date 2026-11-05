@@ -9,6 +9,7 @@ import type {
 } from '../../models/notifications/notification.model';
 import { CorrelationService } from '../correlation/correlation.service';
 import { NotificationsGateway } from './notifications.gateway';
+import { isLighthouseEnabled } from '../../utils/lighthouse';
 import { normalizeProblem } from '../../utils/problem';
 
 const DEMO_NOTIFICATIONS: readonly AppNotification[] = [
@@ -38,10 +39,10 @@ export class NotificationCenterService {
   private readonly gateway = inject(NotificationsGateway);
   private readonly correlation = inject(CorrelationService);
   private readonly itemsState = signal<AppNotification[]>(
-    environment.demoNotifications || isLighthouseWindow() ? [...DEMO_NOTIFICATIONS] : [],
+    environment.demoNotifications || isLighthouseEnabled() ? [...DEMO_NOTIFICATIONS] : [],
   );
   private readonly unreadState = signal(
-    environment.demoNotifications || isLighthouseWindow()
+    environment.demoNotifications || isLighthouseEnabled()
       ? DEMO_NOTIFICATIONS.filter((item) => !item.read).length
       : 0,
   );
@@ -60,7 +61,7 @@ export class NotificationCenterService {
       return;
     }
 
-    if (isLighthouseWindow()) {
+    if (isLighthouseEnabled()) {
       this.loadingState.set(false);
       return;
     }
@@ -82,7 +83,7 @@ export class NotificationCenterService {
       error: (error: unknown) => {
         this.requestInFlight = false;
         this.loadingState.set(false);
-        if (!environment.demoNotifications && !isLighthouseWindow()) {
+        if (!environment.demoNotifications && !isLighthouseEnabled()) {
           this.errorState.set(normalizeProblem(error, this.correlation.last));
         }
       },
@@ -93,7 +94,7 @@ export class NotificationCenterService {
     this.gateway.markRead(id).subscribe({
       next: () => this.markLocal(id),
       error: (error: unknown) => {
-        if (environment.demoNotifications || isLighthouseWindow()) {
+        if (environment.demoNotifications || isLighthouseEnabled()) {
           this.markLocal(id);
           return;
         }
@@ -106,7 +107,7 @@ export class NotificationCenterService {
     this.gateway.markAllRead().subscribe({
       next: () => this.markAllLocal(),
       error: (error: unknown) => {
-        if (environment.demoNotifications || isLighthouseWindow()) {
+        if (environment.demoNotifications || isLighthouseEnabled()) {
           this.markAllLocal();
           return;
         }
@@ -171,15 +172,4 @@ export class NotificationCenterService {
     }
     return 'info';
   }
-}
-
-function isLighthouseWindow(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return (
-    (window.location.hostname === 'localhost' || !environment.production) &&
-    new URLSearchParams(window.location.search).get('lighthouse') === '1'
-  );
 }

@@ -10,6 +10,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { AbidjanDatePipe } from '../../pipes/abidjan-date.pipe';
 import { NotificationCenterService } from '../../services/notifications/notification-center.service';
+import { isLighthouseEnabled } from '../../utils/lighthouse';
 import { IconComponent } from '../icon/icon.component';
 import { StatePanelComponent } from '../state-panel/state-panel.component';
 
@@ -116,7 +117,7 @@ export class NotificationCenterComponent {
   readonly open = signal(false);
 
   constructor() {
-    if (typeof window !== 'undefined') {
+    if (isLighthouseEnabled()) {
       const query = new URLSearchParams(window.location.search);
       if (query.get('notificationCenter') === 'open') {
         this.open.set(true);

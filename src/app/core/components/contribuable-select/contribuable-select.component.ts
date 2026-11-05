@@ -149,7 +149,7 @@ export class ContribuableSelectComponent implements ControlValueAccessor {
   constructor() {
     this.search$
       .pipe(
-        debounceTime(250),
+        debounceTime(300),
         distinctUntilChanged(),
         switchMap((term) => {
           if (term.trim().length < this.minChars()) {

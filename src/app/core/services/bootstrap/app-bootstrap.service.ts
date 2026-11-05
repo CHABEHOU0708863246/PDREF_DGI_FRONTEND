@@ -4,7 +4,7 @@ import { firstValueFrom, catchError, of, timeout } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { AUTH_BOOTSTRAP_MODE } from './auth-bootstrap-mode';
-import { environment } from '../../../../environments/environment';
+import { isLighthouseEnabled } from '../../utils/lighthouse';
 
 /**
  * Bootstrap unique : refresh cookie -> /me -> permissions -> ready.
@@ -29,7 +29,7 @@ export class AppBootstrapService {
       return;
     }
 
-    if (isLighthouseRequest()) {
+    if (isLighthouseEnabled()) {
       this.auth.applySession(
         { accessToken: 'lighthouse-demo-token', expiresAt: '2035-01-01T00:00:00Z' },
         {
@@ -37,7 +37,15 @@ export class AppBootstrapService {
           login: 'lighthouse',
           displayName: 'Lighthouse demo',
           roles: [],
-          permissions: [],
+          permissions: [
+            'Contribuables_Read',
+            'Contribuables_ReadPii',
+            'Contribuables_Create',
+            'Contribuables_Update',
+            'Contribuables_Archive',
+            'Contribuables_Export',
+            'Contribuables_Sync',
+          ],
           mustChangePassword: false,
         },
       );
@@ -71,15 +79,4 @@ function isPublicPage(): boolean {
     path === '/error' ||
     path === '/unauthorized'
   );
-}
-
-function isLighthouseRequest(): boolean {
-  if (
-    typeof window === 'undefined' ||
-    (environment.production && window.location.hostname !== 'localhost')
-  ) {
-    return false;
-  }
-
-  return new URLSearchParams(window.location.search).get('lighthouse') === '1';
 }

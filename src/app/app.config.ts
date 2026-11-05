@@ -22,7 +22,7 @@ import { AUTH_BOOTSTRAP_MODE } from './core/services/bootstrap/auth-bootstrap-mo
 import { GlobalErrorHandler } from './core/services/errors/global-error.handler';
 import {
   CONTRIBUABLE_LOOKUP,
-  DemoContribuableLookup,
+  HttpContribuableLookup,
 } from './core/services/lookup/contribuable-lookup';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { correlationInterceptor } from './core/interceptors/correlation.interceptor';
@@ -58,7 +58,7 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: CONTRIBUABLE_LOOKUP,
-      useClass: DemoContribuableLookup,
+      useClass: HttpContribuableLookup,
     },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

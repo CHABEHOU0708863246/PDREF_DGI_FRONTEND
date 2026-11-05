@@ -1,6 +1,9 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { delay, of } from 'rxjs';
+import { delay, map, of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import type { ApiResponse } from '../../models/common/api-response.model';
 
 export interface LookupOption {
   id: string;
@@ -14,10 +17,33 @@ export interface ContribuableLookup {
 
 export const CONTRIBUABLE_LOOKUP = new InjectionToken<ContribuableLookup>('CONTRIBUABLE_LOOKUP');
 
-/**
- * Implementation de demonstration L2 : aucune API metier, aucun NCC reel.
- * L8 remplacera ce provider par l implementation HTTP.
- */
+interface LookupApiItem {
+  id: string;
+  raisonSociale: string;
+  nccMasque: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class HttpContribuableLookup implements ContribuableLookup {
+  private readonly http = inject(HttpClient);
+
+  search(term: string, limit: number): Observable<readonly LookupOption[]> {
+    return this.http
+      .get<ApiResponse<LookupApiItem[]>>(`${environment.apiUrl}/api/v1/contribuables/lookup`, {
+        params: { term },
+      })
+      .pipe(
+        map((response) =>
+          response.data.slice(0, limit).map((item) => ({
+            id: item.id,
+            label: item.raisonSociale,
+            sub: item.nccMasque,
+          })),
+        ),
+      );
+  }
+}
+
 export class DemoContribuableLookup implements ContribuableLookup {
   private readonly options: readonly LookupOption[] = [
     { id: 'demo-1', label: 'Contribuable demonstration A', sub: 'NCC demo' },

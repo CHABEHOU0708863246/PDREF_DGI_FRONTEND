@@ -70,6 +70,54 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Fichiers - PDREF',
       },
       {
+        path: 'contribuables',
+        loadComponent: () =>
+          import('../contribuables/contribuables-page.component').then(
+            (module) => module.ContribuablesPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Contribuables_Read'], breadcrumb: 'Contribuables' },
+        title: 'Contribuables - PDREF',
+      },
+      {
+        path: 'contribuables/nouveau',
+        loadComponent: () =>
+          import('../contribuables/contribuable-form-page.component').then(
+            (module) => module.ContribuableFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Contribuables_Create'], breadcrumb: 'Nouveau contribuable' },
+        title: 'Nouveau contribuable - PDREF',
+      },
+      {
+        path: 'contribuables/:id/modifier',
+        loadComponent: () =>
+          import('../contribuables/contribuable-form-page.component').then(
+            (module) => module.ContribuableFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Contribuables_Update'],
+          breadcrumb: 'Modifier le contribuable',
+          renderMode: 'client',
+        },
+        title: 'Modifier le contribuable - PDREF',
+      },
+      {
+        path: 'contribuables/:id',
+        loadComponent: () =>
+          import('../contribuables/contribuable-detail-page.component').then(
+            (module) => module.ContribuableDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Contribuables_Read'],
+          breadcrumb: 'Fiche contribuable',
+          renderMode: 'client',
+        },
+        title: 'Fiche contribuable - PDREF',
+      },
+      {
         path: 'my-notifications',
         loadComponent: () =>
           import('../notifications/my-notifications-page.component').then(

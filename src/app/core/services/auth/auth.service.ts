@@ -5,6 +5,7 @@ import { catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs
 import type { AuthSession, AuthTokens, LoginCredentials } from '../../models/auth/auth.model';
 import { PermissionsService } from '../permissions/permissions.service';
 import { TokenStore } from '../token/token.store';
+import { isLighthouseEnabled } from '../../utils/lighthouse';
 import { AUTH_GATEWAY } from './auth.gateway';
 
 @Injectable({ providedIn: 'root' })
@@ -86,7 +87,7 @@ export class AuthService {
 
   expireSession(): void {
     this.clearSession();
-    if (isLighthouseRequest()) {
+    if (isLighthouseEnabled()) {
       return;
     }
     void this.router.navigate(['/auth/login'], { queryParams: { expired: '1' } });
@@ -119,12 +120,4 @@ export class AuthService {
       }),
     );
   }
-}
-
-function isLighthouseRequest(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return new URLSearchParams(window.location.search).get('lighthouse') === '1';
 }
