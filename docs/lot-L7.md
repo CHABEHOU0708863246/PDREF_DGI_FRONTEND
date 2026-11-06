@@ -31,3 +31,7 @@ Le helper `isLighthouseEnabled()` retourne toujours `false` lorsque
 `environment.production` est vrai : aucun bypass d'authentification et aucune
 donnee de demonstration ne sont servis en production, meme sur `localhost`.
 Le harness Lighthouse utilise un build de test non-production optimise.
+
+## Revision L11 - destinataire externe
+
+Le front n'expose aucune boite de notification contribuable en L11. Les evenements `DEPOT_ACCUSE` et `CONFORMITE_REJET` sont produits par l'API L11 et portes par l'outbox L7 avec un destinataire externe chiffre ; aucune PII n'est affichee dans les ecrans internes.

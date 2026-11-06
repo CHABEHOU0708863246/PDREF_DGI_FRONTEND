@@ -27,6 +27,8 @@
   padding: var(--space-4);
   border-right: var(--border-width) solid var(--color-border);
   background: var(--color-surface);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   transform: translateX(-100%);
   transition: transform var(--motion-base) var(--ease-out);
 }
@@ -78,6 +80,9 @@
 
 .nav {
   flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: var(--space-1);
 }
 
 .nav ul {

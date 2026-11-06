@@ -7,13 +7,15 @@ export interface HasUnsavedChanges {
 }
 
 export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = (component) => {
-  if (!component || !component.hasUnsavedChanges()) {
+  if (!component?.hasUnsavedChanges()) {
     return true;
   }
 
-  return inject(ConfirmDialogService).confirm({
-    title: 'Modifications non enregistrees',
-    message: 'Quitter cette page sans enregistrer les modifications ?',
+  const dialogs = inject(ConfirmDialogService);
+  return dialogs.confirm({
+    title: 'Modifications non enregistrées',
+    message: 'Les modifications saisies seront perdues.',
+    details: 'Quitter la page sans enregistrer ?',
     confirmLabel: 'Quitter',
     cancelLabel: 'Rester',
     tone: 'danger',

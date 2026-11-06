@@ -1,5 +1,6 @@
 import type { Routes } from '@angular/router';
 import { accessGuard } from '../../core/guards/access.guard';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 import { DashboardShellComponent } from './shell/dashboard-shell.component';
 
 export const DASHBOARD_ROUTES: Routes = [
@@ -126,6 +127,41 @@ export const DASHBOARD_ROUTES: Routes = [
           renderMode: 'client',
         },
         title: 'Fiche courrier - PDREF',
+      },
+      {
+        path: 'demandes',
+        loadComponent: () =>
+          import('../demandes/demandes-page.component').then(
+            (module) => module.DemandesPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Demandes_Read'], breadcrumb: 'Demandes' },
+        title: 'Demandes - PDREF',
+      },
+      {
+        path: 'demandes/nouvelle',
+        loadComponent: () =>
+          import('../demandes/demande-form-page.component').then(
+            (module) => module.DemandeFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        canDeactivate: [unsavedChangesGuard],
+        data: { permissions: ['Demandes_Create'], breadcrumb: 'Nouvelle demande' },
+        title: 'Nouvelle demande - PDREF',
+      },
+      {
+        path: 'demandes/:id',
+        loadComponent: () =>
+          import('../demandes/demande-detail-page.component').then(
+            (module) => module.DemandeDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Demandes_Read'],
+          breadcrumb: 'Fiche demande',
+          renderMode: 'client',
+        },
+        title: 'Fiche demande - PDREF',
       },
       {
         path: 'contribuables',

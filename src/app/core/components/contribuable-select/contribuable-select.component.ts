@@ -72,7 +72,7 @@ import { IconComponent } from '../icon/icon.component';
             (input)="onInput($event)"
             (focus)="open.set(true)"
             (keydown)="onKeydown($event)"
-            (blur)="onBlur()"
+            (blur)="onBlur($event)"
           />
           @if (loading()) {
             <span class="contribuable-select__spinner" aria-hidden="true"></span>
@@ -103,7 +103,8 @@ import { IconComponent } from '../icon/icon.component';
                   role="option"
                   [attr.aria-selected]="selected()?.id === option.id"
                   [class.contribuable-select__option--active]="index === activeIndex()"
-                  (mousedown)="choose(option)"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="choose(option)"
                 >
                   <strong>{{ option.label }}</strong>
                   @if (option.sub) {
@@ -234,8 +235,13 @@ export class ContribuableSelectComponent implements ControlValueAccessor {
     }
   }
 
-  onBlur(): void {
-    window.setTimeout(() => this.close(), 120);
+  onBlur(event?: FocusEvent): void {
+    const next = (event?.relatedTarget as Node | null) ?? null;
+    if (next && this.host.nativeElement.contains(next)) {
+      return;
+    }
+
+    this.close();
   }
 
   choose(option: LookupOption): void {

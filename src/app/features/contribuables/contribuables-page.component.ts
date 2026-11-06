@@ -27,8 +27,6 @@ import { normalizeProblem } from '../../core/utils/problem';
 
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
-    } @else if (loading()) {
-      <pdref-state-panel state="loading" title="Chargement des contribuables" />
     } @else {
       <section class="contribuables-card pd-card">
         <div class="contribuables-head">
@@ -100,7 +98,9 @@ import { normalizeProblem } from '../../core/utils/problem';
           </div>
         </form>
 
-        @if (items().length === 0) {
+        @if (loading()) {
+          <pdref-state-panel state="loading" title="Chargement des contribuables" />
+        } @else if (items().length === 0) {
           <pdref-state-panel
             state="empty"
             title="Aucun contribuable"
