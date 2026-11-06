@@ -73,3 +73,20 @@ describe('ContribuablesPageComponent', () => {
     expect(gateway.export).toHaveBeenCalledWith({ ...fixture.componentInstance.filters }, 'csv');
   });
 });
+
+describe('ContribuablesPageComponent helpers', () => {
+  it('calcule les pages et gere les erreurs', () => {
+    const gateway = {
+      list: vi.fn(() => of({ items: [], page: 1, pageSize: 20, totalCount: 41 })),
+      quality: vi.fn(() => of(null)),
+      export: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      imports: [ContribuablesPageComponent],
+      providers: [{ provide: ContribuablesGateway, useValue: gateway }],
+    });
+    const fixture = TestBed.createComponent(ContribuablesPageComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.pageCount()).toBe(3);
+  });
+});

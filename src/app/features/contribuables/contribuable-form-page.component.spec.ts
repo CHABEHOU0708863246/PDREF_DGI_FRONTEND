@@ -48,3 +48,53 @@ describe('ContribuableFormPageComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/dashboard/contribuables', 'c1']);
   });
 });
+
+describe('ContribuableFormPageComponent load/edit', () => {
+  it('charge et sauvegarde une fiche existante', () => {
+    const router = { navigate: vi.fn().mockResolvedValue(true) };
+    const gateway = {
+      get: vi.fn(() =>
+        of({
+          id: 'c1',
+          ncc: '1234567A',
+          raisonSociale: 'Client',
+          systemeComptable: 'SYSCOHADA',
+          centreImpotId: 'GUDEF',
+          centreImpotLibelle: 'GUDEF',
+          directionRattachementId: 'd1',
+          secteur: null,
+          formeJuridique: null,
+          zoneId: null,
+          adresse: null,
+          emailMasque: null,
+          telephoneMasque: null,
+          email: null,
+          telephone: null,
+          emailManquant: true,
+          telephoneManquant: true,
+          nccHorsFormat: false,
+          centreRattachementManquant: false,
+          evalueLe: '2026-11-01T00:00:00Z',
+          isArchived: false,
+          archivedAt: null,
+        }),
+      ),
+      create: vi.fn(),
+      update: vi.fn(() => of({ id: 'c1' })),
+    };
+    TestBed.configureTestingModule({
+      imports: [ContribuableFormPageComponent],
+      providers: [
+        { provide: ContribuablesGateway, useValue: gateway },
+        { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'c1' } } } },
+      ],
+    });
+    const fixture = TestBed.createComponent(ContribuableFormPageComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(false);
+    expect(fixture.componentInstance.form.ncc).toBe('1234567A');
+    fixture.componentInstance.save();
+    expect(gateway.update).toHaveBeenCalledWith('c1', expect.objectContaining({ ncc: '1234567A' }));
+  });
+});

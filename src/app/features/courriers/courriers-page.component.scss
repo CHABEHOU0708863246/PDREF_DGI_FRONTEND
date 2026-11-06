@@ -1,0 +1,53 @@
+﻿.courriers-card {
+  margin-block-end: var(--space-5);
+}
+.courriers-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+.table-wrap {
+  overflow-x: auto;
+  max-inline-size: 100%;
+}
+.pd-table {
+  width: 100%;
+  min-inline-size: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.pd-table th,
+.pd-table td {
+  padding: var(--space-2);
+  border-block-end: var(--border-width) solid var(--color-border);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.pd-table th {
+  color: var(--color-text-muted);
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+@media (max-width: 64rem) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 47.9375rem) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}

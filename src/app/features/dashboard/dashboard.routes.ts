@@ -70,6 +70,54 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Fichiers - PDREF',
       },
       {
+        path: 'courriers',
+        loadComponent: () =>
+          import('../courriers/courriers-page.component').then(
+            (module) => module.CourriersPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Courriers_Read'], breadcrumb: 'Courriers' },
+        title: 'Courriers - PDREF',
+      },
+      {
+        path: 'courriers/nouveau',
+        loadComponent: () =>
+          import('../courriers/courrier-form-page.component').then(
+            (module) => module.CourrierFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Courriers_Create'], breadcrumb: 'Nouveau courrier' },
+        title: 'Nouveau courrier - PDREF',
+      },
+      {
+        path: 'courriers/:id/modifier',
+        loadComponent: () =>
+          import('../courriers/courrier-form-page.component').then(
+            (module) => module.CourrierFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Courriers_Update'],
+          breadcrumb: 'Modifier le courrier',
+          renderMode: 'client',
+        },
+        title: 'Modifier le courrier - PDREF',
+      },
+      {
+        path: 'courriers/:id',
+        loadComponent: () =>
+          import('../courriers/courrier-detail-page.component').then(
+            (module) => module.CourrierDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Courriers_Read'],
+          breadcrumb: 'Fiche courrier',
+          renderMode: 'client',
+        },
+        title: 'Fiche courrier - PDREF',
+      },
+      {
         path: 'contribuables',
         loadComponent: () =>
           import('../contribuables/contribuables-page.component').then(

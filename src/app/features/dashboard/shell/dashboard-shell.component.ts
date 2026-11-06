@@ -71,6 +71,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Files_Read',
   },
   {
+    label: 'Courriers',
+    route: '/dashboard/courriers',
+    icon: 'file',
+    exact: false,
+    permission: 'Courriers_Read',
+  },
+  {
     label: 'Contribuables',
     route: '/dashboard/contribuables',
     icon: 'user',

@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L8
+# PDREF Frontend - Lot L9
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L8 ajoute la gestion des contribuables : liste, formulaire, fiche, selection, export et qualite.
+Financiers (DGI Cote d'Ivoire). Le lot L9 ajoute la gestion des courriers : registre, formulaire, fiche, selection, pieces jointes et donnees C3 conditionnelles.
 Le socle L3 conserve la connexion, le renouvellement de session, le mot de passe
 oublie/reinitialisation, le profil, les permissions et la garde de changement obligatoire.
 
@@ -119,7 +119,7 @@ Voir [docs/api-contract.md](docs/api-contract.md),
 [docs/security-front.md](docs/security-front.md),
 [docs/design-system.md](docs/design-system.md),
 [docs/lot-L3.md](docs/lot-L3.md), [docs/lot-L6.md](docs/lot-L6.md) et
-[docs/lot-L7.md](docs/lot-L7.md) et [docs/lot-L8.md](docs/lot-L8.md).
+[docs/lot-L7.md](docs/lot-L7.md), [docs/lot-L8.md](docs/lot-L8.md) et [docs/lot-L9.md](docs/lot-L9.md).
 
 ## Etat de livraison
 
@@ -154,3 +154,11 @@ Resultats de reference L7 (details dans `docs/lot-L7.md`) :
 - Responsive 360/768/1280 et axe 0.
 - Tests front : **213/213** ; e2e **35/35** ; couverture **78,14 % lignes / 76,60 % branches**.
 - Lighthouse contribuables : performance **0,96** / accessibilite **1,00**.
+
+## Lot L9 - Courriers
+
+- Registre filtrable et pagine, formulaire de creation/modification et fiche detail.
+- Imputation GUDEF verrouillee, snapshot contribuable fige, champs C3 masques par permission.
+- Selecteur courrier ARIA, pieces jointes via proxy L6, aucun elargissement Files_*.
+- Tests front : **240/240** ; e2e **41/41** ; couverture **80,17 % lignes / 76,39 % branches**.
+- Lighthouse courriers : performance **0,93** / accessibilite **1,00**.
