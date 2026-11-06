@@ -1,7 +1,7 @@
-# PDREF Frontend - Lot L9
+# PDREF Frontend - Lot L10
 
 Front-end Angular 21 de la Plateforme de Demande de Rectification des Etats
-Financiers (DGI Cote d'Ivoire). Le lot L9 ajoute la gestion des courriers : registre, formulaire, fiche, selection, pieces jointes et donnees C3 conditionnelles.
+Financiers (DGI Cote d'Ivoire). Le lot L10 ajoute la consultation en lecture seule des definitions de workflow versionnees.
 Le socle L3 conserve la connexion, le renouvellement de session, le mot de passe
 oublie/reinitialisation, le profil, les permissions et la garde de changement obligatoire.
 
@@ -119,7 +119,7 @@ Voir [docs/api-contract.md](docs/api-contract.md),
 [docs/security-front.md](docs/security-front.md),
 [docs/design-system.md](docs/design-system.md),
 [docs/lot-L3.md](docs/lot-L3.md), [docs/lot-L6.md](docs/lot-L6.md) et
-[docs/lot-L7.md](docs/lot-L7.md), [docs/lot-L8.md](docs/lot-L8.md) et [docs/lot-L9.md](docs/lot-L9.md).
+[docs/lot-L7.md](docs/lot-L7.md), [docs/lot-L8.md](docs/lot-L8.md), [docs/lot-L9.md](docs/lot-L9.md) et [docs/lot-L10.md](docs/lot-L10.md).
 
 ## Etat de livraison
 
@@ -162,3 +162,10 @@ Resultats de reference L7 (details dans `docs/lot-L7.md`) :
 - Selecteur courrier ARIA, pieces jointes via proxy L6, aucun elargissement Files_*.
 - Tests front : **240/240** ; e2e **41/41** ; couverture **80,17 % lignes / 76,39 % branches**.
 - Lighthouse courriers : performance **0,93** / accessibilite **1,00**.
+
+## Lot L10 - Moteur de workflow
+
+- Ecran admin Workflows en lecture seule, liste, etapes, jointures et feature flag.
+- Aucun editeur, aucun module metier branche.
+- Tests front : **243/243** ; e2e **44/44** ; couverture **80,50 % lignes / 76,33 % branches**.
+- Lighthouse workflows : performance **0,96** / accessibilite **1,00**.

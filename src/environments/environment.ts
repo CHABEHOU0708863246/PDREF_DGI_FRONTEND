@@ -4,5 +4,5 @@ export const environment = {
   authMode: 'http' as 'http' | 'demo',
   showDesignSystemDemo: true,
   demoNotifications: false,
-  appVersion: '2.0.0-l9',
+  appVersion: '2.0.0-l10',
 };

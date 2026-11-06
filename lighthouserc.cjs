@@ -10,6 +10,7 @@ module.exports = {
         'http://localhost:4000/dashboard/my-notifications?lighthouse=1&notificationCenter=open',
         'http://localhost:4000/dashboard/contribuables?lighthouse=1',
         'http://localhost:4000/dashboard/courriers?lighthouse=1',
+        'http://localhost:4000/dashboard/admin/workflows?lighthouse=1',
       ],
       puppeteerScript: 'scripts/lighthouse-auth.js',
       puppeteerLaunchOptions: {

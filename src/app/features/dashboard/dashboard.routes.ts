@@ -14,6 +14,16 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'PDREF - Fondations',
       },
       {
+        path: 'admin/workflows',
+        loadComponent: () =>
+          import('../workflows/workflows-page.component').then(
+            (module) => module.WorkflowsPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Workflows_Read'], breadcrumb: 'Workflows' },
+        title: 'Workflows - Administration PDREF',
+      },
+      {
         path: 'admin/directions',
         loadComponent: () =>
           import('../admin/admin-page.component').then((module) => module.AdminPageComponent),

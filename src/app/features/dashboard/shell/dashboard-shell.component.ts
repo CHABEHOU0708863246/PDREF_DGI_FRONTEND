@@ -29,6 +29,13 @@ const NAVIGATION: readonly NavigationItem[] = [
   { label: 'Design system', route: '/design-system-demo', icon: 'layout', exact: false },
   { label: 'Portail public', route: '/portail-public/suivi', icon: 'external-link', exact: false },
   {
+    label: 'Workflows',
+    route: '/dashboard/admin/workflows',
+    icon: 'layout',
+    exact: false,
+    permission: 'Workflows_Read',
+  },
+  {
     label: 'Directions',
     route: '/dashboard/admin/directions',
     icon: 'layout',
