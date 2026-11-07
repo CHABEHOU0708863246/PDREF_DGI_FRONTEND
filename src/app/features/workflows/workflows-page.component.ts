@@ -131,7 +131,7 @@ const LIGHTHOUSE_WORKFLOWS: WorkflowDefinition[] = [
   template: `
     <pdref-page-header
       title="Workflows"
-      subtitle="Definitions versionnees du circuit de traitement. Lecture seule en L10."
+      subtitle="Definitions versionnees du circuit de traitement."
     />
 
     @if (problem(); as issue) {
@@ -173,7 +173,7 @@ const LIGHTHOUSE_WORKFLOWS: WorkflowDefinition[] = [
                   (click)="select(item)"
                 >
                   <span class="workflow-item__title">{{ item.name }}</span>
-                  <span class="workflow-item__meta">{{ item.code }} · v{{ item.versionDef }}</span>
+                  <span class="workflow-item__meta">{{ item.code }} Â· v{{ item.versionDef }}</span>
                   <span class="pd-badge" [class.pd-badge--success]="item.status === 'ACTIVE'">
                     {{ statusLabel(item.status) }}
                   </span>

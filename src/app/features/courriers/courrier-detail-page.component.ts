@@ -84,7 +84,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               @if (courrier.demandeId) {
                 <span>{{ courrier.demandeId }}</span>
               } @else {
-                <span class="pd-muted">Disponible en L11.</span>
+                <span class="pd-muted">Disponible.</span>
               }
             </dd>
             <dt>Statut</dt>

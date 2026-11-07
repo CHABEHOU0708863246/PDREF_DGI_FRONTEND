@@ -2,37 +2,57 @@
 
 <section class="admin-toolbar" aria-label="Filtres">
   <div class="admin-toolbar__filters">
-    <label class="pd-field">
-      <span class="pd-label">Recherche</span>
-      <input class="pd-input" [formControl]="filters.controls.search" (keyup.enter)="load(1)" />
-    </label>
+    <div class="pd-field">
+      <label class="pd-label" for="admin-search">Recherche</label>
+      <input
+        id="admin-search"
+        class="pd-input"
+        [formControl]="filters.controls.search"
+        (keyup.enter)="load(1)"
+      />
+    </div>
     @if (screen === 'listes-valeurs') {
-      <label class="pd-field">
-        <span class="pd-label">Liste</span>
-        <select class="pd-input" [formControl]="filters.controls.listeCode" (change)="load(1)">
+      <div class="pd-field">
+        <label class="pd-label" for="admin-liste-code">Liste</label>
+        <select
+          id="admin-liste-code"
+          class="pd-input"
+          [formControl]="filters.controls.listeCode"
+          (change)="load(1)"
+        >
           <option value="">Toutes</option>
           @for (item of listCodes; track item.code) {
             <option [value]="item.code">{{ item.label }}</option>
           }
         </select>
-      </label>
-      <label class="pd-field">
-        <span class="pd-label">Legacy</span>
-        <select class="pd-input" [formControl]="filters.controls.legacy" (change)="load(1)">
+      </div>
+      <div class="pd-field">
+        <label class="pd-label" for="admin-legacy">Legacy</label>
+        <select
+          id="admin-legacy"
+          class="pd-input"
+          [formControl]="filters.controls.legacy"
+          (change)="load(1)"
+        >
           <option value="">Tous</option>
           <option value="false">Non legacy</option>
           <option value="true">Legacy</option>
         </select>
-      </label>
+      </div>
     }
-    <label class="pd-field">
-      <span class="pd-label">Etat</span>
-      <select class="pd-input" [formControl]="filters.controls.active" (change)="load(1)">
+    <div class="pd-field">
+      <label class="pd-label" for="admin-active">Etat</label>
+      <select
+        id="admin-active"
+        class="pd-input"
+        [formControl]="filters.controls.active"
+        (change)="load(1)"
+      >
         <option value="">Tous</option>
         <option value="true">Actifs</option>
         <option value="false">Inactifs</option>
       </select>
-    </label>
+    </div>
   </div>
   <div class="pd-actions">
     <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>

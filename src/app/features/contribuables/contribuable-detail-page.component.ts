@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { Contribuable } from '../../core/models/contribuables/contribuable.model';
@@ -105,7 +105,7 @@ import { normalizeProblem } from '../../core/utils/problem';
         <pdref-state-panel
           state="empty"
           title="Aucune demande"
-          message="L historique sera alimente par le lot Demandes."
+          message="L'historique sera alimente par les demandes."
         />
       </section>
     }

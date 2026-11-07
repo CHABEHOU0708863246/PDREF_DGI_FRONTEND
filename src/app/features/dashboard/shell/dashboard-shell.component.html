@@ -1,5 +1,5 @@
 <div class="shell" [class.shell--collapsed]="collapsed()" [class.shell--mobile-open]="mobileOpen()">
-  <aside class="shell__sidebar" [class.shell__sidebar--open]="mobileOpen()">
+  <aside id="app-sidebar" class="shell__sidebar" [class.shell__sidebar--open]="mobileOpen()">
     <a class="brand" routerLink="/dashboard">
       <span class="brand__mark" aria-hidden="true">P</span>
       <span class="brand__text">PDREF<span>DGI</span></span>
@@ -22,10 +22,6 @@
         }
       </ul>
     </nav>
-
-    <div class="shell__foot">
-      <span class="pd-chip">L5 — référentiels</span>
-    </div>
   </aside>
 
   @if (mobileOpen()) {
@@ -42,7 +38,15 @@
       <button
         type="button"
         class="pd-icon-btn"
-        [attr.aria-label]="collapsed() ? 'Deplier la navigation' : 'Reduire la navigation'"
+        [attr.aria-label]="
+          mobileOpen()
+            ? 'Fermer la navigation'
+            : collapsed()
+              ? 'Deplier la navigation'
+              : 'Reduire la navigation'
+        "
+        aria-controls="app-sidebar"
+        [attr.aria-expanded]="sidebarExpanded()"
         (click)="toggleSidebar()"
       >
         <pdref-icon name="menu" />
@@ -70,8 +74,8 @@
     </main>
 
     <footer class="shell__footer">
-      <span>PDREF v2 — L5</span>
-      <span class="pd-muted">Direction Generale des Impots — Cote d'Ivoire</span>
+      <span>Direction Generale des Impots</span>
+      <span class="pd-muted">Cote d'Ivoire</span>
     </footer>
   </div>
 </div>

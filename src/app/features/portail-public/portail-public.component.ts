@@ -38,7 +38,7 @@ import { ThemeToggleComponent } from '../../core/components/theme-toggle/theme-t
 
         <pdref-state-panel
           state="empty"
-          title="Disponible au lot L18"
+          title="Bientot disponible"
           message="Le formulaire de suivi par NCC et e-mail sera livre avec la limitation de debit et la reponse generique."
         />
 

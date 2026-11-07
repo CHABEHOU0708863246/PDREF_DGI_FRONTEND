@@ -72,7 +72,6 @@ import { IconComponent } from '../icon/icon.component';
             (input)="onInput($event)"
             (focus)="open.set(true)"
             (keydown)="onKeydown($event)"
-            (blur)="onBlur($event)"
           />
           @if (loading()) {
             <span class="contribuable-select__spinner" aria-hidden="true"></span>
@@ -84,7 +83,7 @@ import { IconComponent } from '../icon/icon.component';
         ) {
           <div id="contribuable-listbox" class="contribuable-select__list" role="listbox">
             @if (loading()) {
-              <p class="contribuable-select__status" role="status">Recherche…</p>
+              <p class="contribuable-select__status" role="status">Recherche...</p>
             } @else if (error()) {
               <p
                 class="contribuable-select__status contribuable-select__status--error"
@@ -103,7 +102,6 @@ import { IconComponent } from '../icon/icon.component';
                   role="option"
                   [attr.aria-selected]="selected()?.id === option.id"
                   [class.contribuable-select__option--active]="index === activeIndex()"
-                  (mousedown)="$event.preventDefault()"
                   (click)="choose(option)"
                 >
                   <strong>{{ option.label }}</strong>
@@ -128,7 +126,7 @@ export class ContribuableSelectComponent implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   readonly label = input('Contribuable');
-  readonly placeholder = input('Rechercher par NCC ou raison sociale…');
+  readonly placeholder = input('Rechercher par NCC ou raison sociale...');
   readonly minChars = input(2);
   readonly inputId = input('contribuable');
 
@@ -234,16 +232,6 @@ export class ContribuableSelectComponent implements ControlValueAccessor {
       this.close();
     }
   }
-
-  onBlur(event?: FocusEvent): void {
-    const next = (event?.relatedTarget as Node | null) ?? null;
-    if (next && this.host.nativeElement.contains(next)) {
-      return;
-    }
-
-    this.close();
-  }
-
   choose(option: LookupOption): void {
     this.selected.set(option);
     this.term.set('');
@@ -265,8 +253,8 @@ export class ContribuableSelectComponent implements ControlValueAccessor {
     this.activeIndex.set(-1);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.close();
     }

@@ -135,8 +135,11 @@ export class NotificationCenterComponent {
   }
 
   close(): void {
+    const wasOpen = this.open();
     this.open.set(false);
-    this.trigger()?.nativeElement.focus();
+    if (wasOpen) {
+      this.trigger()?.nativeElement.focus();
+    }
   }
 
   markRead(id: string): void {
@@ -149,7 +152,7 @@ export class NotificationCenterComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.host.nativeElement.contains(event.target as Node)) {
+    if (this.open() && !this.host.nativeElement.contains(event.target as Node)) {
       this.close();
     }
   }

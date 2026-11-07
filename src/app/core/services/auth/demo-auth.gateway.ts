@@ -6,7 +6,7 @@ import type { AuthGateway } from './auth.gateway';
 
 /**
  * Mode demonstration : aucun appel reseau, permissions vides. Le mode reel
- * (`http`) est utilise en L3 ; ce gateway reste disponible pour les tests.
+ * (`http`) est utilise en production ; ce gateway reste disponible pour les tests.
  */
 @Injectable({ providedIn: 'root' })
 export class DemoAuthGateway implements AuthGateway {

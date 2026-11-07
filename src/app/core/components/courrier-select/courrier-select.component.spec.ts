@@ -88,18 +88,15 @@ describe('CourrierSelectComponent keyboard', () => {
 });
 
 describe('CourrierSelectComponent pointer', () => {
-  it('ferme au blur et hors du composant', () => {
-    vi.useFakeTimers();
+  it('reste ouvert a la perte de focus et ferme hors du composant', () => {
     const { fixture } = setup();
     fixture.detectChanges();
     fixture.componentInstance.open.set(true);
-    fixture.componentInstance.onBlur();
-    vi.runAllTimers();
+    expect(fixture.componentInstance.open()).toBe(true);
+    fixture.componentInstance.onDocumentPointerDown({
+      target: document.body,
+    } as unknown as PointerEvent);
     expect(fixture.componentInstance.open()).toBe(false);
-    fixture.componentInstance.open.set(true);
-    fixture.componentInstance.onDocumentClick({ target: document.body } as unknown as MouseEvent);
-    expect(fixture.componentInstance.open()).toBe(false);
-    vi.useRealTimers();
   });
 });
 

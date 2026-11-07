@@ -1,6 +1,6 @@
 /**
  * Contrat problem+json RFC 9457 expose par le back-end PDREF.
- * Les noms sont ceux du contrat L1 : type, title, status, detail, instance,
+ * Les noms sont ceux du contrat problem+json : type, title, status, detail, instance,
  * code, traceId, reference, errors[].
  */
 export interface ApiFieldError {

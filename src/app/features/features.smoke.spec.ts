@@ -35,7 +35,7 @@ function baseProviders() {
   ];
 }
 
-describe('features — smoke', () => {
+describe('features Ã¢â‚¬â€ smoke', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
   it('App', () => {
@@ -52,7 +52,7 @@ describe('features — smoke', () => {
     });
     const fixture = TestBed.createComponent(DashboardHomeComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Fondations');
+    expect(fixture.nativeElement.textContent).toContain('Tableau de bord');
   });
 
   it('DashboardShell', () => {
@@ -105,7 +105,7 @@ describe('features — smoke', () => {
     });
     const fixture = TestBed.createComponent(PortailPublicComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('L18');
+    expect(fixture.nativeElement.textContent).toContain('Bientot disponible');
   });
 
   it('PortailPlaceholder', () => {

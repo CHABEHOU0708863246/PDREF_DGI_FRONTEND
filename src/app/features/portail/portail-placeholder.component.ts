@@ -12,12 +12,12 @@ import { StatePanelComponent } from '../../core/components/state-panel/state-pan
     <main class="pd-container pd-page">
       <pdref-page-header
         title="Espace contribuable"
-        subtitle="Le parcours de depot electronique sera livre aux lots L11 et L22."
+        subtitle="Le parcours de depot electronique sera disponible prochainement."
       />
       <pdref-state-panel
         state="empty"
         title="Squelette uniquement"
-        message="Aucun formulaire metier, aucune donnee financiere et aucun appel API en L2."
+        message="Aucun formulaire metier, aucune donnee financiere et aucun appel API."
       />
       <a class="pd-btn pd-btn--ghost" routerLink="/design-system-demo">Design system</a>
     </main>

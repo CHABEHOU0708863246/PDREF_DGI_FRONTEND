@@ -11,14 +11,14 @@ import { PageHeaderComponent } from '../../../core/components/page-header/page-h
   template: `
     <div class="pd-page">
       <pdref-page-header
-        title="PDREF v2 — Fondations"
-        subtitle="Lot L2 : design system, contrat API et securite front. Aucun ecran metier n'est livre a ce stade."
+        title="Tableau de bord"
+        subtitle="Pilotage des contribuables, courriers, demandes et workflows."
       />
 
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero__copy">
-          <span class="pd-chip">L2 — fondations</span>
-          <h2 id="hero-title">Une base commune, prete pour les lots metier</h2>
+          <span class="pd-chip">Vue d'ensemble</span>
+          <h2 id="hero-title">Une base commune, prete pour vos traitements</h2>
           <p>
             Composants accessibles, contrat problem+json, interception securisee et theming
             clair/sombre sont maintenant disponibles pour construire les modules.

@@ -10,11 +10,7 @@ export interface StatusDescriptor {
   pulse?: boolean;
 }
 
-/**
- * Source unique des statuts d'interface. Aucun code metier PDREF n'est
- * introduit en L2 : seuls des statuts de demonstration generiques existent.
- * Les lots L5/L11 ajouteront les statuts metier dans ce meme catalogue.
- */
+/** Catalogue des statuts affiches dans l'interface. */
 export const STATUS_CATALOG: Readonly<Record<string, StatusDescriptor>> = {
   DEMO_PENDING: {
     code: 'DEMO_PENDING',

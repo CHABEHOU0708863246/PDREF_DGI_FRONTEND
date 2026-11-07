@@ -13,7 +13,7 @@ import type {
 import type { AuthGateway } from './auth.gateway';
 
 /**
- * Contrat L3 : cookie HttpOnly pour le refresh, aucun refresh token dans le JSON.
+ * Cookie HttpOnly pour le refresh, aucun refresh token dans le JSON.
  * Seul l'access token est conserve en memoire par TokenStore.
  */
 @Injectable({ providedIn: 'root' })

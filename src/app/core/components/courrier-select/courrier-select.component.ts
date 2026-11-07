@@ -73,7 +73,6 @@ import { IconComponent } from '../icon/icon.component';
             (input)="onInput($event)"
             (focus)="open.set(true)"
             (keydown)="onKeydown($event)"
-            (blur)="onBlur($event)"
           />
           @if (loading()) {
             <span class="contribuable-select__spinner" aria-hidden="true"></span>
@@ -104,7 +103,6 @@ import { IconComponent } from '../icon/icon.component';
                   role="option"
                   [attr.aria-selected]="selected()?.id === option.id"
                   [class.contribuable-select__option--active]="index === activeIndex()"
-                  (mousedown)="$event.preventDefault()"
                   (click)="choose(option)"
                 >
                   <strong>{{ option.numero }}</strong>
@@ -245,16 +243,6 @@ export class CourrierSelectComponent implements ControlValueAccessor {
       this.close();
     }
   }
-
-  onBlur(event?: FocusEvent): void {
-    const next = (event?.relatedTarget as Node | null) ?? null;
-    if (next && this.host.nativeElement.contains(next)) {
-      return;
-    }
-
-    this.close();
-  }
-
   choose(option: CourrierLookup): void {
     this.selected.set(option);
     this.term.set('');
@@ -276,8 +264,8 @@ export class CourrierSelectComponent implements ControlValueAccessor {
     this.activeIndex.set(-1);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.close();
     }

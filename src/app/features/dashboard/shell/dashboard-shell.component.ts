@@ -155,6 +155,10 @@ export class DashboardShellComponent {
     this.mobileOpen.set(false);
   }
 
+  sidebarExpanded(): boolean {
+    return this.isMobileViewport() ? this.mobileOpen() : !this.collapsed();
+  }
+
   logout(): void {
     this.auth.logoutAndRedirect();
   }

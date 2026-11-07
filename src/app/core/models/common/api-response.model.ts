@@ -1,4 +1,4 @@
-/** Enveloppe de succes du back-end PDREF (contrat L1). */
+/** Enveloppe de succes des reponses du back-end PDREF. */
 export interface ApiResponse<T> {
   success: boolean;
   message: string;

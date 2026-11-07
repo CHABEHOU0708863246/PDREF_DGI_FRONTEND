@@ -30,7 +30,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   transform: translateX(-100%);
-  transition: transform var(--motion-base) var(--ease-out);
+  transition:
+    width var(--motion-base) var(--ease-out),
+    padding var(--motion-base) var(--ease-out),
+    transform var(--motion-base) var(--ease-out);
 }
 
 .shell__sidebar--open {
@@ -183,9 +186,9 @@
   .shell__sidebar {
     position: sticky;
     top: 0;
+    width: var(--shell-sidebar-width);
     height: 100vh;
     transform: none;
-    transition: width var(--motion-base) var(--ease-out);
   }
 
   .shell__backdrop {
@@ -202,4 +205,23 @@
 .shell--collapsed .nav__label,
 .shell--collapsed .brand__text {
   display: none;
+}
+
+.shell--collapsed .shell__sidebar {
+  padding-inline: var(--space-2);
+}
+
+.shell--collapsed .brand {
+  justify-content: center;
+}
+
+.shell--collapsed .nav a {
+  justify-content: center;
+}
+
+@include bp.down(sm) {
+  .shell__sidebar {
+    width: var(--sidebar-width);
+    padding-inline: var(--space-4);
+  }
 }

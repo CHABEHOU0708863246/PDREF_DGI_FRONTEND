@@ -45,3 +45,14 @@ describe('NotificationCenterComponent', () => {
     expect(button.getAttribute('aria-expanded')).toBe('false');
   });
 });
+it('ne vole pas le focus quand le panneau est deja ferme', () => {
+  const { fixture } = setup();
+  fixture.detectChanges();
+  const component = fixture.componentInstance;
+  const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  const focus = vi.spyOn(button, 'focus');
+
+  component.onDocumentClick(new MouseEvent('click', { bubbles: true }));
+
+  expect(focus).not.toHaveBeenCalled();
+});
