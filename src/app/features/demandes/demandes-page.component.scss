@@ -44,7 +44,7 @@
 
 .tabs__item {
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 0.125rem solid transparent;
   background: transparent;
   padding: var(--space-2) var(--space-3);
   color: var(--color-text-muted);
@@ -183,6 +183,6 @@
   display: grid;
   gap: 0.4rem;
   padding: 0.85rem;
-  border: 1px solid var(--pd-border, #d9dee8);
-  border-radius: 0.65rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
 }
