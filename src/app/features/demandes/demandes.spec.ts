@@ -283,8 +283,13 @@ describe('Demandes interactions', () => {
     form.exercises[0].etatsFinanciers = ['BILAN'];
     form.exercises[0].motifs = ['FOND_ERREUR_SAISIE'];
     form.submit();
-    expect(create).toHaveBeenCalled();
-    expect(uploadAttachment).toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ brouillon: true }));
+    expect(uploadAttachment).toHaveBeenCalledWith('d1', file);
+    expect(update).toHaveBeenCalledWith(
+      'd1',
+      expect.objectContaining({ brouillon: false, deposer: true }),
+      2,
+    );
   });
 
   it('couvre les erreurs des trois ecrans', () => {
