@@ -92,6 +92,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Demandes_Read',
   },
   {
+    label: 'Suivis',
+    route: '/dashboard/suivis',
+    icon: 'clipboard',
+    exact: false,
+    permission: 'Suivis_Read',
+  },
+  {
     label: 'Contribuables',
     route: '/dashboard/contribuables',
     icon: 'user',

@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { DemandeDetail } from '../../core/models/demandes/demande.model';
+import type { SuiviDetail } from '../../core/models/suivis/suivi.model';
 import type { FileGroup } from '../../core/models/files/file.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
+import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
@@ -224,6 +226,24 @@ const LIGHTHOUSE_DETAIL: DemandeDetail = {
                   </tbody>
                 </table>
               </div>
+              @if (suivi(); as dossier) {
+                <div class="section-head">
+                  <h3>Avis des directions</h3>
+                  <a class="pd-link" [routerLink]="['/dashboard/suivis', dossier.demandeId]">
+                    Ouvrir le suivi
+                  </a>
+                </div>
+                <div class="avis-grid">
+                  @for (avis of dossier.avis; track avis.id) {
+                    <article class="avis-card">
+                      <strong>{{ avis.etapeCode }}</strong>
+                      <span class="pd-chip">{{ avis.statut }}</span>
+                      <span>{{ avis.decision || 'En attente' }}</span>
+                      <span class="pd-muted">{{ avis.directionCode }}</span>
+                    </article>
+                  }
+                </div>
+              }
             } @else {
               <pdref-state-panel
                 state="empty"
@@ -280,6 +300,7 @@ const LIGHTHOUSE_DETAIL: DemandeDetail = {
 })
 export class DemandeDetailPageComponent {
   private readonly gateway = inject(DemandesGateway);
+  private readonly suivisGateway = inject(SuivisGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly permissions = inject(PermissionsService);
   private readonly correlation = inject(CorrelationService);
@@ -287,6 +308,7 @@ export class DemandeDetailPageComponent {
   readonly tabs = ['synthese', 'exercices', 'conformite', 'circuit', 'pieces'] as const;
   readonly activeTab = signal<(typeof this.tabs)[number]>('synthese');
   readonly item = signal<DemandeDetail | null>(null);
+  readonly suivi = signal<SuiviDetail | null>(null);
   readonly attachments = signal<FileGroup[]>([]);
   readonly loading = signal(true);
   readonly attachmentsLoading = signal(false);
@@ -321,6 +343,7 @@ export class DemandeDetailPageComponent {
         this.item.set(item);
         this.loading.set(false);
         this.loadAttachments();
+        this.loadSuivi();
       },
       error: (error: unknown) => {
         this.loading.set(false);
@@ -340,6 +363,16 @@ export class DemandeDetailPageComponent {
     });
   }
 
+  loadSuivi(): void {
+    if (!this.permissions.hasPermission('Suivis_Read')) {
+      return;
+    }
+    this.suivisGateway.get(this.id).subscribe({
+      next: (item) => this.suivi.set(item),
+      error: () => this.suivi.set(null),
+    });
+  }
+
   upload(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -350,6 +383,7 @@ export class DemandeDetailPageComponent {
       next: (progress) => {
         if (progress >= 100) {
           this.loadAttachments();
+          this.loadSuivi();
         }
       },
       error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),

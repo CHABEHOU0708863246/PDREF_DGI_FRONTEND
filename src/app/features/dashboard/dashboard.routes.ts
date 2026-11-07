@@ -164,6 +164,56 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Fiche demande - PDREF',
       },
       {
+        path: 'suivis',
+        loadComponent: () =>
+          import('../suivis/suivis-page.component').then((module) => module.SuivisPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Suivis_Read'], breadcrumb: 'Suivis' },
+        title: 'Suivis - PDREF',
+      },
+      {
+        path: 'suivis/:id/validation',
+        loadComponent: () =>
+          import('../suivis/suivi-validation-page.component').then(
+            (module) => module.SuiviValidationPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Suivis_Decide'],
+          breadcrumb: 'Validation globale',
+          renderMode: 'client',
+        },
+        title: 'Validation globale - PDREF',
+      },
+      {
+        path: 'suivis/:id/corriger',
+        loadComponent: () =>
+          import('../suivis/suivi-correction-page.component').then(
+            (module) => module.SuiviCorrectionPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Suivis_Corriger'],
+          breadcrumb: 'Correction',
+          renderMode: 'client',
+        },
+        title: 'Correction - PDREF',
+      },
+      {
+        path: 'suivis/:id',
+        loadComponent: () =>
+          import('../suivis/suivi-detail-page.component').then(
+            (module) => module.SuiviDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Suivis_Read'],
+          breadcrumb: 'Suivi',
+          renderMode: 'client',
+        },
+        title: 'Suivi - PDREF',
+      },
+      {
         path: 'contribuables',
         loadComponent: () =>
           import('../contribuables/contribuables-page.component').then(

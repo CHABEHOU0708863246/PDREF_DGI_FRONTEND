@@ -12,6 +12,7 @@ module.exports = {
         'http://localhost:4000/dashboard/courriers?lighthouse=1',
         'http://localhost:4000/dashboard/admin/workflows?lighthouse=1',
         'http://localhost:4000/dashboard/demandes?lighthouse=1',
+        'http://localhost:4000/dashboard/suivis?lighthouse=1',
         'http://localhost:4000/dashboard/demandes/lh-demande-1?lighthouse=1',
         'http://localhost:4000/dashboard/demandes/nouvelle?lighthouse=1',
       ],
