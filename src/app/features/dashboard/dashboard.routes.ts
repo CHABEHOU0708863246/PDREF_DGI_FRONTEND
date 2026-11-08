@@ -129,6 +129,34 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Fiche courrier - PDREF',
       },
       {
+        path: 'ctf/a-activer',
+        loadComponent: () =>
+          import('../ctf/ctf-a-activer-page.component').then(
+            (module) => module.CtfAActiverPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'CTF a activer' },
+        title: 'CTF a activer - PDREF',
+      },
+      {
+        path: 'ctf/suivi',
+        loadComponent: () =>
+          import('../ctf/ctf-suivi-page.component').then((module) => module.CtfSuiviPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Suivi CTF' },
+        title: 'Suivi CTF - PDREF',
+      },
+      {
+        path: 'ctf/:id',
+        loadComponent: () =>
+          import('../ctf/ctf-detail-page.component').then(
+            (module) => module.CtfDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Detail CTF', renderMode: 'client' },
+        title: 'Detail CTF - PDREF',
+      },
+      {
         path: 'demandes',
         loadComponent: () =>
           import('../demandes/demandes-page.component').then(

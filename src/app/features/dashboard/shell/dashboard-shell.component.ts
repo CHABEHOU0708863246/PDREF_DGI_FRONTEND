@@ -99,6 +99,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Suivis_Read',
   },
   {
+    label: 'CTF',
+    route: '/dashboard/ctf/a-activer',
+    icon: 'file',
+    exact: false,
+    permission: 'Ctf_Read',
+  },
+  {
     label: 'Contribuables',
     route: '/dashboard/contribuables',
     icon: 'user',

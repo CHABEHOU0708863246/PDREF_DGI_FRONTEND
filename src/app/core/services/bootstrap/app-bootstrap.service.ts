@@ -36,7 +36,7 @@ export class AppBootstrapService {
           id: 'lighthouse',
           login: 'lighthouse',
           displayName: 'Lighthouse demo',
-          roles: ['SD_GUDEF'],
+          roles: ['SD_GUDEF', 'CHEF_CTF'],
           permissions: [
             'Contribuables_Read',
             'Contribuables_ReadPii',
@@ -61,6 +61,9 @@ export class AppBootstrapService {
             'Suivis_Decide',
             'Suivis_Corriger',
             'Suivis_Transmettre',
+            'Ctf_Read',
+            'Ctf_Activer',
+            'Ctf_Retour',
           ],
           mustChangePassword: false,
         },

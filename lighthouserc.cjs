@@ -15,6 +15,8 @@ module.exports = {
         'http://localhost:4000/dashboard/suivis?lighthouse=1',
         'http://localhost:4000/dashboard/demandes/lh-demande-1?lighthouse=1',
         'http://localhost:4000/dashboard/demandes/nouvelle?lighthouse=1',
+        'http://localhost:4000/dashboard/ctf/a-activer?lighthouse=1',
+        'http://localhost:4000/dashboard/ctf/suivi?lighthouse=1',
       ],
       puppeteerScript: 'scripts/lighthouse-auth.js',
       puppeteerLaunchOptions: {
