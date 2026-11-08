@@ -22,6 +22,9 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
       statut: 'AVIS_EN_COURS',
       avisRecus: 1,
       avisTotal: 3,
+      avisFavorables: 1,
+      avisNonFavorables: 0,
+      transmissionsCount: 1,
       etapeCourante: 'AVIS_DERAR',
       demandeStatut: 'EN_CIRCUIT',
       dateDepot: '2026-11-05T00:00:00Z',
@@ -162,6 +165,9 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
       }
       .filters .pd-field {
         min-width: 14rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
       }
     `,
   ],

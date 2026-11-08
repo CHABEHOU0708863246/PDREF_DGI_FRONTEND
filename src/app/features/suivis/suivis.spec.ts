@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -21,6 +21,9 @@ const page: SuiviPage = {
       statut: 'AVIS_EN_COURS',
       avisRecus: 1,
       avisTotal: 3,
+      avisFavorables: 1,
+      avisNonFavorables: 0,
+      transmissionsCount: 0,
       etapeCourante: 'AVIS_DERAR',
       demandeStatut: 'EN_CIRCUIT',
       dateDepot: '2026-11-05T00:00:00Z',
@@ -45,6 +48,12 @@ const detail: SuiviDetail = {
       decision: null,
       motifCode: null,
       commentaire: null,
+      article24: {
+        insuffisanceMemeNature3Ans: null,
+        engagementRedressementEnCours: null,
+        avisVerificationComptabilite: null,
+        verificationApprofondieEnCours: null,
+      },
       emisLe: null,
       emisPar: null,
       echeance: null,
@@ -151,7 +160,7 @@ describe('Pages suivis', () => {
           'Suivis_Decide',
           'Suivis_Corriger',
         ],
-        ['DECIDEUR_DERAR'],
+        ['DECIDEUR_DERAR', 'SD_GUDEF'],
       ),
     });
     const fixture = TestBed.createComponent(SuiviDetailPageComponent);
@@ -161,7 +170,17 @@ describe('Pages suivis', () => {
     expect(component.canAvis(avis)).toBe(true);
     expect(component.canDecide()).toBe(true);
     expect(component.canCorrect()).toBe(true);
-    component.draft[avis.etapeCode] = { decision: 'FAVORABLE', motifCode: '', commentaire: '' };
+    component.draft[avis.etapeCode] = {
+      decision: 'FAVORABLE',
+      motifCode: '',
+      commentaire: '',
+      article24: {
+        insuffisanceMemeNature3Ans: null,
+        engagementRedressementEnCours: null,
+        avisVerificationComptabilite: null,
+        verificationApprofondieEnCours: null,
+      },
+    };
     component.decide(avis);
     component.transmission.destinataires = '507f1f77bcf86cd799439011';
     component.transmit();
@@ -217,6 +236,12 @@ describe('Pages suivis', () => {
       decision: 'NON_FAVORABLE',
       motifCode: '',
       commentaire: '',
+      article24: {
+        insuffisanceMemeNature3Ans: null,
+        engagementRedressementEnCours: null,
+        avisVerificationComptabilite: null,
+        verificationApprofondieEnCours: null,
+      },
     };
     detailComponent.decide(detail.avis[0]);
     detailComponent.transmit();
@@ -257,6 +282,7 @@ describe('Pages suivis', () => {
     const detailFixture = TestBed.createComponent(SuiviDetailPageComponent);
     detailFixture.detectChanges();
     const detailComponent = detailFixture.componentInstance;
+    expect(detailComponent.canDecide()).toBe(false);
     detailComponent.motifLabel('AUTRE');
     detailComponent.statutLabel('AVIS_COMPLET');
     detailComponent.statutLabel('VALIDATION_EN_ATTENTE');
@@ -269,6 +295,12 @@ describe('Pages suivis', () => {
       decision: 'NON_FAVORABLE',
       motifCode: 'AUTRE',
       commentaire: 'precision',
+      article24: {
+        insuffisanceMemeNature3Ans: null,
+        engagementRedressementEnCours: null,
+        avisVerificationComptabilite: null,
+        verificationApprofondieEnCours: null,
+      },
     };
     detailComponent.decide(dvfnAvis);
     detailComponent.transmission.destinataires = '';
@@ -286,6 +318,8 @@ describe('Pages suivis', () => {
     const correctionComponent = correction.componentInstance;
     correctionComponent.cible = 'VALIDATION_GLOBALE|v1|NON_FAVORABLE';
     correctionComponent.onCible();
+    expect(correctionComponent.ancienneDecision()).toBe('NON_FAVORABLE');
+    expect(correctionComponent.cibleLabel()).toBe('Validation globale');
     expect(correctionComponent.nouvelleDecision).toBe('FAVORABLE');
     correctionComponent.cible = '';
     correctionComponent.submit();
@@ -308,6 +342,8 @@ describe('Pages suivis', () => {
     const correctionComponent = correction.componentInstance;
     correctionComponent.cible = 'AVIS|a1|FAVORABLE';
     correctionComponent.onCible();
+    expect(correctionComponent.ancienneDecision()).toBe('FAVORABLE');
+    expect(correctionComponent.cibleLabel()).toBe('Avis a1');
     expect(correctionComponent.nouvelleDecision).toBe('NON_FAVORABLE');
     correctionComponent.motif = 'motif suffisamment long';
     correctionComponent.submit();

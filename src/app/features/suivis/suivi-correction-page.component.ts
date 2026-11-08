@@ -58,6 +58,18 @@ import { normalizeProblem } from '../../core/utils/problem';
               <option value="NON_FAVORABLE">Non favorable</option>
             </select>
           </label>
+          <section class="compare" aria-label="Comparaison avant apres">
+            <div>
+              <span class="pd-label">Avant</span>
+              <strong>{{ ancienneDecision() || '-' }}</strong>
+              <span class="pd-muted">{{ cibleLabel() || 'Selectionner une decision' }}</span>
+            </div>
+            <div>
+              <span class="pd-label">Apres</span>
+              <strong>{{ nouvelleDecision }}</strong>
+              <span class="pd-muted">{{ motif || 'Motif a saisir' }}</span>
+            </div>
+          </section>
           <label class="pd-field">
             <span class="pd-label">Motif (10 caracteres minimum)</span>
             <textarea class="pd-input" rows="3" [(ngModel)]="motif" name="motif"></textarea>
@@ -81,6 +93,18 @@ import { normalizeProblem } from '../../core/utils/problem';
         gap: 0.85rem;
         max-width: 40rem;
       }
+      .compare {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        gap: 0.75rem;
+      }
+      .compare > div {
+        display: grid;
+        gap: 0.25rem;
+        border: 1px solid var(--pd-border, #d9dee8);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+      }
     `,
   ],
 })
@@ -94,6 +118,8 @@ export class SuiviCorrectionPageComponent {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
+  readonly ancienneDecision = signal<string | null>(null);
+  readonly cibleLabel = signal('');
   cible = '';
   nouvelleDecision: 'FAVORABLE' | 'NON_FAVORABLE' = 'FAVORABLE';
   motif = '';
@@ -117,7 +143,11 @@ export class SuiviCorrectionPageComponent {
   }
 
   onCible(): void {
-    const [, , decision] = this.cible.split('|');
+    const [type, id, decision] = this.cible.split('|');
+    this.ancienneDecision.set(decision || null);
+    this.cibleLabel.set(
+      type === 'AVIS' ? `Avis ${id}` : type === 'VALIDATION_GLOBALE' ? 'Validation globale' : '',
+    );
     if (decision === 'FAVORABLE') {
       this.nouvelleDecision = 'NON_FAVORABLE';
     } else if (decision === 'NON_FAVORABLE') {

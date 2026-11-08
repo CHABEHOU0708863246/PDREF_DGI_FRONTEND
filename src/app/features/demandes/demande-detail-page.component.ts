@@ -69,6 +69,89 @@ const LIGHTHOUSE_DETAIL: DemandeDetail = {
   version: 1,
 };
 
+const LIGHTHOUSE_SUIVI: SuiviDetail = {
+  id: 'lh-suivi-1',
+  demandeId: 'lh-demande-1',
+  numero: '2026-0001',
+  cycle: 1,
+  contribuable: { ncc: '1234567A', raisonSociale: 'Client demonstration' },
+  statut: 'AVIS_COMPLET',
+  avisRecus: 3,
+  avisTotal: 3,
+  avisFavorables: 2,
+  avisNonFavorables: 1,
+  transmissionsCount: 1,
+  etapeCourante: 'VALIDATION_GLOBALE_GUDEF',
+  demandeStatut: 'EN_CIRCUIT',
+  dateDepot: '2026-11-05T00:00:00Z',
+  dateOuverture: '2026-11-05T00:00:00Z',
+  dateCloture: null,
+  avis: [
+    {
+      id: 'lh-avis-1',
+      etapeCode: 'AVIS_DERAR',
+      directionId: 'DERAR',
+      directionCode: 'DERAR',
+      statut: 'EMIS',
+      decision: 'FAVORABLE',
+      motifCode: null,
+      commentaire: null,
+      article24: {
+        insuffisanceMemeNature3Ans: false,
+        engagementRedressementEnCours: false,
+        avisVerificationComptabilite: false,
+        verificationApprofondieEnCours: null,
+      },
+      emisLe: '2026-11-05T00:00:00Z',
+      emisPar: 'lh-user-1',
+      echeance: null,
+    },
+    {
+      id: 'lh-avis-2',
+      etapeCode: 'AVIS_DVFN',
+      directionId: 'DVFN',
+      directionCode: 'DVFN',
+      statut: 'EMIS',
+      decision: 'FAVORABLE',
+      motifCode: null,
+      commentaire: null,
+      article24: {
+        insuffisanceMemeNature3Ans: false,
+        engagementRedressementEnCours: false,
+        avisVerificationComptabilite: false,
+        verificationApprofondieEnCours: null,
+      },
+      emisLe: '2026-11-05T00:00:00Z',
+      emisPar: 'lh-user-2',
+      echeance: null,
+    },
+    {
+      id: 'lh-avis-3',
+      etapeCode: 'AVIS_RATTACHEMENT',
+      directionId: 'DGE',
+      directionCode: 'DGE',
+      statut: 'EMIS',
+      decision: 'NON_FAVORABLE',
+      motifCode: 'VERIFICATION_APPROFONDIE_EN_COURS',
+      commentaire: 'Verification en cours',
+      article24: {
+        insuffisanceMemeNature3Ans: false,
+        engagementRedressementEnCours: false,
+        avisVerificationComptabilite: false,
+        verificationApprofondieEnCours: true,
+      },
+      emisLe: '2026-11-05T00:00:00Z',
+      emisPar: 'lh-user-3',
+      echeance: null,
+    },
+  ],
+  validationGlobale: null,
+  corrections: [],
+  transmissions: [],
+  directionIds: ['GUDEF', 'DGE'],
+  etapes: [],
+};
+
 @Component({
   selector: 'pdref-demande-detail-page',
   standalone: true,
@@ -306,7 +389,9 @@ export class DemandeDetailPageComponent {
   private readonly correlation = inject(CorrelationService);
   private readonly id = this.route.snapshot.paramMap.get('id') ?? '';
   readonly tabs = ['synthese', 'exercices', 'conformite', 'circuit', 'pieces'] as const;
-  readonly activeTab = signal<(typeof this.tabs)[number]>('synthese');
+  readonly activeTab = signal<(typeof this.tabs)[number]>(
+    isLighthouseEnabled() ? 'circuit' : 'synthese',
+  );
   readonly item = signal<DemandeDetail | null>(null);
   readonly suivi = signal<SuiviDetail | null>(null);
   readonly attachments = signal<FileGroup[]>([]);
@@ -317,6 +402,7 @@ export class DemandeDetailPageComponent {
   constructor() {
     if (isLighthouseEnabled()) {
       this.item.set(LIGHTHOUSE_DETAIL);
+      this.suivi.set(LIGHTHOUSE_SUIVI);
       this.loading.set(false);
       return;
     }

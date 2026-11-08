@@ -42,7 +42,17 @@ describe('SuivisGateway', () => {
 
   it('couvre les mutations et la signature', () => {
     const { gateway, http } = setup();
-    gateway.decideAvis('d1', 'AVIS_DERAR', { decision: 'FAVORABLE' }).subscribe();
+    gateway
+      .decideAvis('d1', 'AVIS_DERAR', {
+        decision: 'FAVORABLE',
+        article24: {
+          insuffisanceMemeNature3Ans: null,
+          engagementRedressementEnCours: null,
+          avisVerificationComptabilite: null,
+          verificationApprofondieEnCours: null,
+        },
+      })
+      .subscribe();
     http
       .expectOne(
         (request) =>

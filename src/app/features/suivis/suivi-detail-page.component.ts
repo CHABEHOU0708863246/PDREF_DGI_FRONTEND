@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type {
+  Article24Controles,
   AvisDirection,
   MotifNonFavorable,
   SuiviDetail,
@@ -81,6 +82,17 @@ import { normalizeProblem } from '../../core/utils/problem';
           <span class="pd-label">Avis</span
           ><strong>{{ detail.avisRecus }} / {{ detail.avisTotal }}</strong>
         </div>
+        <div>
+          <span class="pd-label">Favorables</span><strong>{{ detail.avisFavorables }}</strong>
+        </div>
+        <div>
+          <span class="pd-label">Non favorables</span
+          ><strong>{{ detail.avisNonFavorables }}</strong>
+        </div>
+        <div>
+          <span class="pd-label">Transmissions</span
+          ><strong>{{ detail.transmissionsCount }}</strong>
+        </div>
       </section>
 
       <section class="pd-card">
@@ -110,6 +122,23 @@ import { normalizeProblem } from '../../core/utils/problem';
                 @if (avis.motifCode) {
                   <p><strong>Motif :</strong> {{ motifLabel(avis.motifCode) }}</p>
                 }
+                <div class="article24-read">
+                  <span
+                    >3 ans : {{ article24Value(avis.article24?.insuffisanceMemeNature3Ans) }}</span
+                  >
+                  <span
+                    >Redressement :
+                    {{ article24Value(avis.article24?.engagementRedressementEnCours) }}</span
+                  >
+                  <span
+                    >Avis comptable :
+                    {{ article24Value(avis.article24?.avisVerificationComptabilite) }}</span
+                  >
+                  <span
+                    >Verification approfondie :
+                    {{ article24Value(avis.article24?.verificationApprofondieEnCours) }}</span
+                  >
+                </div>
               } @else if (avis.statut === 'EN_ATTENTE' && canAvis(avis)) {
                 <label class="pd-field">
                   <span class="pd-label">Decision</span>
@@ -122,6 +151,23 @@ import { normalizeProblem } from '../../core/utils/problem';
                     <option value="NON_FAVORABLE">Non favorable</option>
                   </select>
                 </label>
+                <fieldset class="article24">
+                  <legend>Controles article 24</legend>
+                  @for (control of article24Controls; track control.key) {
+                    <label class="pd-field">
+                      <span class="pd-label">{{ control.label }}</span>
+                      <select
+                        class="pd-input"
+                        [(ngModel)]="draft[avis.etapeCode].article24[control.key]"
+                        [name]="'article24-' + avis.id + '-' + control.key"
+                      >
+                        <option [ngValue]="null">Non renseigne</option>
+                        <option [ngValue]="true">Oui</option>
+                        <option [ngValue]="false">Non</option>
+                      </select>
+                    </label>
+                  }
+                </fieldset>
                 @if (draft[avis.etapeCode].decision === 'NON_FAVORABLE') {
                   <label class="pd-field">
                     <span class="pd-label">Motif</span>
@@ -238,7 +284,7 @@ import { normalizeProblem } from '../../core/utils/problem';
       @if (detail.corrections.length > 0) {
         <section class="pd-card">
           <h2>Corrections</h2>
-          <div class="table-wrap">
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Corrections des decisions">
             <table class="pd-table">
               <thead>
                 <tr>
@@ -295,6 +341,8 @@ import { normalizeProblem } from '../../core/utils/problem';
         padding: 1rem;
         display: grid;
         gap: 0.65rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
       .avis-card--done {
         background: var(--pd-surface-2, #f6f8fb);
@@ -309,6 +357,21 @@ import { normalizeProblem } from '../../core/utils/problem';
         display: grid;
         gap: 0.75rem;
       }
+      .article24 {
+        display: grid;
+        gap: 0.5rem;
+        border: 1px solid var(--pd-border, #d9dee8);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+      }
+      .article24-read {
+        display: grid;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
     `,
   ],
 })
@@ -322,9 +385,20 @@ export class SuiviDetailPageComponent {
   readonly motifs = signal<MotifNonFavorable[]>([]);
   readonly loading = signal(true);
   readonly problem = signal<ApiProblemDetails | null>(null);
+  readonly article24Controls = [
+    { key: 'insuffisanceMemeNature3Ans', label: 'Insuffisance de meme nature dans les 3 ans' },
+    { key: 'engagementRedressementEnCours', label: 'Engagement de redressement en cours' },
+    { key: 'avisVerificationComptabilite', label: 'Avis de verification de comptabilite' },
+    { key: 'verificationApprofondieEnCours', label: 'Verification approfondie en cours' },
+  ] as const;
   readonly draft: Record<
     string,
-    { decision: 'FAVORABLE' | 'NON_FAVORABLE'; motifCode: string; commentaire: string }
+    {
+      decision: 'FAVORABLE' | 'NON_FAVORABLE';
+      motifCode: string;
+      commentaire: string;
+      article24: Article24Controles;
+    }
   > = {};
   readonly transmission = { destinataires: '', commentaireInterne: '' };
 
@@ -346,6 +420,7 @@ export class SuiviDetailPageComponent {
             decision: 'FAVORABLE',
             motifCode: '',
             commentaire: '',
+            article24: this.emptyArticle24(avis),
           };
         }
         this.loading.set(false);
@@ -366,7 +441,7 @@ export class SuiviDetailPageComponent {
   }
 
   canDecide(): boolean {
-    return this.permissions.hasPermission('Suivis_Decide');
+    return this.permissions.hasPermission('Suivis_Decide') && this.permissions.hasRole('SD_GUDEF');
   }
 
   canCorrect(): boolean {
@@ -395,6 +470,7 @@ export class SuiviDetailPageComponent {
         decision: value.decision,
         motifCode: value.motifCode || null,
         commentaire: value.commentaire || null,
+        article24: value.article24,
       })
       .subscribe({
         next: (item) => this.item.set(item),
@@ -460,6 +536,19 @@ export class SuiviDetailPageComponent {
 
   motifLabel(code: string): string {
     return this.motifs().find((motif) => motif.code === code)?.libelle ?? code;
+  }
+
+  article24Value(value: boolean | null | undefined): string {
+    return value === true ? 'Oui' : value === false ? 'Non' : 'Non renseigne';
+  }
+
+  private emptyArticle24(avis: AvisDirection): Article24Controles {
+    return {
+      insuffisanceMemeNature3Ans: avis.article24?.insuffisanceMemeNature3Ans ?? null,
+      engagementRedressementEnCours: avis.article24?.engagementRedressementEnCours ?? null,
+      avisVerificationComptabilite: avis.article24?.avisVerificationComptabilite ?? null,
+      verificationApprofondieEnCours: avis.article24?.verificationApprofondieEnCours ?? null,
+    };
   }
 
   private roleForStep(step: string): boolean {

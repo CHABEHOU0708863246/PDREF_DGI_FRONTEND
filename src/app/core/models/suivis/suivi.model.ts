@@ -1,6 +1,13 @@
-export interface SuiviContribuable {
+﻿export interface SuiviContribuable {
   ncc: string;
   raisonSociale: string;
+}
+
+export interface Article24Controles {
+  insuffisanceMemeNature3Ans: boolean | null;
+  engagementRedressementEnCours: boolean | null;
+  avisVerificationComptabilite: boolean | null;
+  verificationApprofondieEnCours: boolean | null;
 }
 
 export interface AvisDirection {
@@ -12,6 +19,7 @@ export interface AvisDirection {
   decision: string | null;
   motifCode: string | null;
   commentaire: string | null;
+  article24?: Article24Controles;
   emisLe: string | null;
   emisPar: string | null;
   echeance: string | null;
@@ -70,6 +78,9 @@ export interface SuiviDossier {
   statut: string;
   avisRecus: number;
   avisTotal: number;
+  avisFavorables: number;
+  avisNonFavorables: number;
+  transmissionsCount: number;
   etapeCourante: string | null;
   demandeStatut: string | null;
   dateDepot: string | null;
@@ -109,6 +120,7 @@ export interface AvisDecisionWrite {
   decision: 'FAVORABLE' | 'NON_FAVORABLE';
   motifCode?: string | null;
   commentaire?: string | null;
+  article24?: Article24Controles;
 }
 
 export interface ValidationGlobaleWrite {

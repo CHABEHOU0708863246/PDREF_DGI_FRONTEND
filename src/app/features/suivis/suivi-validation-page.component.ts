@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -27,7 +27,7 @@ import { normalizeProblem } from '../../core/utils/problem';
     } @else if (item(); as detail) {
       <section class="pd-card">
         <h2>Jointure des avis</h2>
-        <div class="table-wrap">
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Jointure des avis">
           <table class="pd-table">
             <thead>
               <tr>
@@ -106,6 +106,9 @@ import { normalizeProblem } from '../../core/utils/problem';
         display: grid;
         gap: 0.85rem;
         max-width: 40rem;
+      }
+      .table-wrap {
+        overflow-x: auto;
       }
     `,
   ],
