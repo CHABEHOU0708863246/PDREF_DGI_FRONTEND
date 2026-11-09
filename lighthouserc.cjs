@@ -23,6 +23,7 @@
         'http://localhost:4000/dashboard/imports/lh-import-1?lighthouse=1',
         'http://localhost:4000/dashboard/alertes?lighthouse=1',
         'http://localhost:4000/dashboard?lighthouse=1',
+        'http://localhost:4000/dashboard/rapports?lighthouse=1',
       ],
       puppeteerScript: 'scripts/lighthouse-auth.js',
       puppeteerLaunchOptions: {

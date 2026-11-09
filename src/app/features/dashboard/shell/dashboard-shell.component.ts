@@ -106,6 +106,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Ctf_Read',
   },
   {
+    label: 'Rapports',
+    route: '/dashboard/rapports',
+    icon: 'clipboard',
+    exact: false,
+    permission: 'Rapports_Read',
+  },
+  {
     label: 'Alertes',
     route: '/dashboard/alertes',
     icon: 'alert-triangle',

@@ -15,6 +15,16 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'PDREF - Fondations',
       },
       {
+        path: 'rapports',
+        loadComponent: () =>
+          import('./rapports/rapports-page.component').then(
+            (module) => module.RapportsPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Rapports_Read'], breadcrumb: 'Rapports' },
+        title: 'Rapports - PDREF',
+      },
+      {
         path: 'admin/workflows',
         loadComponent: () =>
           import('../workflows/workflows-page.component').then(
