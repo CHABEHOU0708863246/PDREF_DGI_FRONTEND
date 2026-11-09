@@ -1,10 +1,16 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type { ApiResponse } from '../../models/common/api-response.model';
-import type { CtfDetail, CtfListItem, CtfQuery } from '../../models/ctf/ctf.model';
+import type {
+  CtfDetail,
+  CtfListItem,
+  CtfManualActivationRequest,
+  CtfManualDepotRequest,
+  CtfQuery,
+} from '../../models/ctf/ctf.model';
 
 @Injectable({ providedIn: 'root' })
 export class CtfGateway {
@@ -32,6 +38,27 @@ export class CtfGateway {
   activer(demandeId: string): Observable<CtfDetail> {
     return this.http
       .post<ApiResponse<CtfDetail>>(`${this.base}/${encodeURIComponent(demandeId)}/activation`, {})
+      .pipe(map((response) => response.data));
+  }
+
+  activationManuelle(
+    demandeId: string,
+    request: CtfManualActivationRequest,
+  ): Observable<CtfDetail> {
+    return this.http
+      .post<ApiResponse<CtfDetail>>(
+        `${this.base}/${encodeURIComponent(demandeId)}/activation-manuelle`,
+        request,
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  depotRectifieManuel(demandeId: string, request: CtfManualDepotRequest): Observable<CtfDetail> {
+    return this.http
+      .post<ApiResponse<CtfDetail>>(
+        `${this.base}/${encodeURIComponent(demandeId)}/depot-rectifie-manuel`,
+        request,
+      )
       .pipe(map((response) => response.data));
   }
 

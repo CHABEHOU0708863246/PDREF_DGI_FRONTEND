@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfListItem } from '../../core/models/ctf/ctf.model';
@@ -6,6 +6,8 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
+import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 import { ctfStatutLabel } from './ctf-status';
@@ -40,6 +42,9 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
       subtitle="Autorisations de rectification en attente d'activation."
     />
 
+    @if (modes()?.eImpots === 'MANUEL') {
+      <p><span class="pd-chip">Mode manuel</span></p>
+    }
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
     } @else {
@@ -150,20 +155,24 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
 })
 export class CtfAActiverPageComponent {
   private readonly gateway = inject(CtfGateway);
+  private readonly integrations = inject(IntegrationGateway);
   private readonly permissions = inject(PermissionsService);
 
   readonly items = signal<CtfListItem[]>([]);
   readonly loading = signal(true);
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly activating = signal<ReadonlySet<string>>(new Set());
+  readonly modes = signal<IntegrationModes | null>(null);
   readonly filters = { search: '' };
 
   constructor() {
     if (isLighthouseEnabled()) {
+      this.modes.set({ eImpots: 'MANUEL', signature: 'MANUEL' });
       this.items.set(LIGHTHOUSE_ITEMS);
       this.loading.set(false);
       return;
     }
+    this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
     this.load();
   }
 

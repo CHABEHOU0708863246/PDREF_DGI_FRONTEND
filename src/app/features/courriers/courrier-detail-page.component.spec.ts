@@ -1,9 +1,10 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { CourrierDetailPageComponent } from './courrier-detail-page.component';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 
 const item = {
@@ -34,6 +35,10 @@ const item = {
   depotEImpotsStatut: null,
   depotEImpotsLe: null,
   referenceDepot: null,
+  signatureMode: null,
+  remiseStatut: null,
+  remiseCanal: null,
+  remiseDate: null,
   updatedAt: null,
   version: 1,
 };
@@ -63,6 +68,8 @@ function setup(canInternal = true, canUpdate = true) {
     attachments: vi.fn(() => of([attachment])),
     downloadAttachment: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'courrier.pdf' })),
     uploadAttachment: vi.fn(() => of(100)),
+    signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
+    declarerRemise: vi.fn(() => of(undefined)),
   };
   const permissions = {
     hasPermission: vi.fn((permission: string) => {
@@ -75,6 +82,10 @@ function setup(canInternal = true, canUpdate = true) {
     imports: [CourrierDetailPageComponent],
     providers: [
       { provide: CourriersGateway, useValue: gateway },
+      {
+        provide: IntegrationGateway,
+        useValue: { modes: vi.fn(() => of({ eImpots: 'MANUEL', signature: 'MANUEL' })) },
+      },
       { provide: PermissionsService, useValue: permissions },
       { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
     ],
@@ -91,6 +102,61 @@ describe('CourrierDetailPageComponent', () => {
     expect(fixture.componentInstance.item()?.numero).toBe('C-001');
     expect(fixture.componentInstance.attachments()).toHaveLength(1);
     expect(fixture.nativeElement.textContent).toContain('Instruction C3');
+  });
+
+  it('couvre les actions manuelles de signature et de remise', () => {
+    const { fixture, gateway } = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.manualSignature()).toBe(true);
+    expect(component.canSigner()).toBe(true);
+    component.onSignataire({ target: { value: 'DG' } } as unknown as Event);
+    component.onDateSignature({ target: { value: '2026-11-09' } } as unknown as Event);
+    component.onCanal({ target: { value: 'REMISE_PAPIER' } } as unknown as Event);
+    component.onDateRemise({ target: { value: '2026-11-09' } } as unknown as Event);
+    component.onReferenceRemise({ target: { value: 'REM-1' } } as unknown as Event);
+    const input = document.createElement('input');
+    const file = new File(['%PDF-1.4'], 'signe.pdf', { type: 'application/pdf' });
+    Object.defineProperty(input, 'files', { value: [file] });
+    component.signer({ target: input } as unknown as Event);
+    component.declarerRemise();
+    expect(gateway.signerManuel).toHaveBeenCalled();
+    expect(gateway.declarerRemise).toHaveBeenCalled();
+  });
+
+  it('gere les erreurs des actions manuelles courrier', () => {
+    const gateway = {
+      get: vi.fn(() => of(item)),
+      attachments: vi.fn(() => of([])),
+      downloadAttachment: vi.fn(),
+      uploadAttachment: vi.fn(),
+      signerManuel: vi.fn(() => throwError(() => new Error('sign'))),
+      declarerRemise: vi.fn(() => throwError(() => new Error('remise'))),
+    };
+    TestBed.configureTestingModule({
+      imports: [CourrierDetailPageComponent],
+      providers: [
+        { provide: CourriersGateway, useValue: gateway },
+        {
+          provide: IntegrationGateway,
+          useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
+        },
+        { provide: PermissionsService, useValue: { hasPermission: () => true } },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
+      ],
+    });
+    const component = TestBed.createComponent(CourrierDetailPageComponent).componentInstance;
+    component.onSignataire({ target: { value: 'DG' } } as unknown as Event);
+    component.onDateSignature({ target: { value: '2026-11-09' } } as unknown as Event);
+    component.onCanal({ target: { value: 'REMISE_PAPIER' } } as unknown as Event);
+    component.onDateRemise({ target: { value: '2026-11-09' } } as unknown as Event);
+    component.onReferenceRemise({ target: { value: 'REM-1' } } as unknown as Event);
+    const input = document.createElement('input');
+    const file = new File(['%PDF-1.4'], 'signe.pdf', { type: 'application/pdf' });
+    Object.defineProperty(input, 'files', { value: [file] });
+    component.signer({ target: input } as unknown as Event);
+    component.declarerRemise();
+    expect(component.problem()).not.toBeNull();
   });
 
   it('masque les champs C3 sans permission', () => {
@@ -142,11 +208,21 @@ describe('CourrierDetailPageComponent errors', () => {
       attachments: vi.fn(() => of([])),
       downloadAttachment: vi.fn(() => throwError(() => new Error('boom'))),
       uploadAttachment: vi.fn(() => of(100)),
+      signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
+      declarerRemise: vi.fn(() => of(undefined)),
     };
     TestBed.configureTestingModule({
       imports: [CourrierDetailPageComponent],
       providers: [
         { provide: CourriersGateway, useValue: gateway },
+        {
+          provide: IntegrationGateway,
+          useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
+        },
+        {
+          provide: IntegrationGateway,
+          useValue: { modes: vi.fn(() => of({ eImpots: 'MANUEL', signature: 'MANUEL' })) },
+        },
         { provide: PermissionsService, useValue: { hasPermission: () => true } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
       ],
@@ -166,11 +242,21 @@ describe('CourrierDetailPageComponent error branches', () => {
       attachments: vi.fn(() => throwError(() => new Error('boom'))),
       downloadAttachment: vi.fn(() => throwError(() => new Error('boom'))),
       uploadAttachment: vi.fn(() => of(100)),
+      signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
+      declarerRemise: vi.fn(() => of(undefined)),
     };
     TestBed.configureTestingModule({
       imports: [CourrierDetailPageComponent],
       providers: [
         { provide: CourriersGateway, useValue: gateway },
+        {
+          provide: IntegrationGateway,
+          useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
+        },
+        {
+          provide: IntegrationGateway,
+          useValue: { modes: vi.fn(() => of({ eImpots: 'MANUEL', signature: 'MANUEL' })) },
+        },
         { provide: PermissionsService, useValue: { hasPermission: () => true } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
       ],

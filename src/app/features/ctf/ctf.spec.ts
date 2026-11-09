@@ -1,10 +1,11 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CtfDetail, CtfListItem } from '../../core/models/ctf/ctf.model';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { CtfAActiverPageComponent } from './ctf-a-activer-page.component';
 import { CtfDetailPageComponent } from './ctf-detail-page.component';
 import { CtfSuiviPageComponent } from './ctf-suivi-page.component';
@@ -36,6 +37,9 @@ const detail: CtfDetail = {
   dateInformation: null,
   dateRetourGudef: null,
   dateDepotRectifie: null,
+  referenceDepotRectifie: null,
+  modeActivation: null,
+  modeDepotRectifie: null,
   tentatives: 0,
   derniereErreur: null,
 };
@@ -54,6 +58,10 @@ function providers(permissions: string[]) {
     provideRouter([]),
     { provide: PermissionsService, useValue: permissionService },
     {
+      provide: IntegrationGateway,
+      useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
+    },
+    {
       provide: ActivatedRoute,
       useValue: { snapshot: { paramMap: convertToParamMap({ id: 'd1' }) } },
     },
@@ -67,6 +75,8 @@ describe('Pages CTF', () => {
     get: vi.fn(() => of(detail)),
     activer: vi.fn(() => of(detail)),
     retourGudef: vi.fn(() => of(detail)),
+    activationManuelle: vi.fn(() => of(detail)),
+    depotRectifieManuel: vi.fn(() => of(detail)),
   };
 
   beforeEach(() => {
@@ -137,6 +147,31 @@ describe('Pages CTF', () => {
     expect(gateway.retourGudef).toHaveBeenCalled();
   });
 
+  it('gere les erreurs des actions manuelles CTF', () => {
+    const errorGateway = {
+      aActiver: vi.fn(() => of([item])),
+      list: vi.fn(() => of([item])),
+      get: vi.fn(() => throwError(() => new Error('load'))),
+      activer: vi.fn(() => throwError(() => new Error('activate'))),
+      retourGudef: vi.fn(() => throwError(() => new Error('return'))),
+      activationManuelle: vi.fn(() => throwError(() => new Error('manual'))),
+      depotRectifieManuel: vi.fn(() => throwError(() => new Error('depot'))),
+    };
+    TestBed.configureTestingModule({
+      imports: [CtfDetailPageComponent],
+      providers: [
+        ...providers(['Ctf_Read', 'Ctf_Activer', 'Ctf_Retour']),
+        { provide: CtfGateway, useValue: errorGateway },
+      ],
+    });
+    const component = TestBed.createComponent(CtfDetailPageComponent).componentInstance;
+    component.declarerActivation();
+    component.declarerDepot();
+    component.activer();
+    component.retour();
+    expect(component.problem()).not.toBeNull();
+  });
+
   it('couvre le detail CTF et ses actions', () => {
     TestBed.configureTestingModule({
       imports: [CtfDetailPageComponent],
@@ -151,8 +186,17 @@ describe('Pages CTF', () => {
     expect(component.item()).not.toBeNull();
     expect(component.canActiver()).toBe(true);
     expect(component.canRetour()).toBe(true);
+    expect(component.manualEImpots()).toBe(true);
+    component.onReference({ target: { value: 'REF' } } as unknown as Event);
+    component.onReferenceDepot({ target: { value: 'DEP' } } as unknown as Event);
+    component.onDateActivation({ target: { value: '2026-11-06' } } as unknown as Event);
+    component.onDateDepot({ target: { value: '2026-11-07' } } as unknown as Event);
+    component.declarerActivation();
+    component.declarerDepot();
     component.activer();
     component.retour();
+    expect(gateway.activationManuelle).toHaveBeenCalled();
+    expect(gateway.depotRectifieManuel).toHaveBeenCalled();
     expect(component.statutLabel('A_ACTIVER')).toBe('A activer');
     expect(gateway.get).toHaveBeenCalled();
   });

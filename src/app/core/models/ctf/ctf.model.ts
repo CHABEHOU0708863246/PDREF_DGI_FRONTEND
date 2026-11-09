@@ -1,4 +1,4 @@
-export interface CtfListItem {
+﻿export interface CtfListItem {
   id: string;
   demandeId: string;
   numeroDemande: string;
@@ -24,6 +24,9 @@ export interface CtfDetail extends CtfListItem {
   dateInformation: string | null;
   dateRetourGudef: string | null;
   dateDepotRectifie: string | null;
+  referenceDepotRectifie: string | null;
+  modeActivation: string | null;
+  modeDepotRectifie: string | null;
   tentatives: number;
   derniereErreur: string | null;
 }
@@ -31,4 +34,15 @@ export interface CtfDetail extends CtfListItem {
 export interface CtfQuery {
   search?: string | null;
   statut?: string | null;
+}
+
+export interface CtfManualActivationRequest {
+  reference: string;
+  dateActivation: string;
+  preuveVersionId?: string | null;
+}
+
+export interface CtfManualDepotRequest {
+  reference: string;
+  dateDepot: string;
 }

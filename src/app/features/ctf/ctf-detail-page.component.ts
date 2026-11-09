@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfDetail } from '../../core/models/ctf/ctf.model';
+import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
 import { ctfStatutLabel } from './ctf-status';
 
@@ -26,15 +28,71 @@ import { ctfStatutLabel } from './ctf-status';
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de l'autorisation CTF" />
     } @else if (item(); as detail) {
+      @if (manualEImpots()) {
+        <p><span class="pd-chip">Mode manuel</span></p>
+      }
       <div class="actions">
         @if (canActiver() && detail.statut === 'A_ACTIVER') {
+          @if (manualEImpots()) {
+            <label class="pd-field">
+              <span class="pd-label">Reference e-impots</span>
+              <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
+            </label>
+            <label class="pd-field">
+              <span class="pd-label">Date d'activation</span>
+              <input
+                class="pd-input"
+                type="date"
+                [value]="dateActivation()"
+                (input)="onDateActivation($event)"
+              />
+            </label>
+            <button
+              type="button"
+              class="pd-btn pd-btn--primary"
+              [disabled]="busy()"
+              (click)="declarerActivation()"
+            >
+              Declarer l'activation
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="pd-btn pd-btn--primary"
+              [disabled]="busy()"
+              (click)="activer()"
+            >
+              Activer
+            </button>
+          }
+        }
+        @if (
+          canActiver() &&
+          manualEImpots() &&
+          detail.statut !== 'A_ACTIVER' &&
+          detail.dateRetourGudef &&
+          !detail.dateDepotRectifie
+        ) {
+          <label class="pd-field">
+            <span class="pd-label">Reference depot rectifie</span>
+            <input class="pd-input" [value]="referenceDepot()" (input)="onReferenceDepot($event)" />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Date du depot</span>
+            <input
+              class="pd-input"
+              type="date"
+              [value]="dateDepot()"
+              (input)="onDateDepot($event)"
+            />
+          </label>
           <button
             type="button"
             class="pd-btn pd-btn--primary"
             [disabled]="busy()"
-            (click)="activer()"
+            (click)="declarerDepot()"
           >
-            Activer
+            Declarer le depot rectifie
           </button>
         }
         @if (
@@ -113,7 +171,7 @@ import { ctfStatutLabel } from './ctf-status';
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        align-items: center;
+        align-items: end;
       }
       .actions {
         margin-bottom: 1rem;
@@ -127,6 +185,7 @@ import { ctfStatutLabel } from './ctf-status';
 })
 export class CtfDetailPageComponent {
   private readonly gateway = inject(CtfGateway);
+  private readonly integrations = inject(IntegrationGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly permissions = inject(PermissionsService);
   private readonly demandeId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -135,9 +194,19 @@ export class CtfDetailPageComponent {
   readonly loading = signal(true);
   readonly busy = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
+  readonly modes = signal<IntegrationModes | null>(null);
+  readonly reference = signal('');
+  readonly referenceDepot = signal('');
+  readonly dateActivation = signal(today());
+  readonly dateDepot = signal(today());
 
   constructor() {
     this.load();
+    this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
+  }
+
+  manualEImpots(): boolean {
+    return this.modes()?.eImpots === 'MANUEL';
   }
 
   load(): void {
@@ -161,6 +230,66 @@ export class CtfDetailPageComponent {
 
   canRetour(): boolean {
     return this.permissions.hasPermission('Ctf_Retour');
+  }
+
+  onReference(event: Event): void {
+    this.reference.set((event.target as HTMLInputElement).value);
+  }
+
+  onReferenceDepot(event: Event): void {
+    this.referenceDepot.set((event.target as HTMLInputElement).value);
+  }
+
+  onDateActivation(event: Event): void {
+    this.dateActivation.set((event.target as HTMLInputElement).value);
+  }
+
+  onDateDepot(event: Event): void {
+    this.dateDepot.set((event.target as HTMLInputElement).value);
+  }
+
+  declarerActivation(): void {
+    if (this.busy()) {
+      return;
+    }
+    this.busy.set(true);
+    this.gateway
+      .activationManuelle(this.demandeId, {
+        reference: this.reference(),
+        dateActivation: this.dateActivation(),
+      })
+      .subscribe({
+        next: (item) => {
+          this.busy.set(false);
+          this.item.set(item);
+        },
+        error: (error: unknown) => {
+          this.busy.set(false);
+          this.problem.set(normalizeProblem(error, null));
+        },
+      });
+  }
+
+  declarerDepot(): void {
+    if (this.busy()) {
+      return;
+    }
+    this.busy.set(true);
+    this.gateway
+      .depotRectifieManuel(this.demandeId, {
+        reference: this.referenceDepot(),
+        dateDepot: this.dateDepot(),
+      })
+      .subscribe({
+        next: (item) => {
+          this.busy.set(false);
+          this.item.set(item);
+        },
+        error: (error: unknown) => {
+          this.busy.set(false);
+          this.problem.set(normalizeProblem(error, null));
+        },
+      });
   }
 
   activer(): void {
@@ -202,4 +331,8 @@ export class CtfDetailPageComponent {
   statutLabel(statut: string): string {
     return ctfStatutLabel(statut);
   }
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }

@@ -132,4 +132,36 @@ export class CourriersGateway {
     const plain = /filename="?([^";]+)"?/i.exec(header);
     return plain?.[1] ?? null;
   }
+
+  signerManuel(
+    id: string,
+    file: File,
+    signataire: string,
+    dateSignature: string,
+  ): Observable<{ statut: string; sha256: string | null }> {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('signataire', signataire);
+    form.append('dateSignature', dateSignature);
+    return this.http
+      .post<ApiResponse<{ statut: string; sha256: string | null }>>(
+        `${environment.apiUrl}/api/v1/courriers-manuels/${encodeURIComponent(id)}/signature`,
+        form,
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  declarerRemise(
+    id: string,
+    canal: string,
+    dateRemise: string,
+    reference: string,
+  ): Observable<void> {
+    return this.http
+      .post<ApiResponse<object>>(
+        `${environment.apiUrl}/api/v1/courriers-manuels/${encodeURIComponent(id)}/remise`,
+        { canal, dateRemise, reference },
+      )
+      .pipe(map(() => undefined));
+  }
 }

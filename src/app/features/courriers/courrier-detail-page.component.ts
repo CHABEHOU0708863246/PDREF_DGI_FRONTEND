@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -6,7 +6,9 @@ import type { CourrierDetail } from '../../core/models/courriers/courrier.model'
 import type { FileGroup } from '../../core/models/files/file.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -109,6 +111,64 @@ import { normalizeProblem } from '../../core/utils/problem';
         }
       </section>
 
+      @if (manualSignature()) {
+        <p><span class="pd-chip">Mode manuel</span></p>
+      }
+      @if (canSigner() && manualSignature()) {
+        <section class="pd-card">
+          <h2>Deposer le courrier signe</h2>
+          <label class="pd-field">
+            <span class="pd-label">Signataire declare</span>
+            <input class="pd-input" [value]="signataire()" (input)="onSignataire($event)" />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Date de signature</span>
+            <input
+              class="pd-input"
+              type="date"
+              [value]="dateSignature()"
+              (input)="onDateSignature($event)"
+            />
+          </label>
+          <label class="pd-btn pd-btn--ghost">
+            Choisir le PDF signe
+            <input type="file" accept="application/pdf" hidden (change)="signer($event)" />
+          </label>
+        </section>
+      }
+      @if (canUpdate()) {
+        <section class="pd-card">
+          <h2>Declarer la remise</h2>
+          <label class="pd-field">
+            <span class="pd-label">Canal</span>
+            <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
+              <option value="DEPOT_EIMPOTS_MANUEL">Depot e-impots manuel</option>
+              <option value="REMISE_PAPIER">Remise papier</option>
+            </select>
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Date de remise</span>
+            <input
+              class="pd-input"
+              type="date"
+              [value]="dateRemise()"
+              (input)="onDateRemise($event)"
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Reference</span>
+            <input
+              class="pd-input"
+              [value]="referenceRemise()"
+              (input)="onReferenceRemise($event)"
+            />
+          </label>
+          <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
+            Declarer la remise
+          </button>
+        </section>
+      }
+
       <section class="pd-card detail-full">
         <div class="courriers-head">
           <h2>Pieces jointes</h2>
@@ -168,6 +228,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 export class CourrierDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly gateway = inject(CourriersGateway);
+  private readonly integrations = inject(IntegrationGateway);
   private readonly permissions = inject(PermissionsService);
   private readonly correlation = inject(CorrelationService);
   private readonly id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -177,9 +238,70 @@ export class CourrierDetailPageComponent {
   readonly message = signal<string | null>(null);
   readonly attachments = signal<FileGroup[]>([]);
   readonly attachmentsLoading = signal(true);
+  readonly modes = signal<IntegrationModes | null>(null);
+  readonly signataire = signal('');
+  readonly dateSignature = signal(today());
+  readonly canal = signal('DEPOT_EIMPOTS_MANUEL');
+  readonly dateRemise = signal(today());
+  readonly referenceRemise = signal('');
 
   constructor() {
     this.load();
+    this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
+  }
+
+  manualSignature(): boolean {
+    return this.modes()?.signature === 'MANUEL';
+  }
+
+  canSigner(): boolean {
+    return this.permissions.hasPermission('Courriers_DeposerSigne');
+  }
+
+  onSignataire(event: Event): void {
+    this.signataire.set((event.target as HTMLInputElement).value);
+  }
+
+  onDateSignature(event: Event): void {
+    this.dateSignature.set((event.target as HTMLInputElement).value);
+  }
+
+  onCanal(event: Event): void {
+    this.canal.set((event.target as HTMLSelectElement).value);
+  }
+
+  onDateRemise(event: Event): void {
+    this.dateRemise.set((event.target as HTMLInputElement).value);
+  }
+
+  onReferenceRemise(event: Event): void {
+    this.referenceRemise.set((event.target as HTMLInputElement).value);
+  }
+
+  signer(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    this.gateway.signerManuel(this.id, file, this.signataire(), this.dateSignature()).subscribe({
+      next: () => {
+        this.load();
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
+    input.value = '';
+  }
+
+  declarerRemise(): void {
+    this.gateway
+      .declarerRemise(this.id, this.canal(), this.dateRemise(), this.referenceRemise())
+      .subscribe({
+        next: () => {
+          this.load();
+        },
+        error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+      });
   }
 
   canInternal(): boolean {
@@ -260,4 +382,8 @@ export class CourrierDetailPageComponent {
   typeLabel(type: string): string {
     return type === 'REPONSE_DGI' ? 'Reponse DGI' : type.charAt(0) + type.slice(1).toLowerCase();
   }
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }
