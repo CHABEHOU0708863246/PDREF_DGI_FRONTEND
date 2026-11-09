@@ -10,6 +10,7 @@ export interface RapportLigne {
   favorables: number;
   tauxReponseFavorable: number | null;
   stockGlobal: number;
+  estTotal?: boolean;
 }
 
 export interface RapportResponse {

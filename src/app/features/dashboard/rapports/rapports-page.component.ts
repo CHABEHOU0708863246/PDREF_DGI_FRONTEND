@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import type {
   RapportExport,
@@ -193,7 +193,7 @@ const LIGHTHOUSE_EXPORTS: RapportExport[] = [
                 </thead>
                 <tbody>
                   @for (line of data.lignes; track line.directionId) {
-                    <tr>
+                    <tr [class.total]="line.estTotal">
                       <th scope="row">{{ line.directionLibelle }}</th>
                       <td>{{ line.formulees }}</td>
                       <td>{{ line.traitees }}</td>
@@ -287,6 +287,10 @@ const LIGHTHOUSE_EXPORTS: RapportExport[] = [
       }
       .exports li {
         align-items: center;
+      }
+      .total th,
+      .total td {
+        font-weight: 600;
       }
       @media (max-width: 47.99rem) {
         .export-bar,
@@ -406,7 +410,7 @@ export class RapportsPageComponent {
   }
 
   formatRate(value: number | null): string {
-    return value === null ? '—' : `${value.toFixed(1).replace('.', ',')} %`;
+    return value === null ? 'â€”' : `${value.toFixed(1).replace('.', ',')} %`;
   }
 
   formatDate(value: string): string {
