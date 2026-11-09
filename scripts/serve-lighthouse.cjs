@@ -1,3 +1,4 @@
+﻿const compression = require('compression');
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,6 +11,7 @@ if (!fs.existsSync(path.join(root, 'index.csr.html'))) {
   throw new Error(`Build development introuvable : ${root}`);
 }
 
+app.use(compression());
 app.use(express.static(root, { index: false, maxAge: 0 }));
 app.use((_request, response) => {
   response.sendFile(path.join(root, 'index.csr.html'));

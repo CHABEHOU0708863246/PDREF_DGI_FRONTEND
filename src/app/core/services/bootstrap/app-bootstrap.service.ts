@@ -70,6 +70,7 @@ export class AppBootstrapService {
             'Rejets_Abandonner',
             'Imports_Read',
             'Imports_Execute',
+            'Alertes_Read',
           ],
           mustChangePassword: false,
         },

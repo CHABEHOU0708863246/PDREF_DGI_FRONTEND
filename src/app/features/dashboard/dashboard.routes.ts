@@ -181,6 +181,14 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Detail rejet - PDREF',
       },
       {
+        path: 'alertes',
+        loadComponent: () =>
+          import('../alertes/alertes-page.component').then((module) => module.AlertesPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['Alertes_Read'], breadcrumb: 'Alertes' },
+        title: 'Alertes - PDREF',
+      },
+      {
         path: 'imports',
         loadComponent: () =>
           import('../imports/imports-list-page.component').then(

@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -46,16 +46,11 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
   template: `
     <pdref-page-header
       title="Demandes"
-      subtitle="Demandes de rectification dÃ©posÃ©es au titre de l'article 24."
+      subtitle="Demandes de rectification déposées au titre de l'article 24."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel
-        state="error"
-        [problem]="issue"
-        actionLabel="RÃ©essayer"
-        (retry)="load()"
-      />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card demandes-card">
         <div class="demandes-head">
@@ -77,25 +72,25 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
               class="pd-input"
               [(ngModel)]="filters.search"
               name="search"
-              placeholder="NumÃ©ro, NCC ou raison sociale"
+              placeholder="Numéro, NCC ou raison sociale"
             />
           </label>
           <label class="pd-field">
             <span class="pd-label">Statut</span>
             <select class="pd-input" [(ngModel)]="filters.statut" name="statut">
               <option value="">Tous</option>
-              <option value="DEPOSEE">DÃ©posÃ©e</option>
+              <option value="DEPOSEE">Déposée</option>
               <option value="EN_CIRCUIT">En circuit</option>
-              <option value="REJETEE">RejetÃ©e</option>
-              <option value="CLOTUREE">ClÃ´turÃ©e</option>
-              <option value="ABANDONNEE">AbandonnÃ©e</option>
+              <option value="REJETEE">Rejetée</option>
+              <option value="CLOTUREE">Clôturée</option>
+              <option value="ABANDONNEE">Abandonnée</option>
             </select>
           </label>
           <label class="pd-field">
             <span class="pd-label">Origine</span>
             <select class="pd-input" [(ngModel)]="filters.origine" name="origine">
               <option value="">Toutes</option>
-              <option value="PORTAIL_EIMPOTS">Portail e-impÃ´ts</option>
+              <option value="PORTAIL_EIMPOTS">Portail e-impôts</option>
               <option value="AGENT">Agent</option>
               <option value="IMPORT">Import</option>
               <option value="MIGRATION">Migration</option>
@@ -104,7 +99,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
           <div class="pd-actions">
             <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">
-              RÃ©initialiser
+              Réinitialiser
             </button>
           </div>
         </form>
@@ -122,12 +117,12 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
             <table class="pd-table">
               <thead>
                 <tr>
-                  <th>NumÃ©ro</th>
+                  <th>Numéro</th>
                   <th>Contribuable</th>
                   <th>Exercice</th>
                   <th>Origine</th>
                   <th>Statut</th>
-                  <th>DÃ©pÃ´t</th>
+                  <th>Dépôt</th>
                   <th></th>
                 </tr>
               </thead>
@@ -158,7 +153,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
                       <a
                         class="pd-btn pd-btn--ghost pd-btn--sm"
                         [routerLink]="['/dashboard/demandes', item.id]"
-                        >DÃ©tail</a
+                        >Détail</a
                       >
                     </td>
                   </tr>
@@ -174,7 +169,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
               [disabled]="page().page <= 1"
               (click)="load(page().page - 1)"
             >
-              PrÃ©cÃ©dent
+              Précédent
             </button>
             <span>Page {{ page().page }} / {{ pages() }}</span>
             <button
@@ -245,11 +240,11 @@ export class DemandesPageComponent {
     return (
       {
         BROUILLON: 'Brouillon',
-        DEPOSEE: 'DÃ©posÃ©e',
+        DEPOSEE: 'Déposée',
         EN_CIRCUIT: 'En circuit',
-        REJETEE: 'RejetÃ©e',
-        CLOTUREE: 'ClÃ´turÃ©e',
-        ABANDONNEE: 'AbandonnÃ©e',
+        REJETEE: 'Rejetée',
+        CLOTUREE: 'Clôturée',
+        ABANDONNEE: 'Abandonnée',
       }[value] ?? value
     );
   }
@@ -257,7 +252,7 @@ export class DemandesPageComponent {
   origineLabel(value: string): string {
     return (
       {
-        PORTAIL_EIMPOTS: 'Portail e-impÃ´ts',
+        PORTAIL_EIMPOTS: 'Portail e-impôts',
         AGENT: 'Agent',
         IMPORT: 'Import',
         MIGRATION: 'Migration',

@@ -21,6 +21,7 @@
         'http://localhost:4000/dashboard/rejets/lh-rejet-1?lighthouse=1',
         'http://localhost:4000/dashboard/imports?lighthouse=1',
         'http://localhost:4000/dashboard/imports/lh-import-1?lighthouse=1',
+        'http://localhost:4000/dashboard/alertes?lighthouse=1',
       ],
       puppeteerScript: 'scripts/lighthouse-auth.js',
       puppeteerLaunchOptions: {
