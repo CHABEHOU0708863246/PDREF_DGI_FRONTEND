@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
@@ -83,6 +83,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     icon: 'file',
     exact: false,
     permission: 'Courriers_Read',
+  },
+  {
+    label: 'Courriers a signer',
+    route: '/dashboard/courriers/a-signer',
+    icon: 'file',
+    exact: false,
+    permission: 'Courriers_DeposerSigne',
   },
   {
     label: 'Demandes',

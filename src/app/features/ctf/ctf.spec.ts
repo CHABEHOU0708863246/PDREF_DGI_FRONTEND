@@ -1,4 +1,4 @@
-﻿import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -6,6 +6,7 @@ import type { CtfDetail, CtfListItem } from '../../core/models/ctf/ctf.model';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
+import { FilesGateway } from '../../core/services/files/files.gateway';
 import { CtfAActiverPageComponent } from './ctf-a-activer-page.component';
 import { CtfDetailPageComponent } from './ctf-detail-page.component';
 import { CtfSuiviPageComponent } from './ctf-suivi-page.component';
@@ -60,6 +61,14 @@ function providers(permissions: string[]) {
     {
       provide: IntegrationGateway,
       useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
+    },
+    {
+      provide: FilesGateway,
+      useValue: {
+        uploadGroup: vi.fn(() =>
+          of({ id: 'fg1', currentFile: { id: 'fv1' }, currentVersion: 1, ownerType: null, ownerId: null }),
+        ),
+      },
     },
     {
       provide: ActivatedRoute,
@@ -191,6 +200,12 @@ describe('Pages CTF', () => {
     component.onReferenceDepot({ target: { value: 'DEP' } } as unknown as Event);
     component.onDateActivation({ target: { value: '2026-11-06' } } as unknown as Event);
     component.onDateDepot({ target: { value: '2026-11-07' } } as unknown as Event);
+    const files = TestBed.inject(FilesGateway) as unknown as {
+      uploadGroup: ReturnType<typeof vi.fn>;
+    };
+    component.onProofSelected([new File(['%PDF-1.4'], 'preuve.pdf', { type: 'application/pdf' })]);
+    expect(files.uploadGroup).toHaveBeenCalled();
+    expect(component.proofVersionId()).toBe('fv1');
     component.declarerActivation();
     component.declarerDepot();
     component.activer();

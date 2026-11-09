@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import type { ApiResponse } from '../../models/common/api-response.model';
 import type { FileGroup } from '../../models/files/file.model';
 import type {
+  CourrierASigner,
   CourrierDetail,
   CourrierLookup,
   CourrierPage,
@@ -17,6 +18,14 @@ import type {
 export class CourriersGateway {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/api/v1/courriers`;
+
+  aSigner(search?: string): Observable<CourrierASigner[]> {
+    return this.http
+      .get<ApiResponse<CourrierASigner[]>>(`${this.base}-manuels/a-signer`, {
+        params: search ? { search } : {},
+      })
+      .pipe(map((response) => response.data));
+  }
 
   list(query: CourrierQuery): Observable<CourrierPage> {
     return this.http

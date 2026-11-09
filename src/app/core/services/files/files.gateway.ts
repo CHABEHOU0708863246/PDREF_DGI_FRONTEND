@@ -46,6 +46,20 @@ export class FilesGateway {
       );
   }
 
+  uploadGroup(file: File, ownerType?: string, ownerId?: string): Observable<FileGroup> {
+    const form = new FormData();
+    form.append('file', file);
+    if (ownerType) {
+      form.append('ownerType', ownerType);
+    }
+    if (ownerId) {
+      form.append('ownerId', ownerId);
+    }
+    return this.http
+      .post<ApiResponse<FileGroup>>(this.base, form)
+      .pipe(map((response) => response.data));
+  }
+
   replace(groupId: string, file: File): Observable<FileGroup> {
     const form = new FormData();
     form.append('file', file);

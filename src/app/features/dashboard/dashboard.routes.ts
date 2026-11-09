@@ -1,4 +1,4 @@
-﻿import type { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { accessGuard } from '../../core/guards/access.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 import { DashboardShellComponent } from './shell/dashboard-shell.component';
@@ -109,6 +109,19 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [accessGuard],
         data: { permissions: ['Courriers_Create'], breadcrumb: 'Nouveau courrier' },
         title: 'Nouveau courrier - PDREF',
+      },
+      {
+        path: 'courriers/a-signer',
+        loadComponent: () =>
+          import('../courriers/courriers-a-signer-page.component').then(
+            (module) => module.CourriersASignerPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Courriers_DeposerSigne'],
+          breadcrumb: 'Courriers a signer',
+        },
+        title: 'Courriers a signer - PDREF',
       },
       {
         path: 'courriers/:id/modifier',

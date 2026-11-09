@@ -1,4 +1,4 @@
-﻿export type CourrierSens = 'ENTRANT' | 'SORTANT';
+export type CourrierSens = 'ENTRANT' | 'SORTANT';
 
 export type CourrierType = 'COURRIER' | 'SIGICI' | 'PORTAIL' | 'REPONSE_DGI';
 
@@ -41,6 +41,18 @@ export interface CourrierDetail extends CourrierSummary {
   remiseDate: string | null;
   updatedAt: string | null;
   version: number;
+}
+
+export interface CourrierASigner {
+  courrierId: string;
+  numero: string;
+  objet: string;
+  demandeId: string;
+  numeroDemande: string;
+  raisonSociale: string | null;
+  decisionLe: string;
+  joursDepuisDecision: number;
+  signatureStatut: string;
 }
 
 export interface CourrierPage {

@@ -4,10 +4,12 @@ import type { ApiProblemDetails } from '../../core/models/common/api-problem.mod
 import type { CtfDetail } from '../../core/models/ctf/ctf.model';
 import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { UploadFieldComponent } from '../../core/components/upload-field/upload-field.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { FilesGateway } from '../../core/services/files/files.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
 import { ctfStatutLabel } from './ctf-status';
@@ -15,7 +17,7 @@ import { ctfStatutLabel } from './ctf-status';
 @Component({
   selector: 'pdref-ctf-detail-page',
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe],
+  imports: [RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe, UploadFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -47,10 +49,21 @@ import { ctfStatutLabel } from './ctf-status';
                 (input)="onDateActivation($event)"
               />
             </label>
+            <pdref-upload-field
+              label="Preuve d'activation (facultatif)"
+              hint="PDF, PNG ou JPEG, 5 Mo maximum."
+              accept=".pdf,image/png,image/jpeg"
+              [multiple]="false"
+              [maxFiles]="1"
+              (filesSelected)="onProofSelected($event)"
+            />
+            @if (proofName(); as name) {
+              <p class="pd-muted">Preuve selectionnee : {{ name }}</p>
+            }
             <button
               type="button"
               class="pd-btn pd-btn--primary"
-              [disabled]="busy()"
+              [disabled]="busy() || uploadingProof()"
               (click)="declarerActivation()"
             >
               Declarer l'activation
@@ -186,6 +199,7 @@ import { ctfStatutLabel } from './ctf-status';
 export class CtfDetailPageComponent {
   private readonly gateway = inject(CtfGateway);
   private readonly integrations = inject(IntegrationGateway);
+  private readonly files = inject(FilesGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly permissions = inject(PermissionsService);
   private readonly demandeId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -199,6 +213,9 @@ export class CtfDetailPageComponent {
   readonly referenceDepot = signal('');
   readonly dateActivation = signal(today());
   readonly dateDepot = signal(today());
+  readonly proofVersionId = signal<string | null>(null);
+  readonly proofName = signal<string | null>(null);
+  readonly uploadingProof = signal(false);
 
   constructor() {
     this.load();
@@ -248,8 +265,32 @@ export class CtfDetailPageComponent {
     this.dateDepot.set((event.target as HTMLInputElement).value);
   }
 
+  onProofSelected(files: readonly File[]): void {
+    const file = files[0];
+    if (!file) {
+      this.proofVersionId.set(null);
+      this.proofName.set(null);
+      return;
+    }
+
+    this.uploadingProof.set(true);
+    this.files.uploadGroup(file, 'CTF', this.demandeId).subscribe({
+      next: (group) => {
+        this.uploadingProof.set(false);
+        this.proofVersionId.set(group.currentFile?.id ?? null);
+        this.proofName.set(file.name);
+      },
+      error: (error: unknown) => {
+        this.uploadingProof.set(false);
+        this.proofVersionId.set(null);
+        this.proofName.set(null);
+        this.problem.set(normalizeProblem(error, null));
+      },
+    });
+  }
+
   declarerActivation(): void {
-    if (this.busy()) {
+    if (this.busy() || this.uploadingProof()) {
       return;
     }
     this.busy.set(true);
@@ -257,6 +298,7 @@ export class CtfDetailPageComponent {
       .activationManuelle(this.demandeId, {
         reference: this.reference(),
         dateActivation: this.dateActivation(),
+        preuveVersionId: this.proofVersionId(),
       })
       .subscribe({
         next: (item) => {
