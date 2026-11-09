@@ -106,6 +106,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Ctf_Read',
   },
   {
+    label: 'Rejets',
+    route: '/dashboard/rejets',
+    icon: 'alert-triangle',
+    exact: false,
+    permission: 'Rejets_Read',
+  },
+  {
     label: 'Contribuables',
     route: '/dashboard/contribuables',
     icon: 'user',

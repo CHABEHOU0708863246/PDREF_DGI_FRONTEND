@@ -157,6 +157,30 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Detail CTF - PDREF',
       },
       {
+        path: 'rejets',
+        loadComponent: () =>
+          import('../rejets/rejets-list-page.component').then(
+            (module) => module.RejetsListPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Rejets_Read'], breadcrumb: 'Rejets' },
+        title: 'Rejets - PDREF',
+      },
+      {
+        path: 'rejets/:id',
+        loadComponent: () =>
+          import('../rejets/rejet-detail-page.component').then(
+            (module) => module.RejetDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Rejets_Read'],
+          breadcrumb: 'Detail rejet',
+          renderMode: 'client',
+        },
+        title: 'Detail rejet - PDREF',
+      },
+      {
         path: 'demandes',
         loadComponent: () =>
           import('../demandes/demandes-page.component').then(
