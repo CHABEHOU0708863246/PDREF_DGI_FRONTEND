@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { DemandeDetail } from '../../core/models/demandes/demande.model';
@@ -161,7 +161,12 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
     <pdref-page-header [title]="title()" subtitle="Fiche de demande de rectification." />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
+      <pdref-state-panel
+        state="error"
+        [problem]="issue"
+        actionLabel="RÃ©essayer"
+        (retry)="load()"
+      />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de la demande" />
     } @else if (item(); as demande) {
@@ -171,7 +176,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
             Exporter en PDF
           </button>
         }
-        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/demandes">Retour à la liste</a>
+        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/demandes">Retour Ã  la liste</a>
       </div>
 
       <nav class="tabs" aria-label="Onglets de la demande">
@@ -191,17 +196,20 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
         @case ('synthese') {
           <section class="pd-card detail-grid">
             <div>
-              <span class="pd-label">Numéro</span
+              <span class="pd-label">NumÃ©ro</span
               ><strong>{{ demande.numero || 'Brouillon' }}</strong>
             </div>
             <div>
               <span class="pd-label">Statut</span><strong>{{ demande.statut }}</strong>
+              @if (demande.pdfManquant) {
+                <span class="pd-chip pd-chip--danger">PDF a joindre</span>
+              }
             </div>
             <div>
               <span class="pd-label">Origine</span><strong>{{ demande.origine }}</strong>
             </div>
             <div>
-              <span class="pd-label">Déposée le</span
+              <span class="pd-label">DÃ©posÃ©e le</span
               ><strong>{{ demande.dateDepot | abidjanDate }}</strong>
             </div>
             <div>
@@ -222,7 +230,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               ><strong>{{ demande.contribuable.directionRattachementId }}</strong>
             </div>
             <div>
-              <span class="pd-label">Référence dépôt</span
+              <span class="pd-label">RÃ©fÃ©rence dÃ©pÃ´t</span
               ><strong>{{ demande.referenceDepot || '-' }}</strong>
             </div>
             <div>
@@ -237,10 +245,10 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               <article class="exercise-detail">
                 <h3>Exercice {{ exercise.annee }}</h3>
                 <p>
-                  <strong>Périmètre :</strong>
-                  {{ exercise.touteLaLiasse ? 'Toute la liasse' : 'États sélectionnés' }}
+                  <strong>PÃ©rimÃ¨tre :</strong>
+                  {{ exercise.touteLaLiasse ? 'Toute la liasse' : 'Ã‰tats sÃ©lectionnÃ©s' }}
                 </p>
-                <p><strong>États :</strong> {{ labels(exercise.etatsFinanciers) }}</p>
+                <p><strong>Ã‰tats :</strong> {{ labels(exercise.etatsFinanciers) }}</p>
                 <p><strong>Motifs :</strong> {{ motives(exercise.motifs) }}</p>
                 @if (exercise.variables.length > 0) {
                   <table class="pd-table">
@@ -278,7 +286,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
             @if (demande.conformite.champsManquants.length > 0) {
               <p>Champs manquants : {{ demande.conformite.champsManquants.join(', ') }}</p>
             }
-            <p class="pd-muted">Vérifiée le {{ demande.conformite.verifieLe | abidjanDate }}</p>
+            <p class="pd-muted">VÃ©rifiÃ©e le {{ demande.conformite.verifieLe | abidjanDate }}</p>
           </section>
         }
 
@@ -286,16 +294,16 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
           <section class="pd-card">
             @if (demande.circuit; as circuit) {
               <p>
-                <strong>{{ circuit.code }}</strong> v{{ circuit.version }} — {{ circuit.statut }}
+                <strong>{{ circuit.code }}</strong> v{{ circuit.version }} â€” {{ circuit.statut }}
               </p>
-              <p>Étape courante : {{ circuit.etapeCourante || '-' }}</p>
+              <p>Ã‰tape courante : {{ circuit.etapeCourante || '-' }}</p>
               <div class="table-wrap">
                 <table class="pd-table">
                   <thead>
                     <tr>
-                      <th>Étape</th>
+                      <th>Ã‰tape</th>
                       <th>Statut</th>
-                      <th>Échéance</th>
+                      <th>Ã‰chÃ©ance</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -330,8 +338,8 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
             } @else {
               <pdref-state-panel
                 state="empty"
-                title="Circuit non activé"
-                message="Le circuit n'a pas été activé pour cette demande."
+                title="Circuit non activÃ©"
+                message="Le circuit n'a pas Ã©tÃ© activÃ© pour cette demande."
               />
             }
           </section>
@@ -340,7 +348,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
         @case ('pieces') {
           <section class="pd-card">
             <div class="section-head">
-              <h2>Pièces jointes</h2>
+              <h2>PiÃ¨ces jointes</h2>
               @if (canUpload()) {
                 <label class="pd-btn pd-btn--primary pd-btn--sm">
                   Ajouter un PDF
@@ -349,11 +357,11 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               }
             </div>
             @if (attachmentsLoading()) {
-              <pdref-state-panel state="loading" title="Chargement des pièces jointes" />
+              <pdref-state-panel state="loading" title="Chargement des piÃ¨ces jointes" />
             } @else if (attachments().length === 0) {
               <pdref-state-panel
                 state="empty"
-                title="Aucune pièce jointe"
+                title="Aucune piÃ¨ce jointe"
                 message="Ajoutez au moins un PDF."
               />
             } @else {
@@ -367,7 +375,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
                         class="pd-btn pd-btn--ghost pd-btn--sm"
                         (click)="download(file.id)"
                       >
-                        Télécharger
+                        TÃ©lÃ©charger
                       </button>
                     </li>
                   }
@@ -512,11 +520,11 @@ export class DemandeDetailPageComponent {
   tabLabel(tab: string): string {
     return (
       {
-        synthese: 'Synthèse',
+        synthese: 'SynthÃ¨se',
         exercices: 'Exercices',
-        conformite: 'Conformité',
+        conformite: 'ConformitÃ©',
         circuit: 'Circuit',
-        pieces: 'Pièces jointes',
+        pieces: 'PiÃ¨ces jointes',
       }[tab] ?? tab
     );
   }

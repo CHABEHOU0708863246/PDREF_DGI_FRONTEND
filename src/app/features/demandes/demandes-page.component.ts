@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -31,6 +31,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
       directionRattachementId: 'DGE',
     },
     dateDepot: '2026-11-05T00:00:00Z',
+    pdfManquant: false,
     exercicePrincipal: 2026,
     etapeCourante: 'CONFORMITE_AUTO',
     createdAt: '2026-11-05T00:00:00Z',
@@ -45,11 +46,16 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
   template: `
     <pdref-page-header
       title="Demandes"
-      subtitle="Demandes de rectification déposées au titre de l'article 24."
+      subtitle="Demandes de rectification dÃ©posÃ©es au titre de l'article 24."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
+      <pdref-state-panel
+        state="error"
+        [problem]="issue"
+        actionLabel="RÃ©essayer"
+        (retry)="load()"
+      />
     } @else {
       <section class="pd-card demandes-card">
         <div class="demandes-head">
@@ -71,25 +77,25 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
               class="pd-input"
               [(ngModel)]="filters.search"
               name="search"
-              placeholder="Numéro, NCC ou raison sociale"
+              placeholder="NumÃ©ro, NCC ou raison sociale"
             />
           </label>
           <label class="pd-field">
             <span class="pd-label">Statut</span>
             <select class="pd-input" [(ngModel)]="filters.statut" name="statut">
               <option value="">Tous</option>
-              <option value="DEPOSEE">Déposée</option>
+              <option value="DEPOSEE">DÃ©posÃ©e</option>
               <option value="EN_CIRCUIT">En circuit</option>
-              <option value="REJETEE">Rejetée</option>
-              <option value="CLOTUREE">Clôturée</option>
-              <option value="ABANDONNEE">Abandonnée</option>
+              <option value="REJETEE">RejetÃ©e</option>
+              <option value="CLOTUREE">ClÃ´turÃ©e</option>
+              <option value="ABANDONNEE">AbandonnÃ©e</option>
             </select>
           </label>
           <label class="pd-field">
             <span class="pd-label">Origine</span>
             <select class="pd-input" [(ngModel)]="filters.origine" name="origine">
               <option value="">Toutes</option>
-              <option value="PORTAIL_EIMPOTS">Portail e-impôts</option>
+              <option value="PORTAIL_EIMPOTS">Portail e-impÃ´ts</option>
               <option value="AGENT">Agent</option>
               <option value="IMPORT">Import</option>
               <option value="MIGRATION">Migration</option>
@@ -98,7 +104,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
           <div class="pd-actions">
             <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">
-              Réinitialiser
+              RÃ©initialiser
             </button>
           </div>
         </form>
@@ -116,12 +122,12 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
             <table class="pd-table">
               <thead>
                 <tr>
-                  <th>Numéro</th>
+                  <th>NumÃ©ro</th>
                   <th>Contribuable</th>
                   <th>Exercice</th>
                   <th>Origine</th>
                   <th>Statut</th>
-                  <th>Dépôt</th>
+                  <th>DÃ©pÃ´t</th>
                   <th></th>
                 </tr>
               </thead>
@@ -143,13 +149,16 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
                       <span class="pd-chip" [class.pd-chip--danger]="item.statut === 'REJETEE'">{{
                         statutLabel(item.statut)
                       }}</span>
+                      @if (item.pdfManquant) {
+                        <span class="pd-chip pd-chip--danger">PDF a joindre</span>
+                      }
                     </td>
                     <td>{{ item.dateDepot | abidjanDate }}</td>
                     <td>
                       <a
                         class="pd-btn pd-btn--ghost pd-btn--sm"
                         [routerLink]="['/dashboard/demandes', item.id]"
-                        >Détail</a
+                        >DÃ©tail</a
                       >
                     </td>
                   </tr>
@@ -165,7 +174,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
               [disabled]="page().page <= 1"
               (click)="load(page().page - 1)"
             >
-              Précédent
+              PrÃ©cÃ©dent
             </button>
             <span>Page {{ page().page }} / {{ pages() }}</span>
             <button
@@ -236,11 +245,11 @@ export class DemandesPageComponent {
     return (
       {
         BROUILLON: 'Brouillon',
-        DEPOSEE: 'Déposée',
+        DEPOSEE: 'DÃ©posÃ©e',
         EN_CIRCUIT: 'En circuit',
-        REJETEE: 'Rejetée',
-        CLOTUREE: 'Clôturée',
-        ABANDONNEE: 'Abandonnée',
+        REJETEE: 'RejetÃ©e',
+        CLOTUREE: 'ClÃ´turÃ©e',
+        ABANDONNEE: 'AbandonnÃ©e',
       }[value] ?? value
     );
   }
@@ -248,7 +257,7 @@ export class DemandesPageComponent {
   origineLabel(value: string): string {
     return (
       {
-        PORTAIL_EIMPOTS: 'Portail e-impôts',
+        PORTAIL_EIMPOTS: 'Portail e-impÃ´ts',
         AGENT: 'Agent',
         IMPORT: 'Import',
         MIGRATION: 'Migration',

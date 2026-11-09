@@ -1,4 +1,4 @@
-export interface DemandeReference {
+﻿export interface DemandeReference {
   code: string;
   libelle: string;
   precision?: string | null;
@@ -60,6 +60,7 @@ export interface DemandeSummary {
   statut: string;
   contribuable: DemandeContribuable;
   dateDepot: string | null;
+  pdfManquant?: boolean;
   exercicePrincipal: number;
   etapeCourante: string | null;
   createdAt: string;
