@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+﻿import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom, catchError, of, timeout } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
@@ -68,6 +68,8 @@ export class AppBootstrapService {
             'Rejets_Create',
             'Rejets_Reprendre',
             'Rejets_Abandonner',
+            'Imports_Read',
+            'Imports_Execute',
           ],
           mustChangePassword: false,
         },

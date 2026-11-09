@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
@@ -104,6 +104,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     icon: 'file',
     exact: false,
     permission: 'Ctf_Read',
+  },
+  {
+    label: 'Imports',
+    route: '/dashboard/imports',
+    icon: 'upload',
+    exact: false,
+    permission: 'Imports_Read',
   },
   {
     label: 'Rejets',

@@ -1,4 +1,4 @@
-import type { Routes } from '@angular/router';
+﻿import type { Routes } from '@angular/router';
 import { accessGuard } from '../../core/guards/access.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 import { DashboardShellComponent } from './shell/dashboard-shell.component';
@@ -179,6 +179,30 @@ export const DASHBOARD_ROUTES: Routes = [
           renderMode: 'client',
         },
         title: 'Detail rejet - PDREF',
+      },
+      {
+        path: 'imports',
+        loadComponent: () =>
+          import('../imports/imports-list-page.component').then(
+            (module) => module.ImportsListPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Imports_Read'], breadcrumb: 'Imports' },
+        title: 'Imports - PDREF',
+      },
+      {
+        path: 'imports/:id',
+        loadComponent: () =>
+          import('../imports/import-detail-page.component').then(
+            (module) => module.ImportDetailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Imports_Read'],
+          breadcrumb: 'Detail import',
+          renderMode: 'client',
+        },
+        title: 'Detail import - PDREF',
       },
       {
         path: 'demandes',
