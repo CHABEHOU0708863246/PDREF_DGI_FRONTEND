@@ -1,4 +1,4 @@
-.public-shell {
+﻿.public-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -45,4 +45,54 @@
   border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: var(--color-on-primary);
+}
+
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: end;
+}
+
+.dossier {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dossier__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.dossier__head h3 {
+  margin: 0;
+}
+
+.timeline {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.timeline__dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+
+.timeline__code {
+  overflow-wrap: anywhere;
 }

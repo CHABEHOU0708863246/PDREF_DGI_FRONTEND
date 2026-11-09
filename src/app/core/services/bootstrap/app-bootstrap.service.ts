@@ -107,6 +107,7 @@ function isPublicPage(): boolean {
     path === '/design-system-demo' ||
     path.startsWith('/auth') ||
     path.startsWith('/portail-public') ||
+    path.startsWith('/suivi') ||
     path === '/error' ||
     path === '/unauthorized'
   );

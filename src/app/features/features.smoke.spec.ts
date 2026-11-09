@@ -105,7 +105,7 @@ describe('features Ã¢â‚¬â€ smoke', () => {
     });
     const fixture = TestBed.createComponent(PortailPublicComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Bientot disponible');
+    expect(fixture.nativeElement.textContent).toContain("Suivi public d'une demande");
   });
 
   it('PortailPlaceholder', () => {

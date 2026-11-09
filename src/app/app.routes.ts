@@ -1,4 +1,4 @@
-import type { Routes } from '@angular/router';
+﻿import type { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { mustChangePasswordGuard } from './core/guards/must-change-password.guard';
 
@@ -14,12 +14,20 @@ export const routes: Routes = [
       import('./features/design-system/design-system-demo.component').then(
         (module) => module.DesignSystemDemoComponent,
       ),
-    title: 'Design system — PDREF',
+    title: 'Design system â€” PDREF',
     data: { breadcrumb: 'Design system' },
   },
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((module) => module.AUTH_ROUTES),
+  },
+  {
+    path: 'suivi',
+    loadComponent: () =>
+      import('./features/portail-public/portail-public.component').then(
+        (module) => module.PortailPublicComponent,
+      ),
+    title: 'Suivi public - PDREF',
   },
   {
     path: 'portail-public',
@@ -46,18 +54,18 @@ export const routes: Routes = [
       import('./features/errors/unauthorized.component').then(
         (module) => module.UnauthorizedComponent,
       ),
-    title: 'Acces refuse — PDREF',
+    title: 'Acces refuse â€” PDREF',
   },
   {
     path: 'error',
     loadComponent: () =>
       import('./features/errors/error-page.component').then((module) => module.ErrorPageComponent),
-    title: 'Erreur — PDREF',
+    title: 'Erreur â€” PDREF',
   },
   {
     path: '**',
     loadComponent: () =>
       import('./features/errors/not-found.component').then((module) => module.NotFoundComponent),
-    title: 'Page introuvable — PDREF',
+    title: 'Page introuvable â€” PDREF',
   },
 ];

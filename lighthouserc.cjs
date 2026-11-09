@@ -24,6 +24,7 @@
         'http://localhost:4000/dashboard/alertes?lighthouse=1',
         'http://localhost:4000/dashboard?lighthouse=1',
         'http://localhost:4000/dashboard/rapports?lighthouse=1',
+        'http://localhost:4000/suivi?lighthouse=1',
       ],
       puppeteerScript: 'scripts/lighthouse-auth.js',
       puppeteerLaunchOptions: {
