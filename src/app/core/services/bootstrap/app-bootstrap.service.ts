@@ -71,6 +71,8 @@ export class AppBootstrapService {
             'Imports_Read',
             'Imports_Execute',
             'Alertes_Read',
+            'Dashboard_Read',
+            'Dashboard_ReadDg',
           ],
           mustChangePassword: false,
         },
