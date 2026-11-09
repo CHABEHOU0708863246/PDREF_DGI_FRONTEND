@@ -410,7 +410,7 @@ export class RapportsPageComponent {
   }
 
   formatRate(value: number | null): string {
-    return value === null ? 'â€”' : `${value.toFixed(1).replace('.', ',')} %`;
+    return value === null ? '—' : `${value.toFixed(1).replace('.', ',')} %`;
   }
 
   formatDate(value: string): string {
