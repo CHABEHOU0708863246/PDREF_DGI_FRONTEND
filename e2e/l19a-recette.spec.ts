@@ -541,6 +541,11 @@ test.describe('L19a - recette navigateur', () => {
     await page.getByLabel('Canal').selectOption('REMISE_PAPIER');
     await page.getByLabel('Reference', { exact: true }).last().fill('REM-1');
     await page.getByRole('button', { name: 'Declarer la remise' }).click();
+    await page.goto('/suivi');
+    await page.getByLabel('NCC').fill('7654321B');
+    await page.getByLabel('E-mail').fill('garage@example.test');
+    await page.getByRole('button', { name: 'Rechercher' }).click();
+    await expect(page.getByText('CLOTUREE')).toBeVisible();
   });
 
   test('parcours rejet automatique', async ({ page }) => {
