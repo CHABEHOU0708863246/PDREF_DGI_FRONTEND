@@ -32,6 +32,11 @@ import { normalizeProblem } from '../../core/utils/problem';
       <pdref-state-panel state="loading" title="Chargement du suivi" />
     } @else if (item(); as detail) {
       <div class="actions">
+        @if (canVerify() && detail.etapeCourante === 'VERIF_GUDEF') {
+          <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
+            Verifier GUDEF
+          </button>
+        }
         @if (canDecide() && detail.validationGlobale?.statut === 'EN_ATTENTE') {
           <a
             class="pd-btn pd-btn--primary"
@@ -432,6 +437,10 @@ export class SuiviDetailPageComponent {
     });
   }
 
+  canVerify(): boolean {
+    return this.permissions.hasPermission('Etapes_Verifier_Gudef');
+  }
+
   canAvis(avis: AvisDirection): boolean {
     return (
       this.permissions.hasPermission('Avis_Emettre') &&
@@ -458,6 +467,16 @@ export class SuiviDetailPageComponent {
 
   canDepot(): boolean {
     return this.permissions.hasPermission('Courriers_Deposer_EImpots');
+  }
+
+  verify(): void {
+    this.gateway.verifierGudef(this.id).subscribe({
+      next: (item) => {
+        this.item.set(item);
+        this.load();
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
+    });
   }
 
   decide(avis: AvisDirection): void {

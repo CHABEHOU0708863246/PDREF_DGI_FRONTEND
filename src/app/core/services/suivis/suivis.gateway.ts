@@ -45,6 +45,15 @@ export class SuivisGateway {
       .pipe(map((response) => response.data));
   }
 
+  verifierGudef(demandeId: string): Observable<SuiviDetail> {
+    return this.http
+      .post<ApiResponse<SuiviDetail>>(
+        `${this.demandes}/${encodeURIComponent(demandeId)}/verification-gudef`,
+        null,
+      )
+      .pipe(map((response) => response.data));
+  }
+
   decideAvis(
     demandeId: string,
     etapeCode: string,

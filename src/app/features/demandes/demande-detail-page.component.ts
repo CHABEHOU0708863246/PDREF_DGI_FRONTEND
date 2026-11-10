@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { DemandeDetail } from '../../core/models/demandes/demande.model';
@@ -167,6 +167,11 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
       <pdref-state-panel state="loading" title="Chargement de la demande" />
     } @else if (item(); as demande) {
       <div class="detail-actions">
+        @if (canVerify()) {
+          <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
+            Verifier GUDEF
+          </button>
+        }
         @if (canExport()) {
           <button type="button" class="pd-btn pd-btn--primary" (click)="exportPdf()">
             Exporter en PDF
@@ -416,6 +421,22 @@ export class DemandeDetailPageComponent {
   title(): string {
     const item = this.item();
     return item?.numero ? `Demande ${item.numero}` : 'Demande';
+  }
+
+  canVerify(): boolean {
+    return (
+      this.permissions.hasPermission('Etapes_Verifier_Gudef') &&
+      ['VERIF_GUDEF', 'CONFORMITE_AUTO'].includes(this.item()?.etapeCourante ?? '')
+    );
+  }
+
+  verify(): void {
+    this.suivisGateway.verifierGudef(this.id).subscribe({
+      next: () => {
+        this.load();
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
   }
 
   canExport(): boolean {

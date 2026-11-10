@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONTRIBUABLE_LOOKUP } from '../../core/services/lookup/contribuable-lookup';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
+import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { DemandeDetailPageComponent } from './demande-detail-page.component';
@@ -220,19 +221,33 @@ describe('Demandes interactions', () => {
     const create = vi.fn(() => of({ ...detail, version: 2 }));
     const uploadAttachment = vi.fn(() => of(100));
     const update = vi.fn(() => of(detail));
+    const verifierGudef = vi.fn(() => of(detail));
     TestBed.configureTestingModule({
       imports: [DemandeDetailPageComponent],
-      providers: providers({
-        get: vi.fn(() => of(detail)),
-        attachments: vi.fn(() => of([])),
-        downloadAttachment: vi.fn(() => of({ blob: new Blob(), fileName: 'pj.pdf' })),
-        uploadAttachment: vi.fn(() => of(100)),
-      }),
+      providers: [
+        ...providers({
+          get: vi.fn(() => of(detail)),
+          attachments: vi.fn(() => of([])),
+          downloadAttachment: vi.fn(() => of({ blob: new Blob(), fileName: 'pj.pdf' })),
+          uploadAttachment: vi.fn(() => of(100)),
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => 'd1' } } },
+        },
+        {
+          provide: SuivisGateway,
+          useValue: { verifierGudef, get: vi.fn(() => of(null)) },
+        },
+      ],
     });
     const detailFixture = TestBed.createComponent(DemandeDetailPageComponent);
     const detailComponent = detailFixture.componentInstance;
     detailFixture.detectChanges();
     expect(detailComponent.canUpload()).toBe(true);
+    expect(detailComponent.canVerify()).toBe(true);
+    detailComponent.verify();
+    expect(verifierGudef).toHaveBeenCalledWith('d1');
     detailComponent.download('v1');
     detailComponent.upload({ target: { files: [] } } as unknown as Event);
     const pdf = new File(['pdf'], 'demande.pdf', { type: 'application/pdf' });
@@ -313,18 +328,28 @@ describe('Demandes interactions', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [DemandeDetailPageComponent],
-      providers: providers({
-        get: vi.fn(() => of(detail)),
-        attachments: vi.fn(() => throwError(() => new Error('offline'))),
-        downloadAttachment: vi.fn(() => throwError(() => new Error('offline'))),
-        export: vi.fn(() => throwError(() => new Error('offline'))),
-      }),
+      providers: [
+        ...providers({
+          get: vi.fn(() => of(detail)),
+          attachments: vi.fn(() => throwError(() => new Error('offline'))),
+          downloadAttachment: vi.fn(() => throwError(() => new Error('offline'))),
+          export: vi.fn(() => throwError(() => new Error('offline'))),
+        }),
+        {
+          provide: SuivisGateway,
+          useValue: {
+            verifierGudef: vi.fn(() => throwError(() => new Error('offline'))),
+            get: vi.fn(() => of(null)),
+          },
+        },
+      ],
     });
     const detailFixture = TestBed.createComponent(DemandeDetailPageComponent);
     const detailComponent = detailFixture.componentInstance;
     detailFixture.detectChanges();
     detailComponent.download('v1');
     detailComponent.exportPdf();
+    detailComponent.verify();
     expect(detailComponent.attachmentsLoading()).toBe(false);
   });
 });
