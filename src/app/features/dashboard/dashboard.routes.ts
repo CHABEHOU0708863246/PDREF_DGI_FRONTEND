@@ -25,6 +25,14 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Rapports - PDREF',
       },
       {
+        path: 'admin/utilisateurs',
+        loadComponent: () =>
+          import('../users/users-page.component').then((module) => module.UsersPageComponent),
+        canActivate: [accessGuard],
+        data: { permissions: ['CAN_MANAGE_USERS'], breadcrumb: 'Utilisateurs' },
+        title: 'Utilisateurs - Administration PDREF',
+      },
+      {
         path: 'admin/workflows',
         loadComponent: () =>
           import('../workflows/workflows-page.component').then(

@@ -128,4 +128,6 @@ export const DIRECTION_FUNCTIONS = [
   'DG',
   'DSI',
   'RATTACHEMENT',
+  'DSESF',
+  'INSPECTION',
 ] as const;

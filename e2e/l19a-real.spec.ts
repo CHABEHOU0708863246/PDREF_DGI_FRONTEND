@@ -1,4 +1,4 @@
-﻿import type { APIRequestContext, Page } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from './real.fixture';
 import {
   API,
@@ -15,6 +15,7 @@ import {
 import { loadRealCredentials, passwordFor } from './real-credentials';
 
 const credentials = loadRealCredentials();
+const MAILPIT = 'http://localhost:8125';
 const PASSWORD_CHANGE_MESSAGE = 'Le mot de passe doit etre change avant de continuer.';
 
 async function loginAs(page: Page, login: string): Promise<void> {
@@ -26,6 +27,14 @@ async function loginAs(page: Page, login: string): Promise<void> {
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
   await expect(page.getByText(PASSWORD_CHANGE_MESSAGE)).toHaveCount(0);
+}
+
+async function loginWithPassword(page: Page, login: string, password: string): Promise<void> {
+  await page.goto('/auth/login');
+  await page.getByLabel('Identifiant').fill(login);
+  await page.getByLabel('Mot de passe', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
 }
 
 async function logout(page: Page): Promise<void> {
@@ -109,7 +118,7 @@ async function activerCtfEtCloturer(page: Page, demandeId: string): Promise<void
   await expect(page.getByText('Contribuable informe', { exact: true })).toBeVisible();
   await logout(page);
 
-  await loginAs(page, 'sd.gudef');
+  await loginAs(page, 'chef.ctf');
   await page.goto(`/dashboard/ctf/${demandeId}`);
   const retour = page.waitForResponse(
     (item) => item.url().includes('/retour-gudef') && item.request().method() === 'POST',
@@ -290,5 +299,105 @@ test.describe('L19a - recette sur la vraie pile', () => {
       .toBe('CORRIGE');
     const rejet = await getRejet(request, token, rejetId);
     expect(rejet.cycleCourant).toBeGreaterThanOrEqual(2);
+  });
+
+  test('creation, invitation Mailpit, connexion limitee et desactivation', async ({
+    page,
+    request,
+    browser,
+  }) => {
+    const suffix = Date.now().toString().slice(-8);
+    const matricule = `agent.dvfn.${suffix}`;
+    const email = `${matricule}@test.ci`;
+    const password = 'New-Password-2026!';
+
+    await loginAs(page, 'admin.dsi');
+    await page.goto('/dashboard/admin/utilisateurs');
+    await page.getByRole('button', { name: 'Nouvel utilisateur' }).click();
+    const form = page.locator('section.users-form');
+    await form.getByLabel('Prenom', { exact: true }).fill('Agent');
+    await form.getByLabel('Nom', { exact: true }).fill('DVFN');
+    await form.getByLabel('Email', { exact: true }).fill(email);
+    await form.getByLabel('Matricule', { exact: true }).fill(matricule);
+    await form.getByLabel('Fonction', { exact: true }).fill('Decideur');
+    const directionOption = form.locator('option').filter({ hasText: 'DVFN' }).first();
+    await form.getByLabel('Direction').selectOption((await directionOption.getAttribute('value'))!);
+    await form.getByRole('checkbox', { name: 'Decideur DVFN' }).check();
+    const created = page.waitForResponse(
+      (item) =>
+        item.url().includes('/api/v1/admin/identity/users') && item.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Enregistrer' }).click();
+    expect((await created).ok()).toBe(true);
+    await logout(page);
+
+    let messageId = '';
+    await expect
+      .poll(
+        async () => {
+          const response = await request.get(`${MAILPIT}/api/v1/messages`);
+          if (!response.ok()) {
+            return '';
+          }
+
+          const body = (await response.json()) as {
+            messages?: { ID: string; To?: { Address?: string }[] | string }[];
+          };
+          for (const message of body.messages ?? []) {
+            const recipients = Array.isArray(message.To)
+              ? message.To.map((item) => item.Address)
+              : [message.To];
+            if (recipients.includes(email)) {
+              messageId = message.ID;
+              return messageId;
+            }
+          }
+
+          return '';
+        },
+        { timeout: 30_000, intervals: [500, 1_000, 2_000] },
+      )
+      .not.toBe('');
+
+    const detail = await request.get(`${MAILPIT}/api/v1/message/${messageId}`);
+    const detailBody = (await detail.json()) as { HTML?: string; Text?: string };
+    const link = `${detailBody.HTML ?? ''} ${detailBody.Text ?? ''}`.match(
+      /http:\/\/localhost:4200\/auth\/reset-password\?token=[^"<\s]+/,
+    )?.[0];
+    expect(link).toBeTruthy();
+
+    const userContext = await browser.newContext({ baseURL: 'http://localhost:4200' });
+    const userPage = await userContext.newPage();
+    await userPage.goto(link!);
+    await userPage.getByLabel('Nouveau mot de passe', { exact: true }).fill(password);
+    await userPage.getByLabel('Confirmer le mot de passe', { exact: true }).fill(password);
+    const reset = userPage.waitForResponse(
+      (item) =>
+        item.url().includes('/api/v1/auth/reset-password') && item.request().method() === 'POST',
+    );
+    await userPage.getByRole('button', { name: 'Reinitialiser' }).click();
+    expect((await reset).ok()).toBe(true);
+
+    await loginWithPassword(userPage, matricule, password);
+    const navigation = userPage.getByRole('navigation', { name: 'Navigation principale' });
+    await expect(navigation.getByRole('link')).toHaveCount(1);
+    await expect(navigation.getByRole('link', { name: 'Avis à rendre' })).toBeVisible();
+
+    await loginAs(page, 'admin.dsi');
+    await page.goto('/dashboard/admin/utilisateurs');
+    await page.getByLabel('Recherche').fill(matricule);
+    await page.getByRole('button', { name: 'Filtrer' }).click();
+    const row = page.locator('tr').filter({ hasText: matricule }).first();
+    await expect(row).toBeVisible();
+    page.once('dialog', (dialog) => dialog.accept());
+    const deactivated = page.waitForResponse(
+      (item) => item.url().includes('/deactivate') && item.request().method() === 'POST',
+    );
+    await row.getByRole('button', { name: 'Desactiver' }).click();
+    expect((await deactivated).ok()).toBe(true);
+
+    await userPage.goto('/dashboard/suivis');
+    await expect(userPage).toHaveURL(/\/auth\/login/, { timeout: 30_000 });
+    await userContext.close();
   });
 });

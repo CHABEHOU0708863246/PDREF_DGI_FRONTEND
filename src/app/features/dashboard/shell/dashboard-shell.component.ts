@@ -36,6 +36,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Workflows_Read',
   },
   {
+    label: 'Utilisateurs',
+    route: '/dashboard/admin/utilisateurs',
+    icon: 'user',
+    exact: false,
+    permission: 'CAN_MANAGE_USERS',
+  },
+  {
     label: 'Directions',
     route: '/dashboard/admin/directions',
     icon: 'layout',
@@ -183,11 +190,27 @@ export class DashboardShellComponent {
   private readonly permissions = inject(PermissionsService);
   readonly breadcrumbs = inject(BreadcrumbService);
   readonly user = computed(() => this.auth.currentUser());
-  readonly navigation = computed(() =>
-    NAVIGATION.filter(
+  readonly navigation = computed(() => {
+    const roles = this.auth.currentUser()?.roles ?? [];
+    const decideur = roles.some((role) =>
+      ['DECIDEUR_DERAR', 'DECIDEUR_DVFN', 'DIRECTEUR_RATTACHEMENT'].includes(role),
+    );
+    if (decideur) {
+      return [
+        {
+          label: 'Avis à rendre',
+          route: '/dashboard/suivis',
+          icon: 'clipboard' as const,
+          exact: false,
+          permission: 'Avis_Lire',
+        },
+      ].filter((item) => !item.permission || this.permissions.hasPermission(item.permission));
+    }
+
+    return NAVIGATION.filter(
       (item) => !item.permission || this.permissions.hasPermission(item.permission),
-    ),
-  );
+    );
+  });
 
   readonly collapsed = signal(false);
   readonly mobileOpen = signal(false);
