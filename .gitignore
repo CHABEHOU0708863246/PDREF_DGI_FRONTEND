@@ -9,6 +9,7 @@ lighthouse-report/
 .idea/
 .env
 .env.*
+e2e/.real-credentials.json
 *.local
 *.log
 .DS_Store

@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "serve:ssr": "node dist/PDREF_FRONTEND/server/server.mjs",
     "e2e": "playwright test",
+    "e2e:real": "playwright test --config playwright.real.config.ts",
     "e2e:axe": "playwright test e2e/design-system.spec.ts",
     "lighthouse": "lhci autorun",
     "check:budgets": "node scripts/check-budgets.mjs",

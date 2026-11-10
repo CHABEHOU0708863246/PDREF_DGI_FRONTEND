@@ -1,0 +1,9 @@
+.git
+.angular
+dist
+coverage
+node_modules
+test-results
+playwright-report
+lighthouse-report
+.github
