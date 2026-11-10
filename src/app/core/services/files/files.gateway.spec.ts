@@ -33,6 +33,20 @@ describe('FilesGateway', () => {
     http.verify();
   });
 
+  it('envoie un groupe avec proprietaire et supprime une version', () => {
+    const { gateway, http } = setup();
+    const file = new File(['pdf'], 'preuve.pdf', { type: 'application/pdf' });
+    gateway.uploadGroup(file, 'CTF', 'd1').subscribe((group) => expect(group.id).toBe('g1'));
+    const upload = http.expectOne((r) => r.url.endsWith('/files') && r.method === 'POST');
+    expect(upload.request.body instanceof FormData).toBe(true);
+    upload.flush({
+      data: { id: 'g1', currentVersion: 1, currentFile: null, ownerType: 'CTF', ownerId: 'd1' },
+    });
+    gateway.delete('v1').subscribe();
+    http.expectOne((r) => r.url.endsWith('/files/v1/delete')).flush({});
+    http.verify();
+  });
+
   it('telecharge avec le nom de fichier securise', () => {
     const { gateway, http } = setup();
     gateway.download('v1').subscribe((result) => expect(result.fileName).toBe('facture.pdf'));

@@ -60,6 +60,28 @@ describe('CourriersGateway', () => {
     http.verify();
   });
 
+  it('liste les courriers a signer et execute les actions manuelles', () => {
+    const { gateway, http } = setup();
+    gateway.aSigner('C-1').subscribe((items) => expect(items).toHaveLength(0));
+    const signerList = http.expectOne((request) =>
+      request.url.endsWith('/courriers-manuels/a-signer'),
+    );
+    expect(signerList.request.params.get('search')).toBe('C-1');
+    signerList.flush({ data: [] });
+
+    const file = new File(['pdf'], 'signe.pdf', { type: 'application/pdf' });
+    gateway.signerManuel('cr1', file, 'DG', '2026-11-09').subscribe();
+    http
+      .expectOne((request) => request.url.endsWith('/courriers-manuels/cr1/signature'))
+      .flush({ data: {} });
+
+    gateway.declarerRemise('cr1', 'REMISE_PAPIER', '2026-11-09', 'REM-1').subscribe();
+    http
+      .expectOne((request) => request.url.endsWith('/courriers-manuels/cr1/remise'))
+      .flush({ data: {} });
+    http.verify();
+  });
+
   it('recherche, charge les expediteurs et les pieces jointes', () => {
     const { gateway, http } = setup();
     gateway.lookup('C-0').subscribe((items) => expect(items).toHaveLength(1));

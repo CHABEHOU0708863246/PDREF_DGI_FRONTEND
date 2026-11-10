@@ -114,7 +114,7 @@ test.describe('fichiers', () => {
       await mockFilesApi(page);
       await page.setViewportSize(viewport);
       await page.goto('/dashboard/files');
-      await expect(page.getByRole('heading', { name: 'Fichiers' })).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: 'Fichiers' })).toBeVisible();
       await expect(page.getByRole('cell', { name: 'facture.pdf' })).toBeVisible();
 
       const results = await new AxeBuilder({ page })

@@ -66,7 +66,13 @@ function providers(permissions: string[]) {
       provide: FilesGateway,
       useValue: {
         uploadGroup: vi.fn(() =>
-          of({ id: 'fg1', currentFile: { id: 'fv1' }, currentVersion: 1, ownerType: null, ownerId: null }),
+          of({
+            id: 'fg1',
+            currentFile: { id: 'fv1' },
+            currentVersion: 1,
+            ownerType: null,
+            ownerId: null,
+          }),
         ),
       },
     },

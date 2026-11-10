@@ -1,0 +1,7 @@
+title = "PDREF front secret scan"
+
+[allowlist]
+description = "Libelles metier confondus avec une cle par la regle generique."
+paths = [
+  "src/app/features/suivis/suivi-detail-page.component.ts"
+]

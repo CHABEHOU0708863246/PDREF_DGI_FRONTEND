@@ -17,7 +17,13 @@ import { ctfStatutLabel } from './ctf-status';
 @Component({
   selector: 'pdref-ctf-detail-page',
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe, UploadFieldComponent],
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    StatePanelComponent,
+    AbidjanDatePipe,
+    UploadFieldComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header

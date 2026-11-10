@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+      - run: npm audit --audit-level=high
+      - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo --config=/repo/.gitleaks.toml --redact --verbose
 
   e2e:
     name: E2E et accessibilite
