@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import { CorrelationService } from '../../../core/services/correlation/correlation.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { MfaFlowService } from '../../../core/services/auth/mfa-flow.service';
+import { isMfaChallenge } from '../../../core/models/auth/auth.model';
 import { sanitizeReturnUrl } from '../../../core/utils/url';
 import { normalizeProblem } from '../../../core/utils/problem';
 import { ErrorFooterComponent } from '../../../core/components/error-footer/error-footer.component';
@@ -93,6 +95,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
+  private readonly mfaFlow = inject(MfaFlowService);
 
   readonly loading = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
@@ -124,8 +127,20 @@ export class LoginComponent {
     this.problem.set(null);
 
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: (session) => {
+      next: (result) => {
         this.loading.set(false);
+        if (isMfaChallenge(result)) {
+          this.mfaFlow.setChallenge({
+            challengeToken: result.challengeToken,
+            enrollmentRequired: result.enrollmentRequired,
+          });
+          void this.router.navigate([
+            result.enrollmentRequired ? '/auth/mfa/enrollment' : '/auth/mfa',
+          ]);
+          return;
+        }
+
+        const session = result;
         if (session.user.mustChangePassword) {
           void this.router.navigate(['/auth/my-profile'], { queryParams: { mustChange: '1' } });
           return;

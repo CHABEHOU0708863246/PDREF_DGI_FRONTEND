@@ -1,6 +1,9 @@
 import type { APIRequestContext } from '@playwright/test';
+import { totp } from './totp';
 
 export const API = '/api/v1';
+
+const accessTokenCache = new Map<string, string>();
 
 export interface ApiEnvelope<T> {
   success: boolean;
@@ -16,13 +19,39 @@ export async function apiLogin(
   request: APIRequestContext,
   login: string,
   password: string,
+  mfaSecret: string,
 ): Promise<string> {
+  const cached = accessTokenCache.get(login);
+  if (cached) {
+    return cached;
+  }
+
   const response = await request.post(`${API}/auth/login`, { data: { login, password } });
   const text = await response.text();
   if (!response.ok()) {
     throw new Error(`Login API ${login} refuse (${response.status()}): ${text}`);
   }
-  return (JSON.parse(text) as ApiEnvelope<{ accessToken: string }>).data.accessToken;
+
+  const data = (JSON.parse(text) as ApiEnvelope<{ accessToken: string; challengeToken?: string }>)
+    .data;
+  if (!data.challengeToken) {
+    accessTokenCache.set(login, data.accessToken);
+    return data.accessToken;
+  }
+
+  const verified = await request.post(`${API}/auth/mfa/verify`, {
+    data: { challengeToken: data.challengeToken, code: totp(mfaSecret) },
+  });
+  const verifiedText = await verified.text();
+  if (!verified.ok()) {
+    throw new Error(
+      `Verification MFA API ${login} refusee (${verified.status()}): ${verifiedText}`,
+    );
+  }
+  const accessToken = (JSON.parse(verifiedText) as ApiEnvelope<{ accessToken: string }>).data
+    .accessToken;
+  accessTokenCache.set(login, accessToken);
+  return accessToken;
 }
 
 export async function apiData<T>(

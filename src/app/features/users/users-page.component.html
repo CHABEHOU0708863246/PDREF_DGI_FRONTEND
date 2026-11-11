@@ -135,6 +135,7 @@
             <th scope="col">Fonction</th>
             <th scope="col">Direction</th>
             <th scope="col">Roles</th>
+            <th scope="col">MFA</th>
             <th scope="col">Etat</th>
             <th scope="col">Actions</th>
           </tr>
@@ -149,6 +150,9 @@
               <td>{{ directionLabel(user) }}</td>
               <td>{{ user.roles.join(', ') }}</td>
               <td>
+                <span class="pd-badge">{{ user.mfaEnabled ? 'Active' : 'A enroler' }}</span>
+              </td>
+              <td>
                 <span class="pd-badge">{{ user.isActive ? 'Actif' : 'Inactif' }}</span>
                 @if (user.assignedDossiersCount > 0) {
                   <span class="pd-muted"> ({{ user.assignedDossiersCount }} dossier(s))</span>
@@ -160,6 +164,9 @@
                 </button>
                 <button class="pd-btn pd-btn--ghost" type="button" (click)="resend(user)">
                   Renvoyer l invitation
+                </button>
+                <button class="pd-btn pd-btn--ghost" type="button" (click)="resetMfa(user)">
+                  Reinitialiser la double authentification
                 </button>
                 <button class="pd-btn pd-btn--ghost" type="button" (click)="toggleActive(user)">
                   {{ user.isActive ? 'Desactiver' : 'Reactiver' }}

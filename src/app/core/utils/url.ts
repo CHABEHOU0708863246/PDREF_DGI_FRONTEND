@@ -6,6 +6,7 @@ const PUBLIC_API_PREFIXES = [
   '/api/v1/auth/forgot-password',
   '/api/v1/auth/reset-password',
   '/api/v1/auth/validate-reset-token',
+  '/api/v1/auth/mfa/',
 ];
 
 export function apiPath(url: string): string {

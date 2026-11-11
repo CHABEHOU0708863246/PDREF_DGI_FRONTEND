@@ -2,7 +2,14 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
-import type { AuthSession, AuthTokens, LoginCredentials } from '../../models/auth/auth.model';
+import type {
+  AuthSession,
+  AuthTokens,
+  LoginCredentials,
+  MfaChallenge,
+  MfaEnrollmentMaterial,
+} from '../../models/auth/auth.model';
+import { isMfaChallenge } from '../../models/auth/auth.model';
 import { PermissionsService } from '../permissions/permissions.service';
 import { TokenStore } from '../token/token.store';
 import { isLighthouseEnabled } from '../../utils/lighthouse';
@@ -22,8 +29,41 @@ export class AuthService {
   readonly currentUser = computed(() => this.sessionState()?.user ?? null);
   readonly isAuthenticated = computed(() => this.tokenStore.hasValidAccessToken());
 
-  login(credentials: LoginCredentials): Observable<AuthSession> {
-    return this.gateway.login(credentials).pipe(switchMap((tokens) => this.loadProfile(tokens)));
+  login(credentials: LoginCredentials): Observable<AuthSession | MfaChallenge> {
+    return this.gateway
+      .login(credentials)
+      .pipe(
+        switchMap((result) => (isMfaChallenge(result) ? of(result) : this.loadProfile(result))),
+      );
+  }
+
+  startMfaEnrollment(challengeToken: string): Observable<MfaEnrollmentMaterial> {
+    return this.gateway.startMfaEnrollment(challengeToken);
+  }
+
+  confirmMfaEnrollment(
+    challengeToken: string,
+    code: string,
+  ): Observable<{ session: AuthSession; recoveryCodes: string[] }> {
+    return this.gateway
+      .confirmMfaEnrollment(challengeToken, code)
+      .pipe(
+        switchMap((result) =>
+          this.loadProfile(result.tokens).pipe(
+            map((session) => ({ session, recoveryCodes: result.recoveryCodes })),
+          ),
+        ),
+      );
+  }
+
+  verifyMfa(challengeToken: string, code: string): Observable<AuthSession> {
+    return this.gateway
+      .verifyMfa(challengeToken, code)
+      .pipe(switchMap((tokens) => this.loadProfile(tokens)));
+  }
+
+  regenerateRecoveryCodes(): Observable<string[]> {
+    return this.gateway.regenerateRecoveryCodes();
   }
 
   /** Refresh cookie puis /me : jamais de metier avant le retour de cette chaine. */

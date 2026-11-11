@@ -1,4 +1,4 @@
-import type { APIRequestContext, Page } from '@playwright/test';
+﻿import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from './real.fixture';
 import {
   API,
@@ -12,9 +12,11 @@ import {
   getRejet,
   pdfBuffer,
 } from './real-api';
-import { loadRealCredentials, passwordFor } from './real-credentials';
+import { loadRealCredentials, mfaSecretFor, passwordFor } from './real-credentials';
+import { totp } from './totp';
 
 const credentials = loadRealCredentials();
+const mfaLastStep = new Map<string, number>();
 const MAILPIT = 'http://localhost:8125';
 const PASSWORD_CHANGE_MESSAGE = 'Le mot de passe doit etre change avant de continuer.';
 
@@ -25,7 +27,21 @@ async function loginAs(page: Page, login: string): Promise<void> {
   await page.getByLabel('Identifiant').fill(login);
   await page.getByLabel('Mot de passe', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard|\/auth\/mfa/, { timeout: 30_000 });
+  if (page.url().includes('/auth/mfa')) {
+    const secret = mfaSecretFor(credentials, login);
+    let step = Math.floor(Date.now() / 30_000);
+    const previous = mfaLastStep.get(login);
+    if (previous !== undefined && step <= previous) {
+      await page.waitForTimeout((previous + 1) * 30_000 - Date.now() + 1_000);
+      step = Math.floor(Date.now() / 30_000);
+    }
+    await page.locator('#mfa-code').fill(totp(secret, new Date(step * 30_000)));
+    await page.getByRole('button', { name: 'Verifier' }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+    mfaLastStep.set(login, step);
+  }
+
   await expect(page.getByText(PASSWORD_CHANGE_MESSAGE)).toHaveCount(0);
 }
 
@@ -34,7 +50,20 @@ async function loginWithPassword(page: Page, login: string, password: string): P
   await page.getByLabel('Identifiant').fill(login);
   await page.getByLabel('Mot de passe', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
+  await expect(page).toHaveURL(/\/dashboard|\/auth\/mfa/, { timeout: 30_000 });
+}
+
+async function enrollNewUser(page: Page): Promise<string[]> {
+  await expect(page).toHaveURL(/\/auth\/mfa\/enrollment/, { timeout: 30_000 });
+  const secret = (await page.locator('.mfa-card__secret code').innerText()).trim();
+  await page.getByLabel('Premier code').fill(totp(secret));
+  await page.getByRole('button', { name: "J'active la double authentification" }).click();
+  await expect(page).toHaveURL(/\/auth\/mfa\/recovery-codes/, { timeout: 30_000 });
+  const codes = await page.locator('.mfa-card__codes code').allInnerTexts();
+  expect(codes).toHaveLength(10);
+  await page.getByRole('button', { name: "J'ai note mes codes" }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+  return codes;
 }
 
 async function logout(page: Page): Promise<void> {
@@ -116,18 +145,14 @@ async function activerCtfEtCloturer(page: Page, demandeId: string): Promise<void
   await page.getByRole('button', { name: "Declarer l'activation" }).click();
   expect((await activation).ok()).toBe(true);
   await expect(page.getByText('Contribuable informe', { exact: true })).toBeVisible();
-  await logout(page);
 
-  await loginAs(page, 'chef.ctf');
   await page.goto(`/dashboard/ctf/${demandeId}`);
   const retour = page.waitForResponse(
     (item) => item.url().includes('/retour-gudef') && item.request().method() === 'POST',
   );
   await page.getByRole('button', { name: 'Retour GUDEF' }).click();
   expect((await retour).ok()).toBe(true);
-  await logout(page);
 
-  await loginAs(page, 'chef.ctf');
   await page.goto(`/dashboard/ctf/${demandeId}`);
   await page.getByRole('textbox', { name: /Reference depot rectifie/i }).fill('EIMP-E2E-DEP');
   const depot = page.waitForResponse(
@@ -180,7 +205,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
   });
 
   test('fichier EICAR refuse par le vrai ClamAV', async ({ request }) => {
-    const token = await apiLogin(request, 'chef.ctf', passwordFor(credentials, 'chef.ctf'));
+    const token = await apiLogin(
+      request,
+      'chef.ctf',
+      passwordFor(credentials, 'chef.ctf'),
+      mfaSecretFor(credentials, 'chef.ctf'),
+    );
     const response = await request.post(`${API}/files`, {
       headers: authHeaders(token),
       multipart: {
@@ -199,7 +229,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
   });
 
   test('parcours favorable complet en mode manuel', async ({ page, request }) => {
-    const token = await apiLogin(request, 'agent.gudef', passwordFor(credentials, 'agent.gudef'));
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
     const courrier = await createCourrier(request, token, '1234567A', 'favorable');
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, 'favorable');
 
@@ -215,7 +250,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
   });
 
   test('parcours non favorable complet avec signature et remise', async ({ page, request }) => {
-    const token = await apiLogin(request, 'agent.gudef', passwordFor(credentials, 'agent.gudef'));
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
     const courrier = await createCourrier(request, token, '7654321B', 'nonfavorable');
     const demandeId = await createDemande(request, token, '7654321B', courrier.id, 'nonfavorable');
 
@@ -264,7 +304,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
   });
 
   test('parcours rejet automatique', async ({ page, request }) => {
-    const token = await apiLogin(request, 'agent.gudef', passwordFor(credentials, 'agent.gudef'));
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
     const courrier = await createCourrier(request, token, '1111111C', 'auto');
     await createDemande(request, token, '1111111C', courrier.id, 'auto');
 
@@ -273,7 +318,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
   });
 
   test('parcours rejet par agent puis reprise cycle 2', async ({ page, request }) => {
-    const token = await apiLogin(request, 'agent.gudef', passwordFor(credentials, 'agent.gudef'));
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
     const courrier = await createCourrier(request, token, '1234567A', 'reprise');
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, 'reprise');
     const numero = await getDemandeNumero(request, token, demandeId);
@@ -379,9 +429,29 @@ test.describe('L19a - recette sur la vraie pile', () => {
     expect((await reset).ok()).toBe(true);
 
     await loginWithPassword(userPage, matricule, password);
+    const recoveryCodes = await enrollNewUser(userPage);
     const navigation = userPage.getByRole('navigation', { name: 'Navigation principale' });
     await expect(navigation.getByRole('link')).toHaveCount(1);
-    await expect(navigation.getByRole('link', { name: 'Avis à rendre' })).toBeVisible();
+    await expect(navigation.getByRole('link', { name: /Avis.*rendre/i })).toBeVisible();
+    await logout(userPage);
+
+    await loginWithPassword(userPage, matricule, password);
+    await userPage.locator('#mfa-code').fill('000000');
+    await userPage.getByRole('button', { name: 'Verifier' }).click();
+    await expect(userPage.getByRole('alert')).toBeVisible();
+    await userPage.locator('#mfa-code').fill(recoveryCodes[0]);
+    await userPage.getByRole('button', { name: 'Verifier' }).click();
+    await expect(userPage).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+    await logout(userPage);
+
+    await loginWithPassword(userPage, matricule, password);
+    await userPage.locator('#mfa-code').fill(recoveryCodes[0]);
+    await userPage.getByRole('button', { name: 'Verifier' }).click();
+    await expect(userPage.getByRole('alert')).toBeVisible();
+    await userPage.locator('#mfa-code').fill(recoveryCodes[1]);
+    await userPage.getByRole('button', { name: 'Verifier' }).click();
+    await expect(userPage).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+    await logout(userPage);
 
     await loginAs(page, 'admin.dsi');
     await page.goto('/dashboard/admin/utilisateurs');
@@ -389,6 +459,17 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Filtrer' }).click();
     const row = page.locator('tr').filter({ hasText: matricule }).first();
     await expect(row).toBeVisible();
+    page.once('dialog', (dialog) => dialog.accept('Telephone perdu'));
+    const resetMfa = page.waitForResponse(
+      (item) => item.url().includes('/mfa/reset') && item.request().method() === 'POST',
+    );
+    await row.getByRole('button', { name: 'Reinitialiser la double authentification' }).click();
+    expect((await resetMfa).ok()).toBe(true);
+
+    await userContext.clearCookies();
+    await loginWithPassword(userPage, matricule, password);
+    await expect(userPage).toHaveURL(/\/auth\/mfa\/enrollment/, { timeout: 30_000 });
+    await enrollNewUser(userPage);
     page.once('dialog', (dialog) => dialog.accept());
     const deactivated = page.waitForResponse(
       (item) => item.url().includes('/deactivate') && item.request().method() === 'POST',

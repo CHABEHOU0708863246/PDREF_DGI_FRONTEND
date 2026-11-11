@@ -17,8 +17,33 @@ export interface AuthTokens {
   expiresAt: string;
 }
 
+export interface MfaChallenge {
+  mfaRequired: true;
+  enrollmentRequired: boolean;
+  challengeToken: string;
+  accessToken?: '';
+  expiresAt?: string;
+}
+
+export type LoginResult = AuthTokens | MfaChallenge;
+
+export interface MfaEnrollmentMaterial {
+  secret: string;
+  otpAuthUri: string;
+  qrCodeDataUri: string;
+}
+
+export interface MfaEnrollmentConfirmed {
+  tokens: AuthTokens;
+  recoveryCodes: string[];
+}
+
 export interface AuthSession extends AuthTokens {
   user: CurrentUser;
+}
+
+export function isMfaChallenge(value: LoginResult): value is MfaChallenge {
+  return 'challengeToken' in value && !!value.challengeToken;
 }
 
 export interface LoginCredentials {

@@ -20,6 +20,7 @@ const user = {
   directionCode: 'DVFN',
   isActive: true,
   isLocked: false,
+  mfaEnabled: true,
   assignedDossiersCount: 2,
   roles: ['DECIDEUR_DVFN'],
 };
@@ -117,7 +118,9 @@ describe('UsersPageComponent', () => {
       of({ assignedDossiersCount: 0, reattributionTaskCreated: false }),
     );
     const resendInvitation = vi.fn(() => of({}));
+    const resetMfa = vi.fn(() => of({}));
     vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    vi.spyOn(globalThis, 'prompt').mockReturnValue('Telephone perdu');
     TestBed.configureTestingModule({
       imports: [UsersPageComponent],
       providers: providers({
@@ -126,6 +129,7 @@ describe('UsersPageComponent', () => {
         update,
         deactivate,
         resendInvitation,
+        resetMfa,
       }),
     });
     const fixture = TestBed.createComponent(UsersPageComponent);
@@ -139,6 +143,8 @@ describe('UsersPageComponent', () => {
     expect(deactivate).toHaveBeenCalledWith('u1');
     component.resend(user);
     expect(resendInvitation).toHaveBeenCalledWith('u1');
+    component.resetMfa(user);
+    expect(resetMfa).toHaveBeenCalledWith('u1', 'Telephone perdu');
   });
 
   it('couvre les erreurs et la pagination', () => {

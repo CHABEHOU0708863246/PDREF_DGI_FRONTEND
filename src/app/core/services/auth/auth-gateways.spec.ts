@@ -86,6 +86,52 @@ describe('HttpAuthGateway', () => {
 
     controller.verify();
   });
+
+  it('couvre enrolement, verification et codes de secours MFA', async () => {
+    TestBed.configureTestingModule({
+      providers: [HttpAuthGateway, provideHttpClient(), provideHttpClientTesting()],
+    });
+    const gateway = TestBed.inject(HttpAuthGateway);
+    const controller = TestBed.inject(HttpTestingController);
+
+    const start = firstValueFrom(gateway.startMfaEnrollment('challenge'));
+    controller
+      .expectOne((request) => request.url.endsWith('/api/v1/auth/mfa/enrollment/start'))
+      .flush({
+        success: true,
+        data: { secret: 'SECRET', otpAuthUri: 'otpauth://totp/PDREF', qrCodeDataUri: 'data:image' },
+      });
+    await expect(start).resolves.toMatchObject({ secret: 'SECRET' });
+
+    const confirm = firstValueFrom(gateway.confirmMfaEnrollment('challenge', '123456'));
+    controller
+      .expectOne((request) => request.url.endsWith('/api/v1/auth/mfa/enrollment/confirm'))
+      .flush({
+        success: true,
+        data: {
+          tokens: { accessToken: 'a', expiresAt: '2030-01-01T00:00:00Z' },
+          recoveryCodes: ['AAAAA-BBBBB'],
+        },
+      });
+    await expect(confirm).resolves.toMatchObject({ recoveryCodes: ['AAAAA-BBBBB'] });
+
+    const verify = firstValueFrom(gateway.verifyMfa('challenge', '123456'));
+    controller
+      .expectOne((request) => request.url.endsWith('/api/v1/auth/mfa/verify'))
+      .flush({
+        success: true,
+        data: { accessToken: 'b', expiresAt: '2030-01-01T00:00:00Z' },
+      });
+    await expect(verify).resolves.toMatchObject({ accessToken: 'b' });
+
+    const codes = firstValueFrom(gateway.regenerateRecoveryCodes());
+    controller
+      .expectOne((request) => request.url.endsWith('/api/v1/me/mfa/recovery-codes'))
+      .flush({ success: true, data: { recoveryCodes: ['CCCCC-DDDDD'] } });
+    await expect(codes).resolves.toEqual(['CCCCC-DDDDD']);
+
+    controller.verify();
+  });
 });
 
 describe('DemoAuthGateway', () => {
@@ -100,5 +146,13 @@ describe('DemoAuthGateway', () => {
   it('se deconnecte sans appel reseau', async () => {
     const gateway = new DemoAuthGateway();
     await expect(firstValueFrom(gateway.logout())).resolves.toBeUndefined();
+  });
+
+  it('refuse les operations MFA en mode demonstration', async () => {
+    const gateway = new DemoAuthGateway();
+    await expect(firstValueFrom(gateway.startMfaEnrollment())).rejects.toThrow();
+    await expect(firstValueFrom(gateway.confirmMfaEnrollment())).rejects.toThrow();
+    await expect(firstValueFrom(gateway.verifyMfa())).rejects.toThrow();
+    await expect(firstValueFrom(gateway.regenerateRecoveryCodes())).rejects.toThrow();
   });
 });

@@ -9,6 +9,27 @@ export const AUTH_ROUTES: Routes = [
     title: 'Connexion - PDREF',
   },
   {
+    path: 'mfa',
+    loadComponent: () =>
+      import('./mfa/mfa-verify.component').then((module) => module.MfaVerifyComponent),
+    title: 'Code de verification - PDREF',
+  },
+  {
+    path: 'mfa/enrollment',
+    loadComponent: () =>
+      import('./mfa/mfa-enroll.component').then((module) => module.MfaEnrollComponent),
+    title: 'Double authentification - PDREF',
+  },
+  {
+    path: 'mfa/recovery-codes',
+    loadComponent: () =>
+      import('./mfa/mfa-recovery-codes.component').then(
+        (module) => module.MfaRecoveryCodesComponent,
+      ),
+    canActivate: [authGuard],
+    title: 'Codes de secours - PDREF',
+  },
+  {
     path: 'forgot-password',
     loadComponent: () =>
       import('./forgot-password/forgot-password.component').then(

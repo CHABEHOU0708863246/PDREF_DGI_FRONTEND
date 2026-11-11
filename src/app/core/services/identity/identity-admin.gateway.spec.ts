@@ -108,6 +108,13 @@ describe('IdentityAdminGateway', () => {
       )
       .flush({ data: {} });
 
+    gateway.resetMfa('u1', 'Telephone perdu').subscribe();
+    const reset = http.expectOne(
+      (request) => request.url.endsWith('/users/u1/mfa/reset') && request.method === 'POST',
+    );
+    expect(reset.request.body).toEqual({ reason: 'Telephone perdu' });
+    reset.flush({ data: {} });
+
     http.verify();
   });
 });

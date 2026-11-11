@@ -11,6 +11,7 @@
   directionCode: string | null;
   isActive: boolean;
   isLocked: boolean;
+  mfaEnabled: boolean;
   assignedDossiersCount: number;
   roles: string[];
 }

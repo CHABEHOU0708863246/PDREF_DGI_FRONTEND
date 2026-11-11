@@ -21,3 +21,11 @@ export function passwordFor(credentials: RealCredentials, login: string): string
   }
   return password;
 }
+
+export function mfaSecretFor(credentials: RealCredentials, login: string): string {
+  const secret = credentials[`${login}.mfa`];
+  if (!secret) {
+    throw new Error(`Secret MFA E2E absent du fichier de recette : ${login}.`);
+  }
+  return secret;
+}

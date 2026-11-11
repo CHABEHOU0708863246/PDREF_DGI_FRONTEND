@@ -9,6 +9,9 @@ import type {
   ChangePasswordRequest,
   CurrentUser,
   LoginCredentials,
+  LoginResult,
+  MfaEnrollmentConfirmed,
+  MfaEnrollmentMaterial,
 } from '../../models/auth/auth.model';
 import type { AuthGateway } from './auth.gateway';
 
@@ -21,12 +24,52 @@ export class HttpAuthGateway implements AuthGateway {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/api/v1`;
 
-  login(credentials: LoginCredentials): Observable<AuthTokens> {
+  login(credentials: LoginCredentials): Observable<LoginResult> {
     return this.http
-      .post<ApiResponse<AuthTokens>>(`${this.base}/auth/login`, credentials, {
+      .post<ApiResponse<LoginResult>>(`${this.base}/auth/login`, credentials, {
         withCredentials: true,
       })
       .pipe(map((response) => response.data));
+  }
+
+  startMfaEnrollment(challengeToken: string): Observable<MfaEnrollmentMaterial> {
+    return this.http
+      .post<ApiResponse<MfaEnrollmentMaterial>>(
+        `${this.base}/auth/mfa/enrollment/start`,
+        { challengeToken },
+        { withCredentials: true },
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  confirmMfaEnrollment(challengeToken: string, code: string): Observable<MfaEnrollmentConfirmed> {
+    return this.http
+      .post<ApiResponse<MfaEnrollmentConfirmed>>(
+        `${this.base}/auth/mfa/enrollment/confirm`,
+        { challengeToken, code },
+        { withCredentials: true },
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  verifyMfa(challengeToken: string, code: string): Observable<AuthTokens> {
+    return this.http
+      .post<ApiResponse<AuthTokens>>(
+        `${this.base}/auth/mfa/verify`,
+        { challengeToken, code },
+        { withCredentials: true },
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  regenerateRecoveryCodes(): Observable<string[]> {
+    return this.http
+      .post<ApiResponse<{ recoveryCodes: string[] }>>(
+        `${this.base}/me/mfa/recovery-codes`,
+        {},
+        { withCredentials: true },
+      )
+      .pipe(map((response) => response.data.recoveryCodes));
   }
 
   refresh(): Observable<AuthTokens> {

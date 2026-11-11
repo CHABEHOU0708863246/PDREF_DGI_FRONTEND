@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { delay, of } from 'rxjs';
-import type { AuthTokens, CurrentUser } from '../../models/auth/auth.model';
+import { delay, of, throwError } from 'rxjs';
+import type {
+  AuthTokens,
+  CurrentUser,
+  LoginResult,
+  MfaEnrollmentConfirmed,
+  MfaEnrollmentMaterial,
+} from '../../models/auth/auth.model';
 import type { AuthGateway } from './auth.gateway';
 
 /**
@@ -10,8 +16,24 @@ import type { AuthGateway } from './auth.gateway';
  */
 @Injectable({ providedIn: 'root' })
 export class DemoAuthGateway implements AuthGateway {
-  login(): Observable<AuthTokens> {
+  login(): Observable<LoginResult> {
     return of(this.tokens()).pipe(delay(120));
+  }
+
+  startMfaEnrollment(): Observable<MfaEnrollmentMaterial> {
+    return throwError(() => new Error('MFA indisponible en mode demonstration.'));
+  }
+
+  confirmMfaEnrollment(): Observable<MfaEnrollmentConfirmed> {
+    return throwError(() => new Error('MFA indisponible en mode demonstration.'));
+  }
+
+  verifyMfa(): Observable<AuthTokens> {
+    return throwError(() => new Error('MFA indisponible en mode demonstration.'));
+  }
+
+  regenerateRecoveryCodes(): Observable<string[]> {
+    return throwError(() => new Error('MFA indisponible en mode demonstration.'));
   }
 
   refresh(): Observable<AuthTokens> {

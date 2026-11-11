@@ -31,6 +31,16 @@ function setup(refresh = vi.fn(() => of(tokens))) {
     forgotPassword: vi.fn(() => of(void 0)),
     resetPassword: vi.fn(() => of(void 0)),
     changePassword: vi.fn(() => of(void 0)),
+    startMfaEnrollment: vi.fn(() =>
+      of({
+        secret: 'SECRET',
+        otpAuthUri: 'otpauth://totp/PDREF',
+        qrCodeDataUri: 'data:image/png;base64,abc',
+      }),
+    ),
+    confirmMfaEnrollment: vi.fn(() => of({ tokens, recoveryCodes: ['AAAAA-BBBBB'] })),
+    verifyMfa: vi.fn(() => of(tokens)),
+    regenerateRecoveryCodes: vi.fn(() => of(['CCCCC-DDDDD'])),
   };
 
   TestBed.configureTestingModule({
@@ -119,6 +129,38 @@ describe('AuthService', () => {
     });
 
     expect(failed).toBe(true);
+  });
+
+  it('gere le challenge MFA, l enrolement et les codes de secours', () => {
+    const { service, gateway } = setup();
+    gateway.login.mockReturnValue(
+      of({
+        mfaRequired: true,
+        enrollmentRequired: false,
+        challengeToken: 'challenge',
+      }) as never,
+    );
+    let challenge: unknown;
+    service.login({ login: 'demo', password: 'secret' }).subscribe((value) => {
+      challenge = value;
+    });
+    expect(challenge).toMatchObject({ challengeToken: 'challenge' });
+    expect(gateway.me).not.toHaveBeenCalled();
+
+    service.startMfaEnrollment('challenge').subscribe();
+    expect(gateway.startMfaEnrollment).toHaveBeenCalledWith('challenge');
+
+    let confirmed: { recoveryCodes: string[] } | undefined;
+    service.confirmMfaEnrollment('challenge', '123456').subscribe((value) => {
+      confirmed = value;
+    });
+    expect(confirmed?.recoveryCodes).toEqual(['AAAAA-BBBBB']);
+
+    service.verifyMfa('challenge', '123456').subscribe();
+    expect(gateway.verifyMfa).toHaveBeenCalledWith('challenge', '123456');
+
+    service.regenerateRecoveryCodes().subscribe();
+    expect(gateway.regenerateRecoveryCodes).toHaveBeenCalledOnce();
   });
 
   it('leve mustChangePassword apres changement', () => {

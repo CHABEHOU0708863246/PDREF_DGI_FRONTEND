@@ -246,6 +246,21 @@ export class UsersPageComponent {
     });
   }
 
+  resetMfa(user: AdminUser): void {
+    const reason = globalThis.prompt(`Motif de la reinitialisation MFA de ${user.displayName} ?`);
+    if (!reason?.trim()) {
+      return;
+    }
+
+    this.gateway.resetMfa(user.id, reason.trim()).subscribe({
+      next: () => {
+        this.notice.set('Double authentification reinitialisee. Nouvel enrolement impose.');
+        this.load(this.page());
+      },
+      error: (error: unknown) => this.fail(error),
+    });
+  }
+
   directionLabel(user: AdminUser): string {
     return (
       this.directions().find((item) => item.id === user.directionId)?.libelle ??

@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { AuthService } from '../../core/services/auth/auth.service';
+import { MfaFlowService } from '../../core/services/auth/mfa-flow.service';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { PasswordInputComponent } from '../../core/components/password-input/password-input.component';
 import { LoginComponent } from './login/login.component';
@@ -70,6 +71,30 @@ describe('Auth screens', () => {
 
     expect(auth.login).toHaveBeenCalledOnce();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('login redirige vers l ecran MFA quand un challenge est requis', () => {
+    const auth = authMock();
+    auth.login.mockReturnValue(
+      of({
+        mfaRequired: true,
+        enrollmentRequired: false,
+        challengeToken: 'challenge',
+      }) as never,
+    );
+    TestBed.configureTestingModule({
+      imports: [LoginComponent],
+      providers: commonProviders(auth),
+    });
+    const fixture = TestBed.createComponent(LoginComponent);
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.form.setValue({ login: 'agent', password: 'Correct-Horse-2026!' });
+
+    fixture.componentInstance.submit();
+
+    expect(TestBed.inject(MfaFlowService).challenge()?.challengeToken).toBe('challenge');
+    expect(router.navigate).toHaveBeenCalledWith(['/auth/mfa']);
   });
 
   it('forgot affiche toujours le meme succes', () => {
