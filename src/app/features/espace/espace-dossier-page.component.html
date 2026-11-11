@@ -1,0 +1,63 @@
+@if (problem()?.status === 404) {
+  <section class="espace-empty pd-card" role="alert">
+    <h1>Dossier introuvable</h1>
+    <p>Ce dossier n'existe pas ou n'est pas rattache a votre compte.</p>
+    <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour a mes dossiers</a>
+  </section>
+} @else if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement du dossier" />
+} @else if (problem(); as issue) {
+  <pdref-state-panel
+    state="error"
+    [title]="issue.title"
+    [message]="issue.detail ?? 'Impossible de charger le dossier.'"
+    actionLabel="Reessayer"
+    (retry)="load()"
+  />
+} @else if (dossier(); as item) {
+  <pdref-page-header [title]="'Dossier ' + item.numero" subtitle="Suivi de votre demande" />
+
+  @if (notice()) {
+    <pdref-state-panel state="success" [message]="notice()!" />
+  }
+
+  <section class="espace-card pd-card" aria-labelledby="dossier-synthese">
+    <h2 id="dossier-synthese">Synthese</h2>
+    <dl class="espace-facts">
+      <dt>Statut</dt>
+      <dd>{{ item.statut }}</dd>
+      <dt>Date de depot</dt>
+      <dd>{{ item.dateDepot ? (item.dateDepot | date: 'dd/MM/yyyy HH:mm') : '-' }}</dd>
+      <dt>Decision</dt>
+      <dd>{{ item.decision ?? '-' }}</dd>
+      @if (item.motifRejet) {
+        <dt>Motif de rejet</dt>
+        <dd>{{ item.motifRejet }}</dd>
+      }
+    </dl>
+
+    @if (item.courrierDisponible) {
+      <button class="pd-btn pd-btn--primary" type="button" [disabled]="busy()" (click)="download()">
+        Telecharger le courrier de reponse
+      </button>
+    }
+  </section>
+
+  <section class="espace-card pd-card" aria-labelledby="dossier-chronologie">
+    <h2 id="dossier-chronologie">Chronologie</h2>
+    @if (item.chronologie.length === 0) {
+      <p class="pd-help">Aucune etape terminee pour le moment.</p>
+    } @else {
+      <ol class="espace-timeline">
+        @for (etape of item.chronologie; track etape.code + etape.date) {
+          <li>
+            <strong>{{ etape.code }}</strong>
+            <span>{{ etape.date | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+
+  <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour a mes dossiers</a>
+}

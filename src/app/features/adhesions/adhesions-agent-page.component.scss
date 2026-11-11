@@ -1,0 +1,137 @@
+:host {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.adhesions-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-4);
+}
+
+.adhesions-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: var(--space-4);
+}
+
+.adhesions-list,
+.adhesions-detail,
+.adhesions-accounts {
+  padding: var(--space-4);
+  overflow: auto;
+}
+
+.adhesions-list h2,
+.adhesions-detail h2,
+.adhesions-accounts h2 {
+  margin-top: 0;
+}
+
+.adhesions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.adhesions-table th,
+.adhesions-table td {
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.adhesions-table tbody tr {
+  cursor: pointer;
+}
+
+.adhesions-table tbody tr:hover,
+.adhesions-table tbody tr.is-selected {
+  background: var(--color-surface-alt);
+}
+
+.adhesions-muted {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.adhesions-alert {
+  display: block;
+  color: var(--color-warning-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.adhesions-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+.adhesions-facts dt {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.adhesions-facts dd {
+  margin: 0;
+}
+
+.adhesions-pieces {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adhesions-pieces li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.adhesions-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin-top: var(--space-4);
+}
+
+.adhesions-accounts__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin-bottom: var(--space-3);
+}
+
+.adhesions-accounts__head h2 {
+  margin: 0 auto 0 0;
+}
+
+@media (max-width: 64rem) {
+  .adhesions-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .adhesions-toolbar,
+  .adhesions-actions,
+  .adhesions-accounts__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .adhesions-table {
+    font-size: var(--text-sm);
+  }
+}

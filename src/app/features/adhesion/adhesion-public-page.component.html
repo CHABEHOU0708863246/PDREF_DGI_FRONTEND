@@ -1,0 +1,160 @@
+<main class="public-shell">
+  <header class="public-shell__head">
+    <a class="brand" routerLink="/suivi">
+      <span class="brand__mark" aria-hidden="true">P</span>
+      <span>PDREF</span>
+    </a>
+    <span class="pd-chip">Espace public</span>
+    <pdref-theme-toggle />
+  </header>
+
+  <div class="public-shell__body">
+    <pdref-page-header
+      title="Demande d'adhesion contribuable"
+      subtitle="Un compte n'est actif qu'apres verification de votre e-mail et validation par un agent de la DGI."
+    />
+
+    @if (problem(); as issue) {
+      <pdref-state-panel
+        state="error"
+        [title]="issue.title"
+        [message]="issue.detail ?? 'La demande n a pas pu etre traitee.'"
+      />
+    }
+
+    @if (step() === 'form') {
+      <form class="adhesion-card pd-card" (submit)="$event.preventDefault(); submitDemand()">
+        <div class="adhesion-grid">
+          <label class="pd-field">
+            <span class="pd-label">NCC</span>
+            <input
+              class="pd-input"
+              name="ncc"
+              [value]="ncc()"
+              (input)="ncc.set($any($event.target).value)"
+              required
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Nom</span>
+            <input
+              class="pd-input"
+              name="nom"
+              [value]="nom()"
+              (input)="nom.set($any($event.target).value)"
+              required
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Prenom</span>
+            <input
+              class="pd-input"
+              name="prenom"
+              [value]="prenom()"
+              (input)="prenom.set($any($event.target).value)"
+              required
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Fonction</span>
+            <input
+              class="pd-input"
+              name="fonction"
+              [value]="fonction()"
+              (input)="fonction.set($any($event.target).value)"
+              required
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">E-mail</span>
+            <input
+              class="pd-input"
+              name="email"
+              type="email"
+              autocomplete="email"
+              [value]="email()"
+              (input)="email.set($any($event.target).value)"
+              required
+            />
+          </label>
+          <label class="pd-field">
+            <span class="pd-label">Telephone</span>
+            <input
+              class="pd-input"
+              name="telephone"
+              type="tel"
+              autocomplete="tel"
+              [value]="telephone()"
+              (input)="telephone.set($any($event.target).value)"
+              required
+            />
+          </label>
+        </div>
+
+        <div class="adhesion-actions">
+          <button class="pd-btn pd-btn--primary" type="submit" [disabled]="busy()">
+            Envoyer la demande
+          </button>
+          <a class="pd-btn pd-btn--ghost" routerLink="/suivi">Retour au suivi public</a>
+        </div>
+      </form>
+    }
+
+    @if (step() === 'sent') {
+      <pdref-state-panel
+        state="empty"
+        title="Verifiez votre boite e-mail"
+        message="Votre demande est enregistree. Vous recevrez un e-mail. Le lien de verification est valable 24 heures."
+      />
+    }
+
+    @if (step() === 'pieces' && !problem()) {
+      <section class="adhesion-card pd-card" aria-labelledby="pieces-title">
+        <h2 id="pieces-title">Pieces a joindre</h2>
+        <p class="pd-help">Adresse e-mail verifiee : {{ emailMasque() }}</p>
+
+        <a class="pd-btn pd-btn--ghost" [href]="modeleHref()" target="_blank" rel="noopener">
+          <pdref-icon name="file" size="sm" />
+          Telecharger le modele d'autorisation
+        </a>
+
+        <div class="adhesion-pieces">
+          @for (type of pieceTypes; track type.code) {
+            <label class="pd-field">
+              <span class="pd-label">{{ type.label }}</span>
+              <input
+                class="pd-input"
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                [attr.aria-label]="type.label"
+                (change)="upload(type.code, $event)"
+              />
+              @if (uploaded()[type.code]) {
+                <span class="pd-help">Fichier recu : {{ uploaded()[type.code] }}</span>
+              }
+            </label>
+          }
+        </div>
+
+        <div class="adhesion-actions">
+          <button
+            class="pd-btn pd-btn--primary"
+            type="button"
+            [disabled]="busy() || !allPiecesPresent()"
+            (click)="submitPieces()"
+          >
+            Soumettre ma demande
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (step() === 'done') {
+      <pdref-state-panel
+        state="success"
+        title="Demande transmise"
+        message="Votre demande est en cours de validation par un agent de la DGI. Vous recevrez un e-mail a la suite du traitement."
+      />
+    }
+  </div>
+</main>

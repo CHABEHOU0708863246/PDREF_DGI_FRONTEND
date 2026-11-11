@@ -1,0 +1,238 @@
+<pdref-page-header
+  title="Adhesions a valider"
+  subtitle="Verifiez les pieces, l'e-mail et le NCC avant de creer un compte contribuable."
+/>
+
+@if (notice()) {
+  <pdref-state-panel state="success" [message]="notice()!" />
+}
+
+@if (problem(); as issue) {
+  <pdref-state-panel state="error" [title]="issue.title" [message]="issue.detail ?? 'Erreur.'" />
+}
+
+<section class="adhesions-toolbar pd-card" aria-label="Filtres des adhesions">
+  <label class="pd-field">
+    <span class="pd-label">Statut</span>
+    <select class="pd-input" [ngModel]="statut()" (ngModelChange)="statut.set($event)">
+      <option value="">Tous</option>
+      @for (entry of labels | keyvalue; track entry.key) {
+        <option [value]="entry.key">{{ entry.value }}</option>
+      }
+    </select>
+  </label>
+  <label class="pd-field">
+    <span class="pd-label">Recherche</span>
+    <input
+      class="pd-input"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      placeholder="NCC, nom ou prenom"
+    />
+  </label>
+  <button class="pd-btn pd-btn--primary" type="button" (click)="load()">Filtrer</button>
+</section>
+
+<div class="adhesions-layout">
+  <section class="adhesions-list pd-card" aria-labelledby="adhesions-title">
+    <h2 id="adhesions-title">Demandes</h2>
+    @if (loading()) {
+      <pdref-state-panel state="loading" />
+    } @else if (items().length === 0) {
+      <pdref-state-panel state="empty" title="Aucune adhesion" message="La file est vide." />
+    } @else {
+      <table class="adhesions-table">
+        <thead>
+          <tr>
+            <th>Demandeur</th>
+            <th>NCC</th>
+            <th>Statut</th>
+            <th>Alertes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr [class.is-selected]="detail()?.id === item.id" (click)="open(item)">
+              <td>
+                <strong>{{ item.demandeur }}</strong>
+                <span class="adhesions-muted">{{ item.emailMasque }}</span>
+              </td>
+              <td>{{ item.ncc }}</td>
+              <td>
+                <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
+              </td>
+              <td>
+                @if (!item.nccConnu) {
+                  <span class="adhesions-alert">NCC inconnu</span>
+                }
+                @if (item.emailEcart) {
+                  <span class="adhesions-alert">E-mail different</span>
+                }
+                @if (item.compteActif) {
+                  <span class="adhesions-alert">Compte actif</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <section class="adhesions-detail pd-card" aria-labelledby="adhesion-detail-title">
+    <h2 id="adhesion-detail-title">Detail de la demande</h2>
+    @if (detailLoading()) {
+      <pdref-state-panel state="loading" />
+    } @else if (!detail()) {
+      <pdref-state-panel
+        state="empty"
+        title="Selectionnez une demande"
+        message="Choisissez une adhesion dans la liste pour afficher son detail."
+      />
+    } @else if (detail(); as item) {
+      <dl class="adhesions-facts">
+        <dt>NCC</dt>
+        <dd>{{ item.ncc }} - {{ item.raisonSociale }}</dd>
+        <dt>Demandeur</dt>
+        <dd>{{ item.prenom }} {{ item.nom }} - {{ item.fonction }}</dd>
+        <dt>E-mail</dt>
+        <dd>{{ item.email }}</dd>
+        <dt>Telephone</dt>
+        <dd>{{ item.telephone }}</dd>
+        <dt>Statut</dt>
+        <dd>{{ statutLabel(item.statut) }}</dd>
+        @if (!item.nccConnu) {
+          <dt>Alerte</dt>
+          <dd class="adhesions-alert">NCC inconnu</dd>
+        }
+        @if (item.emailEcart) {
+          <dt>Alerte</dt>
+          <dd class="adhesions-alert">E-mail different de la fiche contribuable</dd>
+        }
+      </dl>
+
+      <h3>Pieces</h3>
+      @if (item.pieces.length === 0) {
+        <p class="pd-help">Aucune piece fournie.</p>
+      } @else {
+        <ul class="adhesions-pieces">
+          @for (piece of item.pieces; track piece.versionId) {
+            <li>
+              <span>{{ piece.type }} - {{ piece.fileName }}</span>
+              <button
+                class="pd-btn pd-btn--ghost pd-btn--sm"
+                type="button"
+                (click)="downloadPiece(piece.versionId, piece.fileName)"
+              >
+                Telecharger
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (item.statut === 'EN_ATTENTE_VALIDATION') {
+        <div class="adhesions-actions">
+          <button
+            class="pd-btn pd-btn--primary"
+            type="button"
+            [disabled]="busy()"
+            (click)="accept()"
+          >
+            Accepter
+          </button>
+          <label class="pd-field">
+            <span class="pd-label">Motif de refus</span>
+            <select
+              class="pd-input"
+              [ngModel]="motifCode()"
+              (ngModelChange)="motifCode.set($event)"
+            >
+              @for (motif of motifs(); track motif.code) {
+                <option [value]="motif.code">{{ motif.libelle }}</option>
+              }
+            </select>
+          </label>
+          <button
+            class="pd-btn pd-btn--danger"
+            type="button"
+            [disabled]="busy() || !motifCode()"
+            (click)="refuse()"
+          >
+            Refuser
+          </button>
+        </div>
+      }
+    }
+  </section>
+</div>
+
+<section class="adhesions-accounts pd-card" aria-labelledby="comptes-title">
+  <div class="adhesions-accounts__head">
+    <h2 id="comptes-title">Comptes contribuables</h2>
+    <label class="pd-field">
+      <span class="pd-label">Recherche</span>
+      <input
+        class="pd-input"
+        [ngModel]="searchAccounts()"
+        (ngModelChange)="searchAccounts.set($event)"
+        placeholder="NCC, nom ou e-mail"
+      />
+    </label>
+    <button class="pd-btn pd-btn--primary" type="button" (click)="loadAccounts()">Filtrer</button>
+  </div>
+
+  @if (accountsLoading()) {
+    <pdref-state-panel state="loading" />
+  } @else if (accounts().length === 0) {
+    <pdref-state-panel
+      state="empty"
+      title="Aucun compte"
+      message="Aucun compte contribuable actif ou historique."
+    />
+  } @else {
+    <table class="adhesions-table">
+      <thead>
+        <tr>
+          <th>Compte</th>
+          <th>NCC</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (account of accounts(); track account.userId) {
+          <tr>
+            <td>
+              <strong>{{ account.displayName }}</strong>
+              <span class="adhesions-muted">{{ account.login }}</span>
+            </td>
+            <td>{{ account.ncc ?? '-' }}</td>
+            <td>{{ account.isActive ? 'Actif' : 'Desactive' }}</td>
+            <td>
+              <button
+                class="pd-btn pd-btn--ghost pd-btn--sm"
+                type="button"
+                (click)="openAccountDialog(account, !account.isActive)"
+              >
+                {{ account.isActive ? 'Desactiver' : 'Reactiver' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
+
+<pdref-confirm-dialog-with-input
+  [open]="accountDialogOpen()"
+  [title]="accountDialogTitle()"
+  message="Le motif est conserve et les sessions du compte sont revoquees."
+  [inputLabel]="accountInputLabel()"
+  hint="Ce motif est conserve dans le journal d audit."
+  [confirmLabel]="accountActive() ? 'Reactiver' : 'Desactiver'"
+  [minLength]="5"
+  (confirmed)="confirmAccount($event)"
+  (cancelled)="accountDialogOpen.set(false)"
+/>

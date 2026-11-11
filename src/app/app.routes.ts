@@ -37,6 +37,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'adhesion',
+    loadChildren: () =>
+      import('./features/adhesion/adhesion.routes').then((module) => module.ADHESION_ROUTES),
+  },
+  {
+    path: 'espace',
+    loadChildren: () =>
+      import('./features/espace/espace.routes').then((module) => module.ESPACE_ROUTES),
+  },
+  {
     path: 'portail',
     loadChildren: () =>
       import('./features/portail/portail.routes').then((module) => module.PORTAIL_ROUTES),
@@ -63,9 +73,15 @@ export const routes: Routes = [
     title: 'Erreur â€” PDREF',
   },
   {
+    path: 'introuvable',
+    loadComponent: () =>
+      import('./features/errors/not-found.component').then((module) => module.NotFoundComponent),
+    title: 'Page introuvable - PDREF',
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/errors/not-found.component').then((module) => module.NotFoundComponent),
-    title: 'Page introuvable â€” PDREF',
+    title: 'Page introuvable �?" PDREF',
   },
 ];

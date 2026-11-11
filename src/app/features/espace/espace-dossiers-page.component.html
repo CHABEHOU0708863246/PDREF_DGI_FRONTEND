@@ -1,0 +1,49 @@
+<pdref-page-header
+  title="Mes dossiers"
+  subtitle="Consultez l'avancement et les courriers de reponse de vos dossiers."
+/>
+
+@if (problem(); as issue) {
+  <pdref-state-panel
+    state="error"
+    [title]="issue.title"
+    [message]="issue.detail ?? 'Impossible de charger vos dossiers.'"
+    actionLabel="Reessayer"
+    (retry)="load()"
+  />
+} @else if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement de vos dossiers" />
+} @else if (dossiers().length === 0) {
+  <pdref-state-panel
+    state="empty"
+    title="Aucun dossier"
+    message="Aucun dossier n'est rattache a votre compte contribuable."
+  />
+} @else {
+  <section class="espace-card pd-card" aria-label="Liste de mes dossiers">
+    <table class="espace-table">
+      <thead>
+        <tr>
+          <th>Dossier</th>
+          <th>Statut</th>
+          <th>Depot</th>
+          <th>Decision</th>
+          <th>Courrier</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (dossier of dossiers(); track dossier.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/espace/dossiers', dossier.id]">{{ dossier.numero }}</a>
+            </td>
+            <td>{{ dossier.statut }}</td>
+            <td>{{ dossier.dateDepot ? (dossier.dateDepot | date: 'dd/MM/yyyy') : '-' }}</td>
+            <td>{{ dossier.decision ?? '-' }}</td>
+            <td>{{ dossier.courrierDisponible ? 'Disponible' : '-' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}

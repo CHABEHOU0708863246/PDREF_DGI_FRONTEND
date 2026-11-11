@@ -1,0 +1,89 @@
+.public-shell {
+  min-height: 100vh;
+  padding: var(--space-5);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.public-shell__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 72rem;
+  margin: 0 auto var(--space-6);
+}
+
+.public-shell__head .pd-chip {
+  margin-inline-start: auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand__mark {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.public-shell__body {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.adhesion-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.adhesion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.adhesion-pieces {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.adhesion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+@media (max-width: 48rem) {
+  .adhesion-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 30rem) {
+  .public-shell {
+    padding: var(--space-3);
+  }
+
+  .public-shell__head {
+    flex-wrap: wrap;
+  }
+
+  .adhesion-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -155,6 +155,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Contribuables_Read',
   },
   {
+    label: 'Adhesions',
+    route: '/dashboard/adhesions',
+    icon: 'clipboard',
+    exact: false,
+    permission: 'ComptesContribuables_Valider',
+  },
+  {
     label: 'Mes notifications',
     route: '/dashboard/my-notifications',
     icon: 'bell',

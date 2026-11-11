@@ -194,6 +194,48 @@ async function verifierStatutPublic(
   await expect(page.getByText(status).first()).toBeVisible();
 }
 
+async function waitForMailpitLink(
+  request: APIRequestContext,
+  email: string,
+  pattern: RegExp,
+): Promise<string> {
+  let link = '';
+  await expect
+    .poll(
+      async () => {
+        const response = await request.get(`${MAILPIT}/api/v1/messages`);
+        if (!response.ok()) {
+          return '';
+        }
+
+        const body = (await response.json()) as {
+          messages?: { ID: string; To?: { Address?: string }[] | string }[];
+        };
+        for (const message of body.messages ?? []) {
+          const recipients = Array.isArray(message.To)
+            ? message.To.map((item) => item.Address)
+            : [message.To];
+          if (!recipients.includes(email)) {
+            continue;
+          }
+
+          const detail = await request.get(`${MAILPIT}/api/v1/message/${message.ID}`);
+          const detailBody = (await detail.json()) as { HTML?: string; Text?: string };
+          const found = `${detailBody.HTML ?? ''} ${detailBody.Text ?? ''}`.match(pattern)?.[0];
+          if (found) {
+            link = found;
+            return link;
+          }
+        }
+
+        return '';
+      },
+      { timeout: 45_000, intervals: [500, 1_000, 2_000] },
+    )
+    .not.toBe('');
+  return link;
+}
+
 test.describe('L19a - recette sur la vraie pile', () => {
   test('garde-fou anti-mock actif', async ({ page }) => {
     expect(() => page.route('**/*', (route) => route.continue())).toThrow(/MOCK_INTERDIT/);
@@ -537,6 +579,179 @@ test.describe('L19a - recette sur la vraie pile', () => {
     expect((await deactivated).ok()).toBe(true);
 
     await userPage.goto('/dashboard/suivis');
+    await expect(userPage).toHaveURL(/\/auth\/login/, { timeout: 30_000 });
+    await userContext.close();
+  });
+
+  test('parcours adhesion contribuable complet', async ({ page, request, browser }) => {
+    const suffix = Date.now().toString().slice(-8);
+    const email = `adhesion.${suffix}@example.test`;
+    const password = 'Adhesion-2026!Aaa';
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
+    const existingAccounts = await request.get(`${API}/adhesions/comptes?search=7654321B`, {
+      headers: authHeaders(token),
+    });
+    const accountsBody = (await existingAccounts.json()) as {
+      data?: { userId: string; isActive: boolean }[];
+    };
+    for (const account of accountsBody.data ?? []) {
+      if (account.isActive) {
+        const disabled = await request.post(
+          `${API}/adhesions/comptes/${account.userId}/desactiver`,
+          {
+            headers: authHeaders(token),
+            data: { motif: 'Recette L22 - remplacement du compte' },
+          },
+        );
+        expect(disabled.ok()).toBe(true);
+      }
+    }
+
+    const courrier = await createCourrier(request, token, '7654321B', `l22-${suffix}`);
+    const demandeId = await createDemande(request, token, '7654321B', courrier.id, `l22-${suffix}`);
+    const numero = await getDemandeNumero(request, token, demandeId);
+    await verifierGudef(page, demandeId);
+    await emettreAvis(page, 'decideur.dvfn', demandeId, 'NON_FAVORABLE');
+    await emettreAvis(page, 'decideur.derar', demandeId);
+    await emettreAvis(page, 'directeur.dme', demandeId);
+
+    await loginAs(page, 'dg');
+    await page.goto('/dashboard/courriers/a-signer');
+    await page.getByRole('link', { name: 'Deposer le PDF signe' }).first().click();
+    await page.waitForURL(/\/dashboard\/courriers\/[a-f0-9]{24}/);
+    const signatureSection = page
+      .locator('section.pd-card')
+      .filter({ hasText: 'Deposer le courrier signe' });
+    await signatureSection.getByLabel('Signataire declare').fill('Directeur General');
+    const signature = page.waitForResponse(
+      (item) => item.url().includes('/signature') && item.request().method() === 'POST',
+    );
+    await signatureSection.locator('input[type="file"]').setInputFiles({
+      name: 'signe-l22.pdf',
+      mimeType: 'application/pdf',
+      buffer: pdfBuffer('Courrier signe L22'),
+    });
+    expect((await signature).ok()).toBe(true);
+    await logout(page);
+
+    await page.goto('/adhesion');
+    await expect(
+      page.getByRole('heading', { name: "Demande d'adhesion contribuable" }),
+    ).toBeVisible();
+    await page.getByLabel('NCC', { exact: true }).fill('7654321B');
+    await page.getByLabel('Nom', { exact: true }).fill('Diallo');
+    await page.getByLabel('Prenom', { exact: true }).fill('Awa');
+    await page.getByLabel('Fonction', { exact: true }).fill('Gerante');
+    await page.getByLabel('E-mail', { exact: true }).fill(email);
+    await page.getByLabel('Telephone', { exact: true }).fill('+2250700000022');
+    await page.getByRole('button', { name: 'Envoyer la demande' }).click();
+    await expect(page.getByText('Verifiez votre boite e-mail')).toBeVisible();
+
+    const adhesionLink = await waitForMailpitLink(
+      request,
+      email,
+      /http:\/\/localhost:4200\/adhesion\?token=[^"<\s]+/,
+    );
+    await page.goto(adhesionLink);
+    await expect(page.getByRole('heading', { name: 'Pieces a joindre' })).toBeVisible();
+    await page.getByLabel(/Autorisation sign/).setInputFiles({
+      name: 'autorisation.pdf',
+      mimeType: 'application/pdf',
+      buffer: pdfBuffer('Autorisation L22'),
+    });
+    await expect(page.getByText(/Fichier recu : autorisation.pdf/)).toBeVisible();
+    await page.getByLabel(/Pièce d'identité/).setInputFiles({
+      name: 'identite.pdf',
+      mimeType: 'application/pdf',
+      buffer: pdfBuffer('Identite L22'),
+    });
+    const submitAdhesion = page.getByRole('button', { name: 'Soumettre ma demande' });
+    await expect(submitAdhesion).toBeEnabled();
+    await submitAdhesion.click();
+    await expect(page.getByText('Demande transmise')).toBeVisible();
+
+    await loginAs(page, 'agent.gudef');
+    await page.goto('/dashboard/adhesions');
+    const toolbar = page.locator('.adhesions-toolbar');
+    await toolbar.getByLabel('Statut').selectOption('EN_ATTENTE_VALIDATION');
+    await toolbar.getByLabel('Recherche').fill('7654321B');
+    await toolbar.getByRole('button', { name: 'Filtrer' }).click();
+    const adhesionRow = page
+      .locator('.adhesions-list tbody tr')
+      .filter({ hasText: '7654321B' })
+      .filter({ hasText: 'En attente de validation' })
+      .first();
+    await expect(adhesionRow).toBeVisible();
+    await adhesionRow.click();
+    await expect(page.getByRole('heading', { name: 'Detail de la demande' })).toBeVisible();
+    const accept = page.waitForResponse(
+      (item) => item.url().includes('/accepter') && item.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Accepter' }).click();
+    expect((await accept).ok()).toBe(true);
+    await logout(page);
+
+    const adminToken = await apiLogin(
+      request,
+      'admin.dsi',
+      passwordFor(credentials, 'admin.dsi'),
+      mfaSecretFor(credentials, 'admin.dsi'),
+    );
+    const forbidden = await request.get(`${API}/adhesions`, {
+      headers: authHeaders(adminToken),
+    });
+    expect(forbidden.status()).toBe(403);
+
+    const invitation = await waitForMailpitLink(
+      request,
+      email,
+      /http:\/\/localhost:4200\/auth\/reset-password\?token=[^"<\s]+/,
+    );
+    const userContext = await browser.newContext({ baseURL: 'http://localhost:4200' });
+    const userPage = await userContext.newPage();
+    await userPage.goto(invitation);
+    await userPage.getByLabel('Nouveau mot de passe', { exact: true }).fill(password);
+    await userPage.getByLabel('Confirmer le mot de passe', { exact: true }).fill(password);
+    const reset = userPage.waitForResponse(
+      (item) =>
+        item.url().includes('/api/v1/auth/reset-password') && item.request().method() === 'POST',
+    );
+    await userPage.getByRole('button', { name: 'Reinitialiser' }).click();
+    expect((await reset).ok()).toBe(true);
+    await loginWithPassword(userPage, email, password);
+    await userPage.goto('/espace');
+    await expect(userPage.getByRole('heading', { name: 'Mes dossiers' })).toBeVisible();
+    await expect(userPage.getByRole('link', { name: numero })).toBeVisible();
+    await userPage.getByRole('link', { name: numero }).click();
+    await expect(userPage.getByRole('heading', { name: `Dossier ${numero}` })).toBeVisible();
+    const download = userPage.waitForEvent('download', { timeout: 30_000 });
+    await userPage.getByRole('button', { name: 'Telecharger le courrier de reponse' }).click();
+    const fichier = await download;
+    expect(fichier.suggestedFilename()).toMatch(/courrier.*\.pdf$/i);
+    await userPage.goto('/espace/dossiers/0123456789abcdef01234567');
+    await expect(userPage.getByRole('heading', { name: 'Dossier introuvable' })).toBeVisible();
+
+    await loginAs(page, 'agent.gudef');
+    await page.goto('/dashboard/adhesions');
+    const accountsSearch = page.locator('.adhesions-accounts__head');
+    await accountsSearch.getByLabel('Recherche').fill(email);
+    await accountsSearch.getByRole('button', { name: 'Filtrer' }).click();
+    const accountRow = page.locator('tr').filter({ hasText: email }).first();
+    await expect(accountRow).toBeVisible();
+    await accountRow.getByRole('button', { name: 'Desactiver' }).click();
+    const motifDialog = page.getByRole('dialog');
+    await motifDialog.getByLabel('Motif obligatoire').fill('Retrait du mandat');
+    const deactivation = page.waitForResponse(
+      (item) => item.url().includes('/desactiver') && item.request().method() === 'POST',
+    );
+    await motifDialog.getByRole('button', { name: 'Desactiver' }).click();
+    expect((await deactivation).ok()).toBe(true);
+    await userPage.goto('/espace');
     await expect(userPage).toHaveURL(/\/auth\/login/, { timeout: 30_000 });
     await userContext.close();
   });

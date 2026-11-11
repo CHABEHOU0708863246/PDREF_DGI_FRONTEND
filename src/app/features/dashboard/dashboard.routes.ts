@@ -1,5 +1,6 @@
 import type { Routes } from '@angular/router';
 import { accessGuard } from '../../core/guards/access.guard';
+import { adhesionFeatureGuard } from '../../core/guards/adhesion-feature.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 import { DashboardShellComponent } from './shell/dashboard-shell.component';
 
@@ -391,6 +392,19 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [accessGuard],
         data: { permissions: ['Audit_Read'], breadcrumb: 'Audit' },
         title: "Journal d'audit - PDREF",
+      },
+      {
+        path: 'adhesions',
+        loadComponent: () =>
+          import('../adhesions/adhesions-agent-page.component').then(
+            (module) => module.AdhesionsAgentPageComponent,
+          ),
+        canActivate: [accessGuard, adhesionFeatureGuard],
+        data: {
+          permissions: ['ComptesContribuables_Valider'],
+          breadcrumb: 'Adhesions',
+        },
+        title: 'Adhesions contribuables - PDREF',
       },
     ],
   },

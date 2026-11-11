@@ -1,4 +1,4 @@
-﻿import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom, catchError, of, timeout } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
@@ -55,6 +55,7 @@ export class AppBootstrapService {
             'Workflows_Manage',
             'Workflows_FeatureFlag',
             'Demandes_Read',
+            'Demandes_ReadOwn',
             'Suivis_Read',
             'Avis_Lire',
             'Avis_Emettre',
