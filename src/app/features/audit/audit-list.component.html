@@ -1,11 +1,20 @@
 <pdref-page-header
   title="Journal d'audit"
-  subtitle="Lecture seule : qui a fait quoi, quand, comment et pourquoi. Aucune modification n'est possible depuis cet ecran."
+  subtitle="Lecture seule : recherche, chronologie, integrite et export. Aucune modification n'est possible depuis cet ecran."
 />
+
+@if (notice(); as message) {
+  <p class="pd-alert pd-alert--success" role="status">{{ message }}</p>
+}
 
 <section class="audit-card pd-card" aria-labelledby="audit-filters-title">
   <h2 id="audit-filters-title">Filtres</h2>
   <form class="audit-filters" [formGroup]="filters" (ngSubmit)="apply()">
+    <div class="pd-field">
+      <label class="pd-label" for="audit-dossier">Dossier</label>
+      <input id="audit-dossier" class="pd-input" formControlName="dossierNumber" />
+    </div>
+
     <div class="pd-field">
       <label class="pd-label" for="audit-event">Evenement</label>
       <select id="audit-event" class="pd-input" formControlName="eventCode">
@@ -19,6 +28,27 @@
     <div class="pd-field">
       <label class="pd-label" for="audit-user">Utilisateur</label>
       <input id="audit-user" class="pd-input" formControlName="userId" autocomplete="off" />
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-result">Resultat</label>
+      <select id="audit-result" class="pd-input" formControlName="result">
+        <option value="">Tous</option>
+        <option value="SUCCESS">Succes</option>
+        <option value="FAILURE">Echec</option>
+        <option value="DENIED">Refuse</option>
+        <option value="IGNORED">Ignore</option>
+      </select>
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-target-type">Entite ciblee</label>
+      <input id="audit-target-type" class="pd-input" formControlName="targetType" />
+    </div>
+
+    <div class="pd-field">
+      <label class="pd-label" for="audit-target-id">Identifiant cible</label>
+      <input id="audit-target-id" class="pd-input" formControlName="targetId" />
     </div>
 
     <div class="pd-field">
@@ -39,17 +69,65 @@
     <div class="audit-actions">
       <button type="submit" class="pd-btn pd-btn--primary" [disabled]="loading()">Appliquer</button>
       <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="loadChronology()">
+        Chronologie du dossier
+      </button>
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="verifyIntegrity()">
+        Verifier l'integrite
+      </button>
       @if (canExport()) {
-        <button type="button" class="pd-btn pd-btn--ghost" (click)="export('csv')">
+        <button
+          type="button"
+          class="pd-btn pd-btn--ghost"
+          [disabled]="exporting()"
+          (click)="export('CSV')"
+        >
           Exporter CSV
         </button>
-        <button type="button" class="pd-btn pd-btn--ghost" (click)="export('json')">
-          Exporter JSON
+        <button
+          type="button"
+          class="pd-btn pd-btn--ghost"
+          [disabled]="exporting()"
+          (click)="export('EXCEL')"
+        >
+          Exporter Excel
         </button>
       }
     </div>
   </form>
 </section>
+
+@if (integrity(); as result) {
+  <section class="audit-card pd-card" aria-live="polite">
+    <h2>Integrite de la periode filtree</h2>
+    <p>
+      {{ result.total }} empreinte(s) controlee(s) : {{ result.valid }} valide(s),
+      {{ result.invalid }} invalide(s).
+    </p>
+  </section>
+}
+
+@if (chronology(); as items) {
+  <section class="audit-card pd-card" aria-labelledby="audit-chronology-title">
+    <h2 id="audit-chronology-title">Chronologie du dossier</h2>
+    @if (items.length === 0) {
+      <pdref-state-panel state="empty" title="Aucun evenement pour ce dossier" />
+    } @else {
+      <ol class="audit-chronology">
+        @for (item of items; track item.id) {
+          <li>
+            <time [attr.datetime]="item.occurredAt">{{ item.occurredAt | date: 'medium' }}</time>
+            <strong>{{ item.eventCode }}</strong>
+            <span>{{ item.result }}</span>
+            <button type="button" class="pd-btn pd-btn--ghost" (click)="openDetail(item)">
+              Detail
+            </button>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+}
 
 @if (loading()) {
   <pdref-state-panel state="loading" title="Chargement de l'audit" />
@@ -85,8 +163,8 @@
             <th scope="col">Resultat</th>
             <th scope="col">Utilisateur</th>
             <th scope="col">Cible</th>
-            <th scope="col">Demande</th>
             <th scope="col">Trace</th>
+            <th scope="col">Detail</th>
           </tr>
         </thead>
         <tbody>
@@ -105,17 +183,14 @@
                   {{ item.actorUserId || '-' }}
                 }
               </td>
-              <td>
-                @if (item.targetDisplayName) {
-                  <span>{{ item.targetDisplayName }}</span
-                  ><br /><small class="pd-muted">{{ item.targetType }} / {{ item.targetId }}</small>
-                } @else {
-                  {{ item.targetType || '-' }} / {{ item.targetId || '-' }}
-                }
-              </td>
-              <td>{{ item.requestId || '-' }}</td>
+              <td>{{ item.targetType || '-' }} / {{ item.targetId || '-' }}</td>
               <td>
                 <code>{{ item.traceId }}</code>
+              </td>
+              <td>
+                <button type="button" class="pd-btn pd-btn--ghost" (click)="openDetail(item)">
+                  Voir
+                </button>
               </td>
             </tr>
           }
@@ -131,13 +206,64 @@
           [disabled]="loadingMore()"
           (click)="loadMore()"
         >
-          @if (loadingMore()) {
-            Chargement...
-          } @else {
-            Charger la suite
-          }
+          {{ loadingMore() ? 'Chargement...' : 'Charger la suite' }}
         </button>
       </div>
+    }
+  </section>
+}
+
+@if (detail(); as item) {
+  <section class="audit-card pd-card" aria-labelledby="audit-detail-title">
+    <h2 id="audit-detail-title">Detail de l'evenement</h2>
+    <dl class="audit-detail">
+      <dt>Evenement</dt>
+      <dd>{{ item.eventCode }}</dd>
+      <dt>Date</dt>
+      <dd>{{ item.occurredAt | date: 'medium' }}</dd>
+      <dt>Acteur</dt>
+      <dd>{{ item.actorLogin || item.actorUserId || '-' }} ({{ item.actorRoles.join(', ') }})</dd>
+      <dt>Correlation</dt>
+      <dd>
+        <code>{{ item.correlationId }}</code>
+      </dd>
+      <dt>Trace</dt>
+      <dd>
+        <code>{{ item.traceId }}</code>
+      </dd>
+      <dt>IP hachee</dt>
+      <dd>
+        <code>{{ item.ipTruncated || '-' }}</code>
+      </dd>
+      <dt>Motif</dt>
+      <dd>{{ item.reason || '-' }}</dd>
+    </dl>
+
+    <h3>Avant / apres</h3>
+    @if (changes(item).length === 0) {
+      <p class="pd-muted">Aucun changement technique enregistre.</p>
+    } @else {
+      <table class="audit-table">
+        <caption>
+          Changements masques a l'ecriture
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Champ</th>
+            <th scope="col">Valeur</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (change of changes(item); track change.key) {
+            <tr>
+              <th scope="row">{{ change.key }}</th>
+              <td>
+                <mark>{{ change.value }}</mark>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   </section>
 }

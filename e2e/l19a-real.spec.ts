@@ -2,6 +2,7 @@
 import { expect, test } from './real.fixture';
 import {
   API,
+  apiData,
   apiLogin,
   authHeaders,
   createCourrier,
@@ -12,13 +13,14 @@ import {
   getRejet,
   pdfBuffer,
 } from './real-api';
+import { totpForLogin } from './mfa-state';
 import { loadRealCredentials, mfaSecretFor, passwordFor } from './real-credentials';
 import { totp } from './totp';
 
 const credentials = loadRealCredentials();
-const mfaLastStep = new Map<string, number>();
 const MAILPIT = 'http://localhost:8125';
 const PASSWORD_CHANGE_MESSAGE = 'Le mot de passe doit etre change avant de continuer.';
+let favorableDossierNumber = '';
 
 async function loginAs(page: Page, login: string): Promise<void> {
   await page.goto('/auth/login');
@@ -30,16 +32,9 @@ async function loginAs(page: Page, login: string): Promise<void> {
   await expect(page).toHaveURL(/\/dashboard|\/auth\/mfa/, { timeout: 30_000 });
   if (page.url().includes('/auth/mfa')) {
     const secret = mfaSecretFor(credentials, login);
-    let step = Math.floor(Date.now() / 30_000);
-    const previous = mfaLastStep.get(login);
-    if (previous !== undefined && step <= previous) {
-      await page.waitForTimeout((previous + 1) * 30_000 - Date.now() + 1_000);
-      step = Math.floor(Date.now() / 30_000);
-    }
-    await page.locator('#mfa-code').fill(totp(secret, new Date(step * 30_000)));
+    await page.locator('#mfa-code').fill(await totpForLogin(login, secret));
     await page.getByRole('button', { name: 'Verifier' }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
-    mfaLastStep.set(login, step);
   }
 
   await expect(page.getByText(PASSWORD_CHANGE_MESSAGE)).toHaveCount(0);
@@ -237,6 +232,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     );
     const courrier = await createCourrier(request, token, '1234567A', 'favorable');
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, 'favorable');
+    favorableDossierNumber = await getDemandeNumero(request, token, demandeId);
 
     await verifierGudef(page, demandeId);
     await emettreAvis(page, 'decideur.dvfn', demandeId);
@@ -303,6 +299,70 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await verifierStatutPublic(page, '7654321B', 'garage@example.test', 'CLOTUREE');
   });
 
+  test('parcours auditeur complet', async ({ page, request }) => {
+    let dossierNumber = favorableDossierNumber;
+    if (!dossierNumber) {
+      const token = await apiLogin(
+        request,
+        'admin.dsi',
+        passwordFor(credentials, 'admin.dsi'),
+        mfaSecretFor(credentials, 'admin.dsi'),
+      );
+      const events = await apiData<{ items: { targetId: string | null }[] }>(
+        request,
+        token,
+        'get',
+        '/audit/events?eventCode=DEMANDE.DEPOSEE&limit=1',
+      );
+      const demandeId = events.items[0]?.targetId;
+      expect(demandeId).toBeTruthy();
+      dossierNumber = await getDemandeNumero(request, token, demandeId!);
+    }
+
+    await loginAs(page, 'auditeur');
+    await page.goto('/dashboard/audit');
+    await expect(page.getByRole('heading', { name: "Journal d'audit" })).toBeVisible();
+    await page.getByLabel('Dossier', { exact: true }).fill(dossierNumber);
+    await page.getByRole('button', { name: 'Appliquer' }).click();
+    await expect(page.locator('table.audit-table tbody tr').first()).toBeVisible();
+
+    await page.getByRole('button', { name: 'Chronologie du dossier' }).click();
+    const chronology = page
+      .locator('section')
+      .filter({ has: page.getByRole('heading', { name: 'Chronologie du dossier' }) });
+    await expect(chronology.locator('li').first()).toBeVisible();
+    await chronology.getByRole('button', { name: 'Detail' }).first().click();
+    await expect(page.getByRole('heading', { name: "Detail de l'evenement" })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Avant / apres' })).toBeVisible();
+
+    await page.getByRole('button', { name: "Verifier l'integrite" }).click();
+    await expect(page.getByText(/0 invalide/)).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download', { timeout: 90_000 });
+    await page.getByRole('button', { name: 'Exporter CSV' }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/audit.*\.csv$/i);
+
+    await page.getByLabel('Dossier', { exact: true }).fill('');
+    await page.getByLabel('Evenement', { exact: true }).selectOption('AUDIT.CONSULTE');
+    await page.getByRole('button', { name: 'Appliquer' }).click();
+    await expect(
+      page.locator('table.audit-table tbody tr').filter({ hasText: 'AUDIT.CONSULTE' }).first(),
+    ).toBeVisible();
+    await logout(page);
+
+    const decideurToken = await apiLogin(
+      request,
+      'decideur.dvfn',
+      passwordFor(credentials, 'decideur.dvfn'),
+      mfaSecretFor(credentials, 'decideur.dvfn'),
+    );
+    const forbidden = await request.get(`${API}/audit/events`, {
+      headers: authHeaders(decideurToken),
+    });
+    expect(forbidden.status()).toBe(403);
+  });
+
   test('parcours rejet automatique', async ({ page, request }) => {
     const token = await apiLogin(
       request,
@@ -351,11 +411,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     expect(rejet.cycleCourant).toBeGreaterThanOrEqual(2);
   });
 
-  test('creation, invitation Mailpit, connexion limitee et desactivation', async ({
-    page,
-    request,
-    browser,
-  }) => {
+  test('parcours MFA complet', async ({ page, request, browser }) => {
     const suffix = Date.now().toString().slice(-8);
     const matricule = `agent.dvfn.${suffix}`;
     const email = `${matricule}@test.ci`;
@@ -459,11 +515,14 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Filtrer' }).click();
     const row = page.locator('tr').filter({ hasText: matricule }).first();
     await expect(row).toBeVisible();
-    page.once('dialog', (dialog) => dialog.accept('Telephone perdu'));
+    await row.getByRole('button', { name: 'Reinitialiser la double authentification' }).click();
+    const resetDialog = page.getByRole('dialog');
+    await expect(resetDialog).toBeVisible();
+    await resetDialog.getByLabel('Motif obligatoire').fill('Telephone perdu');
     const resetMfa = page.waitForResponse(
       (item) => item.url().includes('/mfa/reset') && item.request().method() === 'POST',
     );
-    await row.getByRole('button', { name: 'Reinitialiser la double authentification' }).click();
+    await resetDialog.getByRole('button', { name: 'Reinitialiser' }).click();
     expect((await resetMfa).ok()).toBe(true);
 
     await userContext.clearCookies();

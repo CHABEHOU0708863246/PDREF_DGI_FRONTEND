@@ -1,5 +1,5 @@
 import type { APIRequestContext } from '@playwright/test';
-import { totp } from './totp';
+import { totpForLogin, waitNextMfaStep } from './mfa-state';
 
 export const API = '/api/v1';
 
@@ -39,19 +39,26 @@ export async function apiLogin(
     return data.accessToken;
   }
 
-  const verified = await request.post(`${API}/auth/mfa/verify`, {
-    data: { challengeToken: data.challengeToken, code: totp(mfaSecret) },
-  });
-  const verifiedText = await verified.text();
-  if (!verified.ok()) {
-    throw new Error(
-      `Verification MFA API ${login} refusee (${verified.status()}): ${verifiedText}`,
-    );
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const verified = await request.post(`${API}/auth/mfa/verify`, {
+      data: { challengeToken: data.challengeToken, code: await totpForLogin(login, mfaSecret) },
+    });
+    const verifiedText = await verified.text();
+    if (verified.ok()) {
+      const accessToken = (JSON.parse(verifiedText) as ApiEnvelope<{ accessToken: string }>).data
+        .accessToken;
+      accessTokenCache.set(login, accessToken);
+      return accessToken;
+    }
+    if (attempt === 1) {
+      throw new Error(
+        `Verification MFA API ${login} refusee (${verified.status()}): ${verifiedText}`,
+      );
+    }
+    await waitNextMfaStep();
   }
-  const accessToken = (JSON.parse(verifiedText) as ApiEnvelope<{ accessToken: string }>).data
-    .accessToken;
-  accessTokenCache.set(login, accessToken);
-  return accessToken;
+
+  throw new Error(`Verification MFA API ${login} impossible.`);
 }
 
 export async function apiData<T>(

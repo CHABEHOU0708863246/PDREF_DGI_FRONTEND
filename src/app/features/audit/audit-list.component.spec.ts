@@ -34,7 +34,29 @@ const page = {
 function setup(auditRead = true, auditExport = false) {
   const gateway = {
     query: vi.fn(() => of(page)),
-    export: vi.fn(() => of(new Blob(['id'], { type: 'text/csv' }))),
+    detail: vi.fn(() => of(page.items[0])),
+    chronology: vi.fn(() => of(page.items)),
+    integrity: vi.fn(() => of({ total: 1, valid: 1, invalid: 0, checkedAt: '2026-11-11' })),
+    requestExport: vi.fn(() =>
+      of({
+        id: 'e1',
+        format: 'CSV',
+        status: 'PRET',
+        expiresAt: '2026-12-11',
+        sizeBytes: 10,
+      }),
+    ),
+    getExport: vi.fn(() =>
+      of({
+        id: 'e1',
+        format: 'CSV',
+        status: 'PRET',
+        expiresAt: '2026-12-11',
+        fileName: 'audit.csv',
+        sizeBytes: 10,
+      }),
+    ),
+    downloadExport: vi.fn(() => of(new Blob(['id'], { type: 'text/csv' }))),
   };
   const permissions = new PermissionsService();
   permissions.load({
@@ -87,12 +109,31 @@ describe('AuditListComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Exporter CSV');
   });
 
-  it('exporte en lecture seule avec Audit_Export', () => {
+  it('exporte en arriere-plan avec Audit_Export', () => {
     const { fixture, gateway } = setup(true, true);
     fixture.detectChanges();
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:audit');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
     expect(fixture.nativeElement.textContent).toContain('Exporter CSV');
-    fixture.componentInstance.export('csv');
-    expect(gateway.export).toHaveBeenCalledWith(expect.anything(), 'csv');
+    fixture.componentInstance.export('CSV');
+    expect(gateway.requestExport).toHaveBeenCalledWith(expect.anything(), 'CSV');
+    expect(gateway.downloadExport).toHaveBeenCalledWith('e1');
+  });
+
+  it('charge le detail, la chronologie et verifie l integrite', () => {
+    const { fixture, gateway } = setup();
+    fixture.detectChanges();
+    fixture.componentInstance.openDetail(page.items[0]);
+    fixture.componentInstance.filters.patchValue({ dossierNumber: '2026-0001' });
+    fixture.componentInstance.loadChronology();
+    fixture.componentInstance.verifyIntegrity();
+
+    expect(gateway.detail).toHaveBeenCalledWith('a1');
+    expect(gateway.chronology).toHaveBeenCalledWith('2026-0001');
+    expect(gateway.integrity).toHaveBeenCalled();
+    expect(fixture.componentInstance.detail()).not.toBeNull();
+    expect(fixture.componentInstance.chronology()).toHaveLength(1);
+    expect(fixture.componentInstance.integrity()?.invalid).toBe(0);
   });
 });

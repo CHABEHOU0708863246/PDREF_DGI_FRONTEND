@@ -32,10 +32,37 @@ export interface AuditFilter {
   userId?: string;
   requestId?: string;
   correlationId?: string;
+  dossierNumber?: string;
+  result?: string;
+  targetType?: string;
+  targetId?: string;
   from?: string;
   to?: string;
   cursor?: string | null;
   limit?: number;
+}
+
+export interface AuditIntegrity {
+  total: number;
+  valid: number;
+  invalid: number;
+  checkedAt: string;
+}
+
+export interface AuditExport {
+  id: string;
+  format: string;
+  status: string;
+  completedAt?: string | null;
+  expiresAt: string;
+  fileName?: string | null;
+  contentType?: string | null;
+  sizeBytes: number;
+  errorMessage?: string | null;
+}
+
+export interface AuditExportRequest extends AuditFilter {
+  format: 'CSV' | 'EXCEL';
 }
 
 export const AUDIT_EVENT_CODES = [
@@ -56,4 +83,7 @@ export const AUDIT_EVENT_CODES = [
   'ROLE.PERMISSIONS_CHANGED',
   'PERMISSION.DIRECT_GRANTED',
   'ACCESS.DENIED',
+  'AUDIT.CONSULTE',
+  'AUDIT.DETAIL_CONSULTE',
+  'AUDIT.EXPORTE',
 ] as const;
