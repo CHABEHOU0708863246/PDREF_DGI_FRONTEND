@@ -185,3 +185,19 @@
     </nav>
   }
 </section>
+
+<pdref-confirm-dialog-with-input
+  [open]="resetMfaOpen()"
+  title="Reinitialiser la double authentification"
+  [message]="
+    'Le secret et les codes de secours de ' +
+    (resetMfaTarget()?.displayName ?? 'cet utilisateur') +
+    ' seront supprimes. Toutes ses sessions seront revoquees.'
+  "
+  inputLabel="Motif obligatoire"
+  hint="Ce motif est conserve dans le journal d audit."
+  confirmLabel="Reinitialiser"
+  [minLength]="5"
+  (confirmed)="confirmResetMfa($event)"
+  (cancelled)="cancelResetMfa()"
+/>

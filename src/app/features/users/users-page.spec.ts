@@ -120,7 +120,6 @@ describe('UsersPageComponent', () => {
     const resendInvitation = vi.fn(() => of({}));
     const resetMfa = vi.fn(() => of({}));
     vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
-    vi.spyOn(globalThis, 'prompt').mockReturnValue('Telephone perdu');
     TestBed.configureTestingModule({
       imports: [UsersPageComponent],
       providers: providers({
@@ -144,6 +143,8 @@ describe('UsersPageComponent', () => {
     component.resend(user);
     expect(resendInvitation).toHaveBeenCalledWith('u1');
     component.resetMfa(user);
+    expect(component.resetMfaOpen()).toBe(true);
+    component.confirmResetMfa('Telephone perdu');
     expect(resetMfa).toHaveBeenCalledWith('u1', 'Telephone perdu');
   });
 

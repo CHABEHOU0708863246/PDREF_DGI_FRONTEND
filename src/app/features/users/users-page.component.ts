@@ -1,6 +1,7 @@
 ﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, type Observable } from 'rxjs';
+import { ConfirmDialogWithInputComponent } from '../../core/components/confirm-dialog-with-input/confirm-dialog-with-input.component';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -14,7 +15,12 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-users-page',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatePanelComponent],
+  imports: [
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    StatePanelComponent,
+    ConfirmDialogWithInputComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './users-page.component.html',
   styleUrl: './users-page.component.scss',
@@ -37,6 +43,8 @@ export class UsersPageComponent {
   readonly total = signal(0);
   readonly page = signal(1);
   readonly pageSize = 25;
+  readonly resetMfaOpen = signal(false);
+  readonly resetMfaTarget = signal<AdminUser | null>(null);
 
   readonly title = computed(() =>
     this.editing() ? 'Modifier un utilisateur' : 'Nouvel utilisateur',
@@ -247,18 +255,30 @@ export class UsersPageComponent {
   }
 
   resetMfa(user: AdminUser): void {
-    const reason = globalThis.prompt(`Motif de la reinitialisation MFA de ${user.displayName} ?`);
-    if (!reason?.trim()) {
+    this.resetMfaTarget.set(user);
+    this.resetMfaOpen.set(true);
+  }
+
+  confirmResetMfa(reason: string): void {
+    const target = this.resetMfaTarget();
+    this.resetMfaOpen.set(false);
+    this.resetMfaTarget.set(null);
+    if (!target || !reason.trim()) {
       return;
     }
 
-    this.gateway.resetMfa(user.id, reason.trim()).subscribe({
+    this.gateway.resetMfa(target.id, reason.trim()).subscribe({
       next: () => {
         this.notice.set('Double authentification reinitialisee. Nouvel enrolement impose.');
         this.load(this.page());
       },
       error: (error: unknown) => this.fail(error),
     });
+  }
+
+  cancelResetMfa(): void {
+    this.resetMfaOpen.set(false);
+    this.resetMfaTarget.set(null);
   }
 
   directionLabel(user: AdminUser): string {
