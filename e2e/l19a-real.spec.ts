@@ -1,4 +1,5 @@
-﻿import type { APIRequestContext, Page } from '@playwright/test';
+﻿import AxeBuilder from '@axe-core/playwright';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from './real.fixture';
 import {
   API,
@@ -1015,6 +1016,22 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await loginWithPassword(page, email, password);
     await page.goto(`/espace/dossiers/${demandeId}`);
     await expect(page.getByRole('heading', { name: 'Pieces demandees' })).toBeVisible();
+    for (const viewport of [
+      { width: 360, height: 800 },
+      { width: 768, height: 1024 },
+      { width: 1280, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport);
+      const audit = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze();
+      expect(audit.violations, `axe ${viewport.width}px`).toEqual([]);
+      const noOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+      );
+      expect(noOverflow, `overflow ${viewport.width}px`).toBe(true);
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page
       .locator('input[type="file"]')
       .setInputFiles({ name: 'preuve.pdf', mimeType: 'application/pdf', buffer: pdfBuffer('L24') });
