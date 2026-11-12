@@ -140,6 +140,25 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
         </section>
       }
 
+      @if (detail.piecesContribuable?.length) {
+        <section class="pd-card">
+          <h2>Pièces reçues</h2>
+          @for (envoi of detail.piecesContribuable; track envoi.id) {
+            <article class="piece-depot">
+              <strong>{{ envoi.createdAt | abidjanDate }}</strong>
+              @if (envoi.message) {
+                <p>{{ envoi.message }}</p>
+              }
+              <ul>
+                @for (file of envoi.files; track file.fileGroupId) {
+                  <li>{{ file.fileName }} ({{ file.sizeBytes }} octets)</li>
+                }
+              </ul>
+            </article>
+          }
+        </section>
+      }
+
       @if (detail.motifAbandon) {
         <section class="pd-card">
           <h2>Motif d'abandon</h2>
@@ -225,6 +244,17 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
       }
       .table-wrap {
         overflow-x: auto;
+      }
+      .piece-depot {
+        border-top: 1px solid var(--pd-border);
+        padding: 0.75rem 0;
+      }
+      .piece-depot:first-of-type {
+        border-top: 0;
+      }
+      .piece-depot ul {
+        margin: 0.5rem 0 0;
+        padding-left: 1.25rem;
       }
     `,
   ],

@@ -43,6 +43,67 @@
     }
   </section>
 
+  @if (pieces(); as depot) {
+    <section class="espace-card pd-card pieces" aria-labelledby="dossier-pieces">
+      <h2 id="dossier-pieces">Pieces demandees</h2>
+      <p class="pd-help">Motif : {{ depot.motifLibelle }}</p>
+
+      @for (envoi of depot.envois; track envoi.id) {
+        <article class="envoi">
+          <header>
+            <strong>{{ envoi.createdAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+            @if (envoi.message) {
+              <p>{{ envoi.message }}</p>
+            }
+          </header>
+          <ul>
+            @for (file of envoi.files; track file.fileGroupId) {
+              <li>{{ file.fileName }} - {{ file.sizeBytes }} octets</li>
+            }
+          </ul>
+        </article>
+      }
+
+      @if (depot.peutEnvoyer) {
+        @if (piecesError()) {
+          <p class="pd-error" role="alert">{{ piecesError() }}</p>
+        }
+        <label class="pd-field">
+          <span class="pd-label">Pieces (PDF, JPEG ou PNG)</span>
+          <input
+            class="pd-input"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            multiple
+            (change)="onFiles($event)"
+          />
+        </label>
+        <p class="pd-help">
+          {{ selectedFiles().length }} fichier(s) selectionne(s), maximum 10 fichiers, 2 Mo par
+          fichier et 5 Mo par envoi.
+        </p>
+        <label class="pd-field">
+          <span class="pd-label">Message (facultatif)</span>
+          <textarea
+            class="pd-input"
+            rows="3"
+            maxlength="500"
+            [value]="message()"
+            (input)="onMessage($event)"
+          ></textarea>
+        </label>
+        <button
+          class="pd-btn pd-btn--primary"
+          type="button"
+          [disabled]="busy() || selectedFiles().length === 0"
+          (click)="sendPieces()"
+        >
+          Envoyer les pieces
+        </button>
+      }
+    </section>
+  }
+
   <section class="espace-card pd-card" aria-labelledby="dossier-chronologie">
     <h2 id="dossier-chronologie">Chronologie</h2>
     @if (item.chronologie.length === 0) {

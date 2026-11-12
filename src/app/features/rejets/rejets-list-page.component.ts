@@ -220,6 +220,9 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
                     <td>{{ item.motifLibelle }}</td>
                     <td>
                       <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
+                      @if (item.piecesRecues) {
+                        <span class="pd-chip pieces-chip">Pièces reçues</span>
+                      }
                     </td>
                     <td>{{ item.dateCreation | abidjanDate }}</td>
                     <td class="actions">
@@ -313,6 +316,10 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
+      }
+      .pieces-chip {
+        margin-left: 0.35rem;
+        background: var(--pd-accent-soft, #e8f5e9);
       }
     `,
   ],

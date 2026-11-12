@@ -4,10 +4,12 @@ import type { OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { EspaceDossier } from '../../core/models/adhesions/adhesion.model';
+import type { RejetPiecesDossier } from '../../core/models/rejets/rejet.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AdhesionGateway } from '../../core/services/adhesions/adhesion.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
+import { RejetPiecesGateway } from '../../core/services/rejets/rejet-pieces.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 
@@ -21,6 +23,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 })
 export class EspaceDossierPageComponent implements OnInit {
   private readonly gateway = inject(AdhesionGateway);
+  private readonly rejetPieces = inject(RejetPiecesGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
 
@@ -30,6 +33,10 @@ export class EspaceDossierPageComponent implements OnInit {
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly notice = signal<string | null>(null);
   readonly id = signal('');
+  readonly pieces = signal<RejetPiecesDossier | null>(null);
+  readonly selectedFiles = signal<readonly File[]>([]);
+  readonly message = signal('');
+  readonly piecesError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.id.set(this.route.snapshot.paramMap.get('id') ?? '');
@@ -60,10 +67,70 @@ export class EspaceDossierPageComponent implements OnInit {
       next: (dossier) => {
         this.dossier.set(dossier);
         this.loading.set(false);
+        this.loadPieces();
       },
       error: (error: unknown) => {
         this.loading.set(false);
         this.problem.set(normalizeProblem(error, this.correlation.last));
+      },
+    });
+  }
+
+  loadPieces(): void {
+    this.rejetPieces.get(this.id()).subscribe({
+      next: (pieces) => this.pieces.set(pieces),
+      error: () => this.pieces.set(null),
+    });
+  }
+
+  onFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.piecesError.set(null);
+    if (files.length > 10) {
+      this.piecesError.set('Maximum 10 pieces par envoi.');
+      this.selectedFiles.set([]);
+      return;
+    }
+
+    if (files.some((file) => file.size > 2 * 1024 * 1024)) {
+      this.piecesError.set('Chaque piece doit faire au maximum 2 Mo.');
+      this.selectedFiles.set([]);
+      return;
+    }
+
+    if (files.reduce((total, file) => total + file.size, 0) > 5 * 1024 * 1024) {
+      this.piecesError.set('L envoi ne doit pas depasser 5 Mo.');
+      this.selectedFiles.set([]);
+      return;
+    }
+
+    this.selectedFiles.set(files);
+  }
+
+  onMessage(event: Event): void {
+    this.message.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  sendPieces(): void {
+    if (this.busy() || this.selectedFiles().length === 0) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.piecesError.set(null);
+    this.rejetPieces.send(this.id(), this.selectedFiles(), this.message()).subscribe({
+      next: (pieces) => {
+        this.busy.set(false);
+        this.pieces.set(pieces);
+        this.selectedFiles.set([]);
+        this.message.set('');
+        this.notice.set('Pieces transmises. L agent sera notifie.');
+      },
+      error: (error: unknown) => {
+        this.busy.set(false);
+        const issue = normalizeProblem(error, this.correlation.last);
+        this.piecesError.set(issue.detail ?? issue.title);
       },
     });
   }

@@ -14,6 +14,35 @@ export interface RejetListItem {
   dateReprise: string | null;
   dateAbandon: string | null;
   motifAbandon: string | null;
+  piecesRecues?: boolean;
+  piecesCount?: number;
+}
+
+export interface RejetPieceFile {
+  fileGroupId: string;
+  versionId: string | null;
+  fileName: string;
+  sizeBytes: number;
+  origin: string;
+  createdAt: string;
+}
+
+export interface RejetPieceDepot {
+  id: string;
+  rejetId: string;
+  demandeId: string;
+  message: string | null;
+  createdAt: string;
+  files: RejetPieceFile[];
+}
+
+export interface RejetPiecesDossier {
+  rejetId: string;
+  demandeId: string;
+  motifLibelle: string;
+  messageMaxLength: number;
+  peutEnvoyer: boolean;
+  envois: RejetPieceDepot[];
 }
 
 export interface RejetCycle {
@@ -33,6 +62,7 @@ export interface RejetDetail extends RejetListItem {
   reprisePar: string | null;
   abandonnePar: string | null;
   dateClotureDefinitive: string | null;
+  piecesContribuable?: RejetPieceDepot[];
   historique: RejetCycle[];
 }
 

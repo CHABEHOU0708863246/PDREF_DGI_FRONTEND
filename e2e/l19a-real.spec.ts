@@ -895,6 +895,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.waitForTimeout(2500);
 
     await expect(page).toHaveURL(/\/espace\/depots\/[a-f0-9]{24}/, { timeout: 15_000 });
+    expect(
+      await page.evaluate(() => ({
+        local: localStorage.length,
+        session: sessionStorage.length,
+      })),
+    ).toEqual({ local: 0, session: 0 });
     const draftUrl = page.url();
     await page.close();
 
@@ -910,8 +916,15 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Motifs/ })).toBeVisible();
-    await resumedPage.getByRole('checkbox', { name: 'Erreur de saisie' }).check();
-    await resumedPage.waitForTimeout(2500);
+    const motif = resumedPage.getByRole('checkbox', { name: 'Erreur de saisie' });
+    const savedMotifs = resumedPage.waitForResponse(
+      (item) =>
+        item.url().includes('/espace/depots/brouillons/') && item.request().method() === 'PUT',
+      { timeout: 20_000 },
+    );
+    await motif.check();
+    await savedMotifs;
+    await expect(motif).toBeChecked();
     await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Variables/ })).toBeVisible();
     await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
@@ -966,5 +979,70 @@ test.describe('L19a - recette sur la vraie pile', () => {
     );
     expect(queue.items.some((item) => item.numero === numero)).toBe(true);
     await resumed.close();
+  });
+
+  test('parcours pieces apres rejet L24', async ({ page, request }) => {
+    const suffix = Date.now().toString().slice(-6);
+    const ncc = '8' + suffix + 'Z';
+    const email = `pieces.${Date.now()}@example.test`;
+    const password = 'Pieces-2026!Aaa';
+    await creerCompteContribuable(request, ncc, email, password);
+
+    const agentToken = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
+    const courrier = await createCourrier(request, agentToken, ncc, `l24-${suffix}`);
+    const demandeId = await createDemande(request, agentToken, ncc, courrier.id, `l24-${suffix}`);
+    const numero = await getDemandeNumero(request, agentToken, demandeId);
+    const rejetId = await createRejet(request, agentToken, demandeId);
+
+    const contribuableToken = await apiLogin(request, email, password, '');
+    const eicar = await request.post(`${API}/espace/dossiers/${demandeId}/pieces-demandees`, {
+      headers: authHeaders(contribuableToken),
+      multipart: {
+        files: {
+          name: 'eicar.pdf',
+          mimeType: 'application/pdf',
+          buffer: eicarPdfBuffer(),
+        },
+      },
+    });
+    expect(eicar.ok()).toBe(false);
+
+    await loginWithPassword(page, email, password);
+    await page.goto(`/espace/dossiers/${demandeId}`);
+    await expect(page.getByRole('heading', { name: 'Pieces demandees' })).toBeVisible();
+    await page
+      .locator('input[type="file"]')
+      .setInputFiles({ name: 'preuve.pdf', mimeType: 'application/pdf', buffer: pdfBuffer('L24') });
+    await page.getByLabel('Message (facultatif)').fill('Piece transmise pour correction.');
+    const envoi = page.waitForResponse(
+      (item) =>
+        item.url().includes(`/espace/dossiers/${demandeId}/pieces-demandees`) &&
+        item.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Envoyer les pieces' }).click();
+    expect((await envoi).ok()).toBe(true);
+    await expect(page.getByText('preuve.pdf')).toBeVisible();
+    await logout(page);
+
+    await loginAs(page, 'agent.gudef');
+    await page.goto('/dashboard/rejets');
+    const row = page.locator('tr').filter({ hasText: numero }).first();
+    await expect(row).toBeVisible();
+    await expect(row.getByText('Pièces reçues')).toBeVisible();
+    await row.getByRole('link', { name: numero }).click();
+    await expect(page.getByRole('heading', { name: 'Pièces reçues' })).toBeVisible();
+    await expect(page.getByText('preuve.pdf')).toBeVisible();
+    await logout(page);
+
+    await apiData(request, agentToken, 'post', `/rejets/${rejetId}/reprendre`, {});
+    const afterReprise = await request.get(`${API}/espace/dossiers/${demandeId}/pieces-demandees`, {
+      headers: authHeaders(contribuableToken),
+    });
+    expect(afterReprise.status()).toBe(404);
   });
 });

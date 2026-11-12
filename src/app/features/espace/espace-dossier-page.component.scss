@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: grid;
   gap: var(--space-4);
 }
@@ -55,5 +55,31 @@
 @media (max-width: 40rem) {
   .espace-facts {
     grid-template-columns: 1fr;
+  }
+}
+
+.pieces .envoi {
+  border: thin solid var(--pd-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pieces .envoi header p {
+  margin: 0.25rem 0;
+}
+
+.pieces .envoi ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.pieces .pd-error {
+  color: var(--pd-danger);
+}
+
+@media (max-width: 30rem) {
+  .pieces .pd-btn {
+    width: 100%;
   }
 }
