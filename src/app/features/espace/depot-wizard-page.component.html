@@ -1,0 +1,296 @@
+﻿<pdref-page-header
+  title="Nouveau depot en ligne"
+  subtitle="Preparez votre demande en cinq etapes. Le brouillon est enregistre cote serveur."
+>
+  <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour a mes dossiers</a>
+</pdref-page-header>
+
+@if (loading()) {
+  <pdref-state-panel state="loading" title="Chargement du depot" />
+} @else if (problem(); as issue) {
+  <pdref-state-panel
+    state="error"
+    title="Depot indisponible"
+    [problem]="issue"
+    actionLabel="Reessayer"
+    (retry)="load()"
+  />
+} @else if (deposited(); as done) {
+  <section class="depot-confirmation pd-card" aria-live="polite">
+    <h2>Demande deposee</h2>
+    <p class="depot-confirmation__numero">Numero {{ done.demande.numero ?? done.demande.id }}</p>
+    <p>Votre demande a ete enregistree et transmise au service GUDEF.</p>
+    <div class="depot-actions">
+      <button class="pd-btn pd-btn--primary" type="button" (click)="downloadAccuse()">
+        Telecharger l'accuse de reception
+      </button>
+      <a class="pd-btn pd-btn--ghost" [routerLink]="['/espace/dossiers', done.demande.id]">
+        Voir le dossier
+      </a>
+      <a class="pd-btn pd-btn--ghost" routerLink="/espace">Mes dossiers</a>
+    </div>
+  </section>
+} @else if (formulaire(); as form) {
+  <div class="depot-layout">
+    <aside class="depot-stepper pd-card" aria-label="Etapes du depot">
+      <ol>
+        @for (label of etapes; track label; let index = $index) {
+          <li
+            [class.is-active]="step() === index + 1"
+            [class.is-done]="step() > index + 1"
+            [attr.aria-current]="step() === index + 1 ? 'step' : null"
+          >
+            <span class="depot-stepper__number">{{ index + 1 }}</span>
+            <span>{{ label }}</span>
+          </li>
+        }
+      </ol>
+      <p class="depot-save" role="status" aria-live="polite">
+        @if (saving()) {
+          Enregistrement...
+        } @else if (lastSaved(); as saved) {
+          Enregistre a {{ saved | date: 'HH:mm:ss' }}
+        } @else {
+          Aucun enregistrement
+        }
+      </p>
+      @if (saveProblem(); as warning) {
+        <p class="pd-field__error" role="alert">{{ warning }} Nouvel essai automatique.</p>
+      }
+    </aside>
+
+    <section class="depot-panel pd-card">
+      <h2>{{ stepLabel(step() - 1) }}</h2>
+
+      @if (stepProblem(); as issue) {
+        <p class="pd-field__error" role="alert">{{ issue }}</p>
+      }
+
+      @if (step() === 1) {
+        <p class="pd-muted">Selectionnez un ou deux exercices : N et N-1.</p>
+        <div class="depot-choices">
+          @for (exercice of form.exercices; track exercice.annee) {
+            <label class="depot-choice">
+              <input
+                type="checkbox"
+                [checked]="selectedYear(exercice.annee)"
+                (change)="toggleYear(exercice.annee)"
+              />
+              <span>{{ exercice.libelle }}</span>
+            </label>
+          }
+        </div>
+      }
+
+      @if (step() === 2) {
+        @for (exercice of state().exercices; track exercice.annee; let i = $index) {
+          <fieldset class="depot-fieldset">
+            <legend>Exercice {{ exercice.annee }}</legend>
+            <label class="depot-choice">
+              <input
+                type="checkbox"
+                [checked]="exercice.touteLaLiasse"
+                (change)="setTouteLaLiasse(i, $any($event.target).checked)"
+              />
+              <span>Toute la liasse</span>
+            </label>
+            @if (!exercice.touteLaLiasse) {
+              <div class="depot-choices">
+                @for (etat of form.etatsFinanciers; track etat.code) {
+                  <label class="depot-choice">
+                    <input
+                      type="checkbox"
+                      [checked]="hasEtat(i, etat.code)"
+                      (change)="toggleEtat(i, etat.code)"
+                    />
+                    <span>{{ etat.libelle }}</span>
+                  </label>
+                }
+              </div>
+            }
+          </fieldset>
+        }
+      }
+
+      @if (step() === 3) {
+        @for (exercice of state().exercices; track exercice.annee; let i = $index) {
+          <fieldset class="depot-fieldset">
+            <legend>Motifs de rectification - {{ exercice.annee }}</legend>
+            <div class="depot-choices">
+              @for (motif of form.motifs; track motif.code) {
+                <label class="depot-choice">
+                  <input
+                    type="checkbox"
+                    [checked]="hasMotif(i, motif.code)"
+                    (change)="toggleMotif(i, motif.code)"
+                  />
+                  <span>{{ motif.libelle }}</span>
+                </label>
+              }
+            </div>
+            @for (motif of exercice.motifs; track motif.code) {
+              @if (isAutre(motif.code)) {
+                <label class="pd-field">
+                  <span class="pd-label">Precision pour {{ motif.code }}</span>
+                  <input
+                    class="pd-input"
+                    type="text"
+                    [value]="motifPrecision(i, motif.code)"
+                    (input)="setMotifPrecision(i, motif.code, $any($event.target).value)"
+                  />
+                </label>
+              }
+            }
+          </fieldset>
+        }
+      }
+
+      @if (step() === 4) {
+        <p class="pd-muted">
+          Valeur erronee / valeur exacte. Maximum {{ form.variablesMax }} variables par demande.
+        </p>
+        @for (exercice of state().exercices; track exercice.annee; let i = $index) {
+          <fieldset class="depot-fieldset">
+            <legend>Variables - {{ exercice.annee }}</legend>
+            @for (variable of exercice.variables; track $index; let j = $index) {
+              <div class="depot-variable">
+                <label class="pd-field">
+                  <span class="pd-label">Code</span>
+                  <input
+                    class="pd-input"
+                    type="text"
+                    [value]="variable.code"
+                    (input)="updateVariable(i, j, { code: $any($event.target).value })"
+                  />
+                </label>
+                <label class="pd-field">
+                  <span class="pd-label">Libelle</span>
+                  <input
+                    class="pd-input"
+                    type="text"
+                    [value]="variable.libelle"
+                    (input)="updateVariable(i, j, { libelle: $any($event.target).value })"
+                  />
+                </label>
+                <label class="pd-field">
+                  <span class="pd-label">Type</span>
+                  <select
+                    class="pd-input"
+                    [value]="variableType(i, j)"
+                    (change)="onVariableType(i, j, $event)"
+                  >
+                    <option value="TEXTE">Texte</option>
+                    <option value="MONTANT">Montant</option>
+                  </select>
+                </label>
+                @if (variableType(i, j) === 'MONTANT') {
+                  <label class="pd-field">
+                    <span class="pd-label">Montant</span>
+                    <input
+                      class="pd-input"
+                      type="number"
+                      [value]="variable.montant ?? ''"
+                      (input)="
+                        updateVariable(i, j, { montant: toNumber($any($event.target).value) })
+                      "
+                    />
+                  </label>
+                } @else {
+                  <label class="pd-field">
+                    <span class="pd-label">Valeur</span>
+                    <input
+                      class="pd-input"
+                      type="text"
+                      [value]="variable.texte ?? ''"
+                      (input)="updateVariable(i, j, { texte: $any($event.target).value })"
+                    />
+                  </label>
+                }
+                <button class="pd-btn pd-btn--ghost" type="button" (click)="removeVariable(i, j)">
+                  Retirer
+                </button>
+              </div>
+            }
+            <button class="pd-btn pd-btn--ghost" type="button" (click)="addVariable(i)">
+              Ajouter une variable
+            </button>
+          </fieldset>
+        }
+      }
+
+      @if (step() === 5) {
+        <section class="depot-fieldset">
+          <h3>Pieces jointes</h3>
+          <p class="pd-muted">Formats et antivirus appliques par la plateforme.</p>
+          @if (pieces().length === 0) {
+            <p>Aucune piece jointe pour le moment.</p>
+          } @else {
+            <ul class="depot-pieces">
+              @for (piece of pieces(); track piece.id) {
+                <li>
+                  @if (piece.currentFile; as file) {
+                    {{ file.originalName }} - {{ file.scanStatus }}
+                  } @else {
+                    Piece {{ piece.id }}
+                  }
+                </li>
+              }
+            </ul>
+          }
+          <label class="pd-field">
+            <span class="pd-label">Ajouter un PDF</span>
+            <input
+              type="file"
+              accept="application/pdf"
+              (change)="upload($event)"
+              [disabled]="busy()"
+            />
+          </label>
+        </section>
+        <section class="depot-fieldset">
+          <h3>Recapitulatif</h3>
+          @for (exercice of state().exercices; track exercice.annee) {
+            <p>
+              Exercice {{ exercice.annee }} :
+              {{ exercice.touteLaLiasse ? 'toute la liasse' : exercice.etatsFinanciers.join(', ') }}
+              - {{ exercice.motifs.length }} motif(s) - {{ exercice.variables.length }} variable(s).
+            </p>
+          }
+          <p class="pd-muted">Le numero de demande sera attribue au depot, pas avant.</p>
+        </section>
+      }
+
+      <div class="depot-actions">
+        @if (step() > 1) {
+          <button
+            class="pd-btn pd-btn--ghost"
+            type="button"
+            (click)="previous()"
+            [disabled]="busy()"
+          >
+            Precedent
+          </button>
+        }
+        @if (step() < 5) {
+          <button
+            class="pd-btn pd-btn--primary"
+            type="button"
+            (click)="next()"
+            [disabled]="busy() || saving()"
+          >
+            Etape suivante
+          </button>
+        } @else {
+          <button
+            class="pd-btn pd-btn--primary"
+            type="button"
+            (click)="deposit()"
+            [disabled]="busy() || saving()"
+          >
+            Deposer la demande
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+}

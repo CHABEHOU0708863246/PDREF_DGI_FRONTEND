@@ -16,3 +16,4 @@ e2e/.real-credentials.json
 .lighthouseci/
 lighthouse-desktop.json
 lighthouse-report-l22/
+lighthouse-report-l23/

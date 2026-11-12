@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: grid;
   gap: var(--space-4);
 }
@@ -34,4 +34,20 @@
   .espace-table {
     font-size: var(--text-sm);
   }
+}
+
+.espace-drafts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.espace-drafts li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
 }

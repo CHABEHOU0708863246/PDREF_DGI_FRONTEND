@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ThemeToggleComponent } from '../../core/components/theme-toggle/theme-toggle.component';
 import { AuthService } from '../../core/services/auth/auth.service';
@@ -22,6 +22,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
           >
             Mes dossiers
           </a>
+          <a routerLink="/espace/depots/nouveau" routerLinkActive="is-active"> Nouveau depot </a>
         </nav>
         <span class="espace-user">{{ auth.currentUser()?.displayName }}</span>
         <pdref-theme-toggle />

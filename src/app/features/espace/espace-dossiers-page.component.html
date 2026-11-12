@@ -1,7 +1,9 @@
-<pdref-page-header
+﻿<pdref-page-header
   title="Mes dossiers"
   subtitle="Consultez l'avancement et les courriers de reponse de vos dossiers."
-/>
+>
+  <a class="pd-btn pd-btn--primary" routerLink="/espace/depots/nouveau">Nouveau depot</a>
+</pdref-page-header>
 
 @if (problem(); as issue) {
   <pdref-state-panel
@@ -13,37 +15,61 @@
   />
 } @else if (loading()) {
   <pdref-state-panel state="loading" title="Chargement de vos dossiers" />
-} @else if (dossiers().length === 0) {
-  <pdref-state-panel
-    state="empty"
-    title="Aucun dossier"
-    message="Aucun dossier n'est rattache a votre compte contribuable."
-  />
 } @else {
-  <section class="espace-card pd-card" aria-label="Liste de mes dossiers">
-    <table class="espace-table">
-      <thead>
-        <tr>
-          <th>Dossier</th>
-          <th>Statut</th>
-          <th>Depot</th>
-          <th>Decision</th>
-          <th>Courrier</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (dossier of dossiers(); track dossier.id) {
-          <tr>
-            <td>
-              <a [routerLink]="['/espace/dossiers', dossier.id]">{{ dossier.numero }}</a>
-            </td>
-            <td>{{ dossier.statut }}</td>
-            <td>{{ dossier.dateDepot ? (dossier.dateDepot | date: 'dd/MM/yyyy') : '-' }}</td>
-            <td>{{ dossier.decision ?? '-' }}</td>
-            <td>{{ dossier.courrierDisponible ? 'Disponible' : '-' }}</td>
-          </tr>
+  @if (drafts().length > 0) {
+    <section class="espace-card pd-card" aria-label="Brouillons de depot">
+      <h2>Brouillons de depot</h2>
+      <ul class="espace-drafts">
+        @for (draft of drafts(); track draft.id) {
+          <li>
+            <span>
+              Exercice{{ draft.exerciceSecondaire ? 's' : '' }} {{ draft.exercicePrincipal }}
+              @if (draft.exerciceSecondaire) {
+                / {{ draft.exerciceSecondaire }}
+              }
+              - etape {{ draft.etape }} / 5
+            </span>
+            <a class="pd-btn pd-btn--ghost" [routerLink]="['/espace/depots', draft.id]">
+              Reprendre
+            </a>
+          </li>
         }
-      </tbody>
-    </table>
-  </section>
+      </ul>
+    </section>
+  }
+
+  @if (dossiers().length === 0 && drafts().length === 0) {
+    <pdref-state-panel
+      state="empty"
+      title="Aucun dossier"
+      message="Aucun dossier n'est rattache a votre compte contribuable."
+    />
+  } @else if (dossiers().length > 0) {
+    <section class="espace-card pd-card" aria-label="Liste de mes dossiers">
+      <table class="espace-table">
+        <thead>
+          <tr>
+            <th>Dossier</th>
+            <th>Statut</th>
+            <th>Depot</th>
+            <th>Decision</th>
+            <th>Courrier</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (dossier of dossiers(); track dossier.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/espace/dossiers', dossier.id]">{{ dossier.numero }}</a>
+              </td>
+              <td>{{ dossier.statut }}</td>
+              <td>{{ dossier.dateDepot ? (dossier.dateDepot | date: 'dd/MM/yyyy') : '-' }}</td>
+              <td>{{ dossier.decision ?? '-' }}</td>
+              <td>{{ dossier.courrierDisponible ? 'Disponible' : '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
 }

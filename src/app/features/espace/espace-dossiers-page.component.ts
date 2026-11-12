@@ -1,12 +1,14 @@
-import { DatePipe } from '@angular/common';
+﻿import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { EspaceDossier } from '../../core/models/adhesions/adhesion.model';
+import type { DepotDraftSummary } from '../../core/models/depots/depot.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AdhesionGateway } from '../../core/services/adhesions/adhesion.gateway';
+import { DepotGateway } from '../../core/services/depots/depot.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -21,9 +23,11 @@ import { normalizeProblem } from '../../core/utils/problem';
 })
 export class EspaceDossiersPageComponent implements OnInit {
   private readonly gateway = inject(AdhesionGateway);
+  private readonly depotGateway = inject(DepotGateway);
   private readonly correlation = inject(CorrelationService);
 
   readonly dossiers = signal<EspaceDossier[]>([]);
+  readonly drafts = signal<DepotDraftSummary[]>([]);
   readonly loading = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
 
@@ -51,6 +55,7 @@ export class EspaceDossiersPageComponent implements OnInit {
   }
 
   load(): void {
+    this.loadDrafts();
     this.loading.set(true);
     this.problem.set(null);
     this.gateway.dossiers().subscribe({
@@ -62,6 +67,17 @@ export class EspaceDossiersPageComponent implements OnInit {
         this.loading.set(false);
         this.problem.set(normalizeProblem(error, this.correlation.last));
       },
+    });
+  }
+
+  private loadDrafts(): void {
+    if (isLighthouseEnabled()) {
+      return;
+    }
+
+    this.depotGateway.drafts().subscribe({
+      next: (drafts) => this.drafts.set(drafts),
+      error: () => this.drafts.set([]),
     });
   }
 }

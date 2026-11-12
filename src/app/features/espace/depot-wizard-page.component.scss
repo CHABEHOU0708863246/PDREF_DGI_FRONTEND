@@ -1,0 +1,131 @@
+﻿.depot-layout {
+  display: grid;
+  grid-template-columns: minmax(13.75rem, 17.5rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.depot-stepper {
+  position: sticky;
+  top: 1rem;
+  padding: 1rem;
+}
+
+.depot-stepper ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.depot-stepper li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  color: var(--pd-muted);
+}
+
+.depot-stepper li.is-active {
+  color: var(--pd-text);
+  font-weight: 600;
+}
+
+.depot-stepper li.is-done {
+  color: var(--color-success);
+}
+
+.depot-stepper__number {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999rem;
+  border: var(--border-width) solid currentColor;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+
+.depot-save {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pd-muted);
+}
+
+.depot-panel {
+  padding: 1.25rem;
+}
+
+.depot-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.depot-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.depot-fieldset {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 0 0 1rem;
+}
+
+.depot-fieldset legend {
+  font-weight: 600;
+  padding: 0 0.35rem;
+}
+
+.depot-variable {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.depot-pieces {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.depot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.depot-confirmation {
+  padding: 1.5rem;
+  max-width: 45rem;
+}
+
+.depot-confirmation__numero {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+@media (max-width: 56.25rem) {
+  .depot-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .depot-stepper {
+    position: static;
+  }
+
+  .depot-variable {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 32.5rem) {
+  .depot-variable {
+    grid-template-columns: 1fr;
+  }
+}

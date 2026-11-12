@@ -236,6 +236,128 @@ async function waitForMailpitLink(
   return link;
 }
 
+async function creerCompteContribuable(
+  request: APIRequestContext,
+  ncc: string,
+  email: string,
+  password: string,
+): Promise<void> {
+  const adminToken = await apiLogin(
+    request,
+    'admin.dsi',
+    passwordFor(credentials, 'admin.dsi'),
+    mfaSecretFor(credentials, 'admin.dsi'),
+  );
+  const created = await request.post(`${API}/contribuables`, {
+    headers: authHeaders(adminToken),
+    data: {
+      ncc,
+      raisonSociale: `Entreprise ${ncc}`,
+      systemeComptable: 'SYSCOHADA',
+      centreImpotId: 'GUDEF',
+      email,
+      telephone: '+2250700000022',
+    },
+  });
+  expect([200, 201, 409]).toContain(created.status());
+
+  const demande = await request.post(`${API}/public/adhesions`, {
+    data: {
+      ncc,
+      nom: 'Diallo',
+      prenom: 'Awa',
+      fonction: 'Gerante',
+      email,
+      telephone: '+2250700000022',
+    },
+  });
+  expect([200, 202]).toContain(demande.status());
+
+  const adhesionLink = await waitForMailpitLink(
+    request,
+    email,
+    /http:\/\/localhost:4200\/adhesion\?token=[^"<\s]+/,
+  );
+  const token = new URL(adhesionLink).searchParams.get('token');
+  expect(token).toBeTruthy();
+  const verify = await request.post(`${API}/public/adhesions/verifier-email`, {
+    data: { token },
+  });
+  expect(verify.ok()).toBe(true);
+  const verifyBody = (await verify.json()) as {
+    data: { jeton: string };
+  };
+  const jeton = verifyBody.data.jeton;
+
+  for (const type of ['AUTORISATION_MANDATAIRE', 'PIECE_IDENTITE']) {
+    const upload = await request.post(`${API}/public/adhesions/pieces`, {
+      headers: { 'X-Adhesion-Token': jeton },
+      multipart: {
+        type,
+        file: {
+          name: `${type}.pdf`,
+          mimeType: 'application/pdf',
+          buffer: pdfBuffer(type),
+        },
+      },
+    });
+    expect(upload.ok()).toBe(true);
+  }
+
+  const submit = await request.post(`${API}/public/adhesions/soumettre`, {
+    headers: { 'X-Adhesion-Token': jeton },
+    data: {},
+  });
+  expect(submit.ok()).toBe(true);
+
+  const agentToken = await apiLogin(
+    request,
+    'agent.gudef',
+    passwordFor(credentials, 'agent.gudef'),
+    mfaSecretFor(credentials, 'agent.gudef'),
+  );
+  const accounts = await apiData<{ userId: string; isActive: boolean }[]>(
+    request,
+    agentToken,
+    'get',
+    `/adhesions/comptes?search=${encodeURIComponent(ncc)}`,
+  );
+  for (const account of accounts) {
+    if (account.isActive) {
+      const disabled = await request.post(`${API}/adhesions/comptes/${account.userId}/desactiver`, {
+        headers: authHeaders(agentToken),
+        data: { motif: 'Recette L23 - remplacement du compte' },
+      });
+      expect(disabled.ok()).toBe(true);
+    }
+  }
+  const adhesions = await apiData<{ id: string }[]>(
+    request,
+    agentToken,
+    'get',
+    `/adhesions?statut=EN_ATTENTE_VALIDATION&search=${encodeURIComponent(ncc)}`,
+  );
+  const adhesion = adhesions.find((item) => item.id);
+  expect(adhesion).toBeTruthy();
+  const accept = await request.post(`${API}/adhesions/${adhesion!.id}/accepter`, {
+    headers: authHeaders(agentToken),
+    data: {},
+  });
+  const acceptText = await accept.text();
+  expect(accept.ok(), acceptText).toBe(true);
+
+  const invitation = await waitForMailpitLink(
+    request,
+    email,
+    /http:\/\/localhost:4200\/auth\/reset-password\?token=[^"<\s]+/,
+  );
+  const resetToken = new URL(invitation).searchParams.get('token');
+  const reset = await request.post(`${API}/auth/reset-password`, {
+    data: { token: resetToken, newPassword: password },
+  });
+  expect(reset.ok()).toBe(true);
+}
+
 test.describe('L19a - recette sur la vraie pile', () => {
   test('garde-fou anti-mock actif', async ({ page }) => {
     expect(() => page.route('**/*', (route) => route.continue())).toThrow(/MOCK_INTERDIT/);
@@ -754,5 +876,95 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await userPage.goto('/espace');
     await expect(userPage).toHaveURL(/\/auth\/login/, { timeout: 30_000 });
     await userContext.close();
+  });
+  test('parcours depot en ligne enrichi', async ({ page, request, browser }) => {
+    const ncc = '9' + Date.now().toString().slice(-6) + 'Z';
+    const email = `depot.${Date.now()}@example.test`;
+    const password = 'Depot-2026!Aaa';
+    await creerCompteContribuable(request, ncc, email, password);
+
+    await loginWithPassword(page, email, password);
+    await page.goto('/espace');
+    await page.getByRole('link', { name: 'Nouveau depot' }).first().click();
+    await expect(page.getByRole('heading', { name: /Identification et exercices/ })).toBeVisible();
+    await page.locator('.depot-choice input').first().check();
+    await expect(page).toHaveURL(/\/espace\/depots\/[a-f0-9]{24}/, { timeout: 15_000 });
+    await page.getByRole('button', { name: 'Etape suivante' }).click();
+    await expect(page.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
+    await page.getByLabel('Toute la liasse').first().check();
+    await page.waitForTimeout(2500);
+
+    await expect(page).toHaveURL(/\/espace\/depots\/[a-f0-9]{24}/, { timeout: 15_000 });
+    const draftUrl = page.url();
+    await page.close();
+
+    const resumed = await browser.newContext({ baseURL: 'http://localhost:4200' });
+    const resumedPage = await resumed.newPage();
+    await loginWithPassword(resumedPage, email, password);
+    await resumedPage.goto('/espace');
+    const draft = resumedPage.locator('.espace-drafts li').filter({ hasText: 'Exercice' }).first();
+    await expect(draft).toBeVisible();
+    await draft.getByRole('link', { name: 'Reprendre' }).click();
+    await expect(resumedPage.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
+    await expect(resumedPage.getByLabel('Toute la liasse').first()).toBeChecked();
+
+    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await expect(resumedPage.getByRole('heading', { name: /Motifs/ })).toBeVisible();
+    await resumedPage.getByRole('checkbox', { name: 'Erreur de saisie' }).check();
+    await resumedPage.waitForTimeout(2500);
+    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await expect(resumedPage.getByRole('heading', { name: /Variables/ })).toBeVisible();
+    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await expect(
+      resumedPage.getByRole('heading', { name: /Pieces et recapitulatif/ }),
+    ).toBeVisible();
+
+    const draftId = new URL(resumedPage.url()).pathname.split('/').pop();
+    const contribuableToken = await apiLogin(request, email, password, '');
+    const upload = await request.post(`${API}/espace/depots/brouillons/${draftId}/pieces`, {
+      headers: authHeaders(contribuableToken),
+      multipart: {
+        file: {
+          name: 'depot.pdf',
+          mimeType: 'application/pdf',
+          buffer: pdfBuffer('Depot en ligne'),
+        },
+      },
+    });
+    expect(upload.ok(), await upload.text()).toBe(true);
+    await resumedPage.reload();
+    await expect(
+      resumedPage.getByRole('heading', { name: /Pieces et recapitulatif/ }),
+    ).toBeVisible();
+    await expect(resumedPage.getByText('depot.pdf')).toBeVisible();
+    const deposit = resumedPage.waitForResponse(
+      (item) => item.url().includes('/deposer') && item.request().method() === 'POST',
+    );
+    await resumedPage.getByRole('button', { name: 'Deposer la demande' }).click();
+    expect((await deposit).ok()).toBe(true);
+    await expect(resumedPage.getByRole('heading', { name: 'Demande deposee' })).toBeVisible();
+    const numero = (await resumedPage.locator('.depot-confirmation__numero').innerText()).replace(
+      /^Numero\s+/,
+      '',
+    );
+    expect(numero).toMatch(/^\d{4}-\d{4}$/);
+
+    await resumedPage.goto('/espace');
+    await expect(resumedPage.getByRole('link', { name: numero })).toBeVisible();
+
+    const agentToken = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
+    const queue = await apiData<{ items: { numero: string | null }[] }>(
+      request,
+      agentToken,
+      'get',
+      `/demandes?search=${encodeURIComponent(numero)}`,
+    );
+    expect(queue.items.some((item) => item.numero === numero)).toBe(true);
+    await resumed.close();
   });
 });
