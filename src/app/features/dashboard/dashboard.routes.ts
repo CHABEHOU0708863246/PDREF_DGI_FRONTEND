@@ -16,6 +16,26 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'PDREF - Fondations',
       },
       {
+        path: 'pilotage/dossiers',
+        loadComponent: () =>
+          import('../pilotage/pilotage-list-page.component').then(
+            (module) => module.PilotageListPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Dashboard_Read'], breadcrumb: 'Dossiers' },
+        title: 'Dossiers - PDREF',
+      },
+      {
+        path: 'pilotage/charge',
+        loadComponent: () =>
+          import('../pilotage/workload-page.component').then(
+            (module) => module.WorkloadPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Dashboard_Read'], breadcrumb: 'Charge de travail' },
+        title: 'Charge de travail - PDREF',
+      },
+      {
         path: 'rapports',
         loadComponent: () =>
           import('./rapports/rapports-page.component').then(

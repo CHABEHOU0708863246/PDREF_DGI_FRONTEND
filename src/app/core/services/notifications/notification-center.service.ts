@@ -153,6 +153,7 @@ export class NotificationCenterService {
       createdAt: item.createdAt,
       readAt: item.readAt,
       read: item.isRead,
+      demandeId: item.aggregateId ?? null,
     };
   }
 

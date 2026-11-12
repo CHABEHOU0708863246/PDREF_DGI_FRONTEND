@@ -1,9 +1,10 @@
-import {
+﻿import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
   inject,
+  type OnDestroy,
   signal,
   viewChild,
 } from '@angular/core';
@@ -82,6 +83,17 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
                     <strong>{{ item.title }}</strong>
                     <p>{{ item.message }}</p>
                     <time [attr.datetime]="item.createdAt">{{ item.createdAt | abidjanDate }}</time>
+                    <span class="notification-item__state"
+                      >Envoyee Â· {{ item.read ? 'Lue' : 'Non lue' }}</span
+                    >
+                    @if (item.demandeId) {
+                      <a
+                        class="pd-link"
+                        [routerLink]="['/dashboard/demandes', item.demandeId]"
+                        (click)="markRead(item.id); close()"
+                        >Ouvrir le dossier</a
+                      >
+                    }
                   </div>
                   @if (!item.read) {
                     <button
@@ -110,11 +122,12 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
   `,
   styleUrl: './notification-center.component.scss',
 })
-export class NotificationCenterComponent {
+export class NotificationCenterComponent implements OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
   readonly service = inject(NotificationCenterService);
   readonly open = signal(false);
+  private refreshTimer?: ReturnType<typeof setInterval>;
 
   constructor() {
     if (isLighthouseEnabled()) {
@@ -131,14 +144,38 @@ export class NotificationCenterComponent {
     this.open.set(next);
     if (next) {
       this.service.load();
+      this.startRefresh();
+    } else {
+      this.stopRefresh();
     }
   }
 
   close(): void {
     const wasOpen = this.open();
     this.open.set(false);
+    this.stopRefresh();
     if (wasOpen) {
       this.trigger()?.nativeElement.focus();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopRefresh();
+  }
+
+  private startRefresh(): void {
+    this.stopRefresh();
+    this.refreshTimer = setInterval(() => {
+      if (this.open()) {
+        this.service.load();
+      }
+    }, 5000);
+  }
+
+  private stopRefresh(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = undefined;
     }
   }
 

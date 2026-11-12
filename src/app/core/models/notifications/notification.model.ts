@@ -8,6 +8,7 @@ export interface NotificationApiItem {
   readAt: string | null;
   isRead: boolean;
   createdAt: string;
+  aggregateId?: string | null;
 }
 
 export interface NotificationPage {
@@ -26,6 +27,7 @@ export interface AppNotification {
   createdAt: string;
   readAt?: string | null;
   read: boolean;
+  demandeId?: string | null;
 }
 
 export interface ToastMessage {

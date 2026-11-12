@@ -6,7 +6,7 @@
   signal,
   type OnDestroy,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import type {
   DashboardKpis,
@@ -110,6 +110,9 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
         @if (canImputation()) {
           <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/imputations">Imputation GUDEF</a>
         }
+        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/pilotage/charge"
+          >Charge de travail</a
+        >
       </section>
 
       <section class="kpis" aria-label="Indicateurs cles">
@@ -149,17 +152,33 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
           icon="alert-triangle"
           [state]="kpiState()"
         />
-        <pdref-kpi-card
-          label="En retard"
-          [value]="kpis()?.enRetard ?? null"
-          icon="clock"
-          [state]="kpiState()"
-        />
+        <a
+          class="kpi-link"
+          [routerLink]="['/dashboard/pilotage/dossiers']"
+          [queryParams]="{
+            source: 'DASHBOARD',
+            metric: 'EN_RETARD',
+            periode: filters.periode,
+            statut: filters.statut || null,
+          }"
+        >
+          <pdref-kpi-card
+            label="En retard"
+            [value]="kpis()?.enRetard ?? null"
+            icon="clock"
+            [state]="kpiState()"
+          />
+        </a>
       </section>
 
       <section class="pd-card">
         <h2>Demandes par statut</h2>
-        <pdref-bar-chart title="Demandes par statut" unit="demandes" [series]="chartData()" />
+        <pdref-bar-chart
+          title="Demandes par statut"
+          unit="demandes"
+          [series]="chartData()"
+          (barClick)="openMetric($event)"
+        />
       </section>
 
       <section class="pd-card">
@@ -296,6 +315,7 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
 export class DashboardHomeComponent implements OnDestroy {
   private readonly gateway = inject(DashboardGateway);
   private readonly permissions = inject(PermissionsService);
+  private readonly router = inject(Router);
   private readonly timer: ReturnType<typeof setInterval> | null;
 
   readonly periods = [
@@ -366,6 +386,23 @@ export class DashboardHomeComponent implements OnDestroy {
     this.gateway.nominatif(this.filters).subscribe({
       next: (page) => this.nominatif.set(page),
       error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
+    });
+  }
+
+  openMetric(label: string): void {
+    const map: Record<string, string> = {
+      'En cours': 'EN_COURS',
+      Favorables: 'FAVORABLES',
+      'Non favorables': 'NON_FAVORABLES',
+      Rejetes: 'REJETES',
+    };
+    void this.router.navigate(['/dashboard/pilotage/dossiers'], {
+      queryParams: {
+        source: 'DASHBOARD',
+        metric: map[label] ?? 'TOTAL',
+        periode: this.filters.periode,
+        statut: this.filters.statut || null,
+      },
     });
   }
 

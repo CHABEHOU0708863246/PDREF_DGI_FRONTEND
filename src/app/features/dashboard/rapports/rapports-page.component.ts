@@ -1,4 +1,5 @@
 ﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import type {
   RapportExport,
@@ -82,7 +83,7 @@ const LIGHTHOUSE_EXPORTS: RapportExport[] = [
 @Component({
   selector: 'pdref-rapports-page',
   standalone: true,
-  imports: [PageHeaderComponent, StatePanelComponent],
+  imports: [RouterLink, PageHeaderComponent, StatePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -194,7 +195,14 @@ const LIGHTHOUSE_EXPORTS: RapportExport[] = [
                 <tbody>
                   @for (line of data.lignes; track line.directionId) {
                     <tr [class.total]="line.estTotal">
-                      <th scope="row">{{ line.directionLibelle }}</th>
+                      <th scope="row">
+                        <a
+                          class="pd-link"
+                          [routerLink]="['/dashboard/pilotage/dossiers']"
+                          [queryParams]="directionQuery(line)"
+                          >{{ line.directionLibelle }}</a
+                        >
+                      </th>
                       <td>{{ line.formulees }}</td>
                       <td>{{ line.traitees }}</td>
                       <td>{{ formatRate(line.tauxTraitement) }}</td>
@@ -304,6 +312,7 @@ const LIGHTHOUSE_EXPORTS: RapportExport[] = [
 export class RapportsPageComponent {
   private readonly gateway = inject(RapportGateway);
   private readonly permissions = inject(PermissionsService);
+  private readonly router = inject(Router);
   readonly report = signal<RapportResponse | null>(null);
   readonly exports = signal<RapportExport[]>([]);
   readonly loading = signal(true);
@@ -386,6 +395,18 @@ export class RapportsPageComponent {
       },
       error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
     });
+  }
+
+  directionQuery(line: { directionId: string; estTotal?: boolean }) {
+    return {
+      source: 'RAPPORTS',
+      metric: 'FORMULEES',
+      directionId: line.estTotal ? null : line.directionId,
+      rapportType: this.type(),
+      dateReference: this.dateReference() || null,
+      dateDu: this.dateDu() || null,
+      dateAu: this.dateAu() || null,
+    };
   }
 
   onType(event: Event): void {

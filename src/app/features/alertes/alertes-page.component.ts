@@ -1,5 +1,5 @@
 ﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { Alerte, AlertePage, AlerteStats } from '../../core/models/alertes/alerte.model';
 import {
@@ -80,9 +80,13 @@ const LIGHTHOUSE_STATS: AlerteStats = {
         <div class="pd-card stat">
           <span class="pd-label">Ouvertes</span><strong>{{ page().ouvertes }}</strong>
         </div>
-        <div class="pd-card stat">
+        <a
+          class="pd-card stat"
+          [routerLink]="['/dashboard/pilotage/dossiers']"
+          [queryParams]="{ source: 'ALERTES', metric: 'EN_RETARD' }"
+        >
           <span class="pd-label">En retard</span><strong>{{ page().enRetard }}</strong>
-        </div>
+        </a>
         <div class="pd-card stat">
           <span class="pd-label">Resolues</span><strong>{{ page().resolues }}</strong>
         </div>
@@ -106,7 +110,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
             title="Alertes ouvertes par periode"
             unit="alertes"
             [series]="chartData()"
-            (barClick)="filterPeriod($event)"
+            (barClick)="openPeriod($event)"
           />
         }
       </section>
@@ -255,6 +259,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
 })
 export class AlertesPageComponent {
   private readonly gateway = inject(AlerteGateway);
+  private readonly router = inject(Router);
   readonly page = signal<AlertePage>({
     items: [],
     page: 1,
@@ -349,6 +354,24 @@ export class AlertesPageComponent {
       this.filters.dateAu = range[1];
       this.load();
     }
+  }
+
+  openPeriod(period: string): void {
+    const range = periodRange(period);
+    if (!range) {
+      return;
+    }
+    void this.router.navigate(['/dashboard/pilotage/dossiers'], {
+      queryParams: {
+        source: 'ALERTES',
+        metric: 'OUVERTES',
+        dateDu: range[0],
+        dateAu: range[1],
+        directionId: this.filters.directionId || null,
+        type: this.filters.type || null,
+        etape: this.filters.etape || null,
+      },
+    });
   }
 
   typeLabel(type: string): string {

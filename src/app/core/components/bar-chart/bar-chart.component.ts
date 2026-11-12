@@ -19,7 +19,15 @@ export interface BarChartDatum {
           <svg class="bar-chart__svg" viewBox="0 0 640 260" aria-hidden="true">
             <line class="bar-chart__axis" x1="24" y1="220" x2="616" y2="220" />
             @for (bar of bars(); track bar.label; let index = $index) {
-              <g class="bar-chart__bar" (click)="select(bar.label)">
+              <g
+                class="bar-chart__bar"
+                role="button"
+                tabindex="0"
+                [attr.aria-label]="bar.label + ' : ' + bar.value + ' ' + unit()"
+                (click)="select(bar.label)"
+                (keydown.enter)="select(bar.label)"
+                (keydown.space)="onSpace($event, bar.label)"
+              >
                 <rect
                   [attr.x]="bar.x"
                   [attr.y]="bar.y"

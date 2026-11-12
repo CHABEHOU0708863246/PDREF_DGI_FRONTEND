@@ -33,9 +33,17 @@ async function loginAs(page: Page, login: string): Promise<void> {
   await expect(page).toHaveURL(/\/dashboard|\/auth\/mfa/, { timeout: 30_000 });
   if (page.url().includes('/auth/mfa')) {
     const secret = mfaSecretFor(credentials, login);
-    await page.locator('#mfa-code').fill(await totpForLogin(login, secret));
+    const codeInput = page.locator('#mfa-code');
+    await codeInput.fill(await totpForLogin(login, secret));
     await page.getByRole('button', { name: 'Verifier' }).click();
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+    try {
+      await page.waitForURL(/\/dashboard/, { timeout: 15_000 });
+    } catch {
+      await page.waitForTimeout(31_000);
+      await codeInput.fill(await totpForLogin(login, secret));
+      await page.getByRole('button', { name: 'Verifier' }).click();
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+    }
   }
 
   await expect(page.getByText(PASSWORD_CHANGE_MESSAGE)).toHaveCount(0);
@@ -1011,6 +1019,71 @@ test.describe('L19a - recette sur la vraie pile', () => {
     );
     expect(queue.items.some((item) => item.numero === numero)).toBe(true);
     await resumed.close();
+  });
+
+  test('parcours pilotage avance L25', async ({ page, request }) => {
+    const suffix = Date.now().toString().slice(-6);
+    const token = await apiLogin(
+      request,
+      'agent.gudef',
+      passwordFor(credentials, 'agent.gudef'),
+      mfaSecretFor(credentials, 'agent.gudef'),
+    );
+    const courrier = await createCourrier(request, token, '1234567A', `l25-${suffix}`);
+    const demandeId = await createDemande(request, token, '1234567A', courrier.id, `l25-${suffix}`);
+    const numero = await getDemandeNumero(request, token, demandeId);
+    await attribuerGudef(page, numero);
+
+    await loginAs(page, 'agent.gudef');
+    await page.getByRole('button', { name: /Notifications/ }).click();
+    const notification = page.getByText('Dossier attribue').first();
+    await expect(notification).toBeVisible({ timeout: 30_000 });
+    const notificationItem = page
+      .locator('li.notification-item')
+      .filter({ has: page.locator(`a[href="/dashboard/demandes/${demandeId}"]`) })
+      .first();
+    await expect(notificationItem).toBeVisible({ timeout: 30_000 });
+    await notificationItem.locator('button[aria-label^="Marquer comme lu"]').click();
+    await notificationItem.getByRole('link', { name: 'Ouvrir le dossier' }).click();
+    await expect(page).toHaveURL(new RegExp(`/dashboard/demandes/${demandeId}`), {
+      timeout: 15_000,
+    });
+    await logout(page);
+
+    await loginAs(page, 'sd.gudef');
+    await page.goto('/dashboard');
+    const lateCard = page.locator('a.kpi-link').filter({ hasText: 'En retard' });
+    const periode = await page.getByLabel('Periode').inputValue();
+    let lateCount = 0;
+    await expect
+      .poll(
+        async () => {
+          const parsed = Number((await lateCard.locator('strong').innerText()).trim());
+          if (Number.isFinite(parsed)) {
+            lateCount = parsed;
+          }
+          return Number.isFinite(parsed);
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
+    await lateCard.click();
+    await expect(page.getByRole('button', { name: 'Retour au graphique' })).toBeVisible();
+    const listed = Number((await page.locator('.actions .pd-muted').innerText()).split(' ')[0]);
+    expect(listed).toBe(lateCount);
+    await page.getByRole('button', { name: 'Retour au graphique' }).click();
+    await expect(page.getByLabel('Periode')).toHaveValue(periode);
+    await logout(page);
+
+    await loginAs(page, 'sd.gudef');
+    await page.goto('/dashboard/pilotage/charge');
+    await expect(page.getByRole('link', { name: 'M. Yao' })).toBeVisible();
+    await logout(page);
+
+    await loginAs(page, 'directeur.dme');
+    await page.goto('/dashboard/pilotage/charge');
+    await expect(page.getByText('DERAR', { exact: true })).toHaveCount(0);
+    await logout(page);
   });
 
   test('parcours pieces apres rejet L24', async ({ page, request }) => {
