@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+﻿import { Injectable, signal } from '@angular/core';
 import type { CurrentUser } from '../../models/auth/auth.model';
 
 @Injectable({ providedIn: 'root' })
@@ -7,14 +7,17 @@ export class PermissionsService {
   private readonly roleSet = signal<ReadonlySet<string>>(new Set());
   private readonly readyState = signal(false);
   private readonly mustChange = signal(false);
+  private readonly userId = signal<string | null>(null);
 
   readonly ready = this.readyState.asReadonly();
   readonly mustChangePassword = this.mustChange.asReadonly();
+  readonly currentUserId = this.userId.asReadonly();
 
   load(user: CurrentUser): void {
     this.permissionSet.set(new Set(user.permissions));
     this.roleSet.set(new Set(user.roles));
     this.mustChange.set(user.mustChangePassword === true);
+    this.userId.set(user.id);
     this.readyState.set(true);
   }
 
@@ -26,6 +29,7 @@ export class PermissionsService {
     this.permissionSet.set(new Set());
     this.roleSet.set(new Set());
     this.mustChange.set(false);
+    this.userId.set(null);
     this.readyState.set(false);
   }
 

@@ -33,6 +33,7 @@ export interface DemandeEtape {
   activeLe: string | null;
   echeance: string | null;
   decideLe: string | null;
+  assigneeUserId?: string | null;
 }
 
 export interface DemandeCircuit {

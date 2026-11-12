@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+﻿import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
@@ -8,7 +8,7 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: [['list']],
-  timeout: 180_000,
+  timeout: 300_000,
   expect: { timeout: 20_000 },
   use: {
     baseURL: process.env['E2E_BASE_URL'] ?? 'http://localhost:4200',

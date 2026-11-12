@@ -1,10 +1,11 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONTRIBUABLE_LOOKUP } from '../../core/services/lookup/contribuable-lookup';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
+import { RejetGateway } from '../../core/services/rejets/rejet.gateway';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
@@ -57,10 +58,17 @@ function providers(gateway: Partial<DemandesGateway>) {
     provideRouter([]),
     { provide: DemandesGateway, useValue: gateway },
     { provide: CourriersGateway, useValue: { lookup: vi.fn(() => of([])) } },
+    {
+      provide: RejetGateway,
+      useValue: {
+        motifs: vi.fn(() => of([])),
+        create: vi.fn(() => of({ id: 'r1' })),
+      },
+    },
     { provide: CONTRIBUABLE_LOOKUP, useValue: { search: vi.fn(() => of([])) } },
     {
       provide: PermissionsService,
-      useValue: { hasPermission: () => true },
+      useValue: { hasPermission: () => true, hasRole: () => false, currentUserId: () => 'u1' },
     },
     { provide: CorrelationService, useValue: { last: null } },
   ];
@@ -196,8 +204,19 @@ describe('Demandes interactions', () => {
     expect(component.circuitEntries(detail)).toEqual([]);
     component.activeTab.set('pieces');
     component.exportPdf();
+    component.upload({ target: { files: [] } } as unknown as Event);
+    component.download('f1');
     expect(component.tabLabel('synthese')).toContain('Synth');
     expect(component.canExport()).toBe(true);
+    component.canReject();
+    component.canUpload();
+    component.openRejet();
+    expect(component.rejetOpen()).toBe(true);
+    component.confirmerRejet({
+      motifCode: 'PIECE_JUSTIFICATIVE_MANQUANTE',
+      commentaire: 'Commentaire de rejet suffisant.',
+      pieceComplementaireRequise: false,
+    });
   });
 
   it('couvre les libelles et la pagination de la liste', () => {

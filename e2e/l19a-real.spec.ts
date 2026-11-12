@@ -8,7 +8,6 @@ import {
   authHeaders,
   createCourrier,
   createDemande,
-  createRejet,
   eicarPdfBuffer,
   getDemandeNumero,
   getRejet,
@@ -92,6 +91,30 @@ async function attribuerGudef(page: Page, numero: string): Promise<void> {
   await logout(page);
 }
 
+async function rejeterParAgent(page: Page, demandeId: string): Promise<string> {
+  await loginAs(page, 'agent.gudef');
+  await page.goto(`/dashboard/demandes/${demandeId}`);
+  await page.getByRole('button', { name: 'Rejeter', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Rejeter le dossier' });
+  await expect(dialog).toBeVisible();
+  const audit = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  expect(audit.violations, 'axe rejet').toEqual([]);
+  await dialog.getByLabel(/Motif obligatoire/i).selectOption({ index: 1 });
+  await dialog
+    .getByLabel(/Commentaire obligatoire/i)
+    .fill('Rejet de controle GUDEF pour dossier incomplet.');
+  const response = page.waitForResponse(
+    (item) => item.url().includes('/rejets') && item.request().method() === 'POST',
+  );
+  await dialog.getByRole('button', { name: 'Confirmer le rejet' }).click();
+  const result = await response;
+  expect(result.ok()).toBe(true);
+  const body = (await result.json()) as { data: { id: string } };
+  await logout(page);
+  return body.data.id;
+}
 async function verifierGudef(page: Page, demandeId: string): Promise<void> {
   await loginAs(page, 'agent.gudef');
   await page.goto(`/dashboard/demandes/${demandeId}`);
@@ -590,7 +613,22 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const courrier = await createCourrier(request, token, '1234567A', 'reprise');
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, 'reprise');
     const numero = await getDemandeNumero(request, token, demandeId);
-    const rejetId = await createRejet(request, token, demandeId);
+    await attribuerGudef(page, numero);
+    const collabToken = await apiLogin(
+      request,
+      'collab.gudef',
+      passwordFor(credentials, 'collab.gudef'),
+      mfaSecretFor(credentials, 'collab.gudef'),
+    );
+    const forbiddenRejet = await request.post(`${API}/demandes/${demandeId}/rejets`, {
+      headers: authHeaders(collabToken),
+      data: {
+        motifCode: 'PIECE_JUSTIFICATIVE_MANQUANTE',
+        commentaire: 'Tentative de rejet non autorisee.',
+      },
+    });
+    expect(forbiddenRejet.status()).toBe(403);
+    const rejetId = await rejeterParAgent(page, demandeId);
 
     await loginAs(page, 'agent.gudef');
     await page.goto('/dashboard/rejets');
@@ -956,13 +994,16 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Motifs/ })).toBeVisible();
+    await expect(resumedPage.locator('.depot-save')).toContainText('Enregistre a', {
+      timeout: 20_000,
+    });
     const motif = resumedPage.getByRole('checkbox', { name: 'Erreur de saisie' });
     const savedMotifs = resumedPage.waitForResponse(
       (item) =>
         item.url().includes('/espace/depots/brouillons/') && item.request().method() === 'PUT',
       { timeout: 20_000 },
     );
-    await motif.check();
+    await motif.click();
     await savedMotifs;
     await expect(motif).toBeChecked();
     await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
@@ -1033,6 +1074,17 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, `l25-${suffix}`);
     const numero = await getDemandeNumero(request, token, demandeId);
     await attribuerGudef(page, numero);
+    const collabToken = await apiLogin(
+      request,
+      'collab.gudef',
+      passwordFor(credentials, 'collab.gudef'),
+      mfaSecretFor(credentials, 'collab.gudef'),
+    );
+    const forbiddenAttribution = await request.post(`${API}/imputations/${demandeId}/attribuer`, {
+      headers: authHeaders(collabToken),
+      data: { userId: '' },
+    });
+    expect(forbiddenAttribution.status()).toBe(403);
 
     await loginAs(page, 'agent.gudef');
     await page.getByRole('button', { name: /Notifications/ }).click();
@@ -1052,6 +1104,21 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginAs(page, 'sd.gudef');
     await page.goto('/dashboard');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const transitionProperty = await page
+      .locator('.bar-chart__bar rect')
+      .first()
+      .evaluate((element) => getComputedStyle(element).transitionProperty);
+    expect(transitionProperty).toBe('none');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    const assertNoPiiInUrl = (url: string): void => {
+      const current = new URL(url);
+      const target = decodeURIComponent(current.pathname + current.search);
+      expect(target).not.toContain('1234567A');
+      expect(target).not.toContain('Boulangerie');
+      expect(target).not.toContain('@');
+    };
+    assertNoPiiInUrl(page.url());
     const lateCard = page.locator('a.kpi-link').filter({ hasText: 'En retard' });
     const periode = await page.getByLabel('Periode').inputValue();
     let lateCount = 0;
@@ -1068,6 +1135,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
       )
       .toBe(true);
     await lateCard.click();
+    assertNoPiiInUrl(page.url());
     await expect(page.getByRole('button', { name: 'Retour au graphique' })).toBeVisible();
     const listed = Number((await page.locator('.actions .pd-muted').innerText()).split(' ')[0]);
     expect(listed).toBe(lateCount);
@@ -1077,6 +1145,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginAs(page, 'sd.gudef');
     await page.goto('/dashboard/pilotage/charge');
+    assertNoPiiInUrl(page.url());
     await expect(page.getByRole('link', { name: 'M. Yao' })).toBeVisible();
     await logout(page);
 
@@ -1102,7 +1171,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const courrier = await createCourrier(request, agentToken, ncc, `l24-${suffix}`);
     const demandeId = await createDemande(request, agentToken, ncc, courrier.id, `l24-${suffix}`);
     const numero = await getDemandeNumero(request, agentToken, demandeId);
-    const rejetId = await createRejet(request, agentToken, demandeId);
+    await attribuerGudef(page, numero);
+    const rejetId = await rejeterParAgent(page, demandeId);
 
     const contribuableToken = await apiLogin(request, email, password, '');
     const eicar = await request.post(`${API}/espace/dossiers/${demandeId}/pieces-demandees`, {
@@ -1120,6 +1190,10 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await loginWithPassword(page, email, password);
     await page.goto(`/espace/dossiers/${demandeId}`);
     await expect(page.getByRole('heading', { name: 'Pieces demandees' })).toBeVisible();
+    const espaceUrl = decodeURIComponent(new URL(page.url()).pathname + new URL(page.url()).search);
+    expect(espaceUrl).not.toContain(ncc);
+    expect(espaceUrl).not.toContain(email);
+    expect(espaceUrl).not.toContain('Boulangerie');
     for (const viewport of [
       { width: 360, height: 800 },
       { width: 768, height: 1024 },

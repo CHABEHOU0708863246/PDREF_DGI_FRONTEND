@@ -1,6 +1,6 @@
 ﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type {
   Article24Controles,
@@ -9,6 +9,12 @@ import type {
   SuiviDetail,
 } from '../../core/models/suivis/suivi.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import {
+  RejetDialogComponent,
+  type RejetDialogValue,
+} from '../../core/components/rejet-dialog/rejet-dialog.component';
+import type { RejetMotif } from '../../core/models/rejets/rejet.model';
+import { RejetGateway } from '../../core/services/rejets/rejet.gateway';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
@@ -18,7 +24,14 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-suivi-detail-page',
   standalone: true,
-  imports: [FormsModule, RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe],
+  imports: [
+    FormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatePanelComponent,
+    AbidjanDatePipe,
+    RejetDialogComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -36,6 +49,9 @@ import { normalizeProblem } from '../../core/utils/problem';
           <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
             Verifier GUDEF
           </button>
+        }
+        @if (canReject()) {
+          <button type="button" class="pd-btn pd-btn--danger" (click)="openRejet()">Rejeter</button>
         }
         @if (canDecide() && detail.validationGlobale?.statut === 'EN_ATTENTE') {
           <a
@@ -325,6 +341,13 @@ import { normalizeProblem } from '../../core/utils/problem';
         </section>
       }
     }
+
+    <pdref-rejet-dialog
+      [(open)]="rejetOpen"
+      [motifs]="rejetMotifs()"
+      [busy]="rejetBusy()"
+      (confirmed)="confirmerRejet($event)"
+    />
   `,
   styles: [
     `
@@ -389,6 +412,8 @@ import { normalizeProblem } from '../../core/utils/problem';
 })
 export class SuiviDetailPageComponent {
   private readonly gateway = inject(SuivisGateway);
+  private readonly rejets = inject(RejetGateway);
+  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly permissions = inject(PermissionsService);
   private readonly id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -397,6 +422,9 @@ export class SuiviDetailPageComponent {
   readonly motifs = signal<MotifNonFavorable[]>([]);
   readonly loading = signal(true);
   readonly problem = signal<ApiProblemDetails | null>(null);
+  readonly rejetOpen = signal(false);
+  readonly rejetMotifs = signal<readonly RejetMotif[]>([]);
+  readonly rejetBusy = signal(false);
   readonly article24Controls = [
     { key: 'insuffisanceMemeNature3Ans', label: 'Insuffisance de meme nature dans les 3 ans' },
     { key: 'engagementRedressementEnCours', label: 'Engagement de redressement en cours' },
@@ -446,6 +474,41 @@ export class SuiviDetailPageComponent {
 
   canVerify(): boolean {
     return this.permissions.hasPermission('Etapes_Verifier_Gudef');
+  }
+
+  canReject(): boolean {
+    const item = this.item();
+    return (
+      ['VERIF_GUDEF', 'CONFORMITE_AUTO'].includes(item?.etapeCourante ?? '') &&
+      this.permissions.hasPermission('Rejets_Create') &&
+      (this.permissions.hasRole('SD_GUDEF') ||
+        item?.assigneeUserId === this.permissions.currentUserId())
+    );
+  }
+
+  openRejet(): void {
+    this.rejets.motifs().subscribe({
+      next: (items) => {
+        this.rejetMotifs.set(items);
+        this.rejetOpen.set(true);
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
+    });
+  }
+
+  confirmerRejet(value: RejetDialogValue): void {
+    this.rejetBusy.set(true);
+    this.rejets.create(this.id, value).subscribe({
+      next: (item) => {
+        this.rejetBusy.set(false);
+        this.rejetOpen.set(false);
+        void this.router.navigate(['/dashboard/rejets', item.id]);
+      },
+      error: (error: unknown) => {
+        this.rejetBusy.set(false);
+        this.problem.set(normalizeProblem(error, null));
+      },
+    });
   }
 
   canAvis(avis: AvisDirection): boolean {

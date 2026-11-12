@@ -1,5 +1,5 @@
 ﻿import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { PilotageGateway } from '../../core/services/pilotage/pilotage.gateway';
@@ -49,6 +49,34 @@ describe('Pilotage pages', () => {
     fixture.detectChanges();
     expect(gateway.drilldown).toHaveBeenCalled();
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('2026-0001');
+  });
+
+  it('recharge et revient au graphique', () => {
+    TestBed.configureTestingModule({
+      imports: [PilotageListPageComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParamMap: convertToParamMap({ source: 'DASHBOARD', metric: 'TOTAL' }),
+            },
+          },
+        },
+        {
+          provide: PilotageGateway,
+          useValue: {
+            drilldown: vi.fn(() => of({ items: [], page: 1, pageSize: 50, totalCount: 0 })),
+          },
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(PilotageListPageComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.load();
+    component.retour();
   });
 
   it('affiche la charge par agent et direction', () => {

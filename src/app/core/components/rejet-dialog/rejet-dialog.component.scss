@@ -1,0 +1,68 @@
+﻿.dialog {
+  width: min(var(--size-dialog-md), calc(100vw - var(--space-5)));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+  backdrop-filter: blur(var(--space-1));
+}
+
+.dialog__card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-3);
+}
+
+.dialog__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.dialog__head h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+.dialog__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-pill);
+}
+
+.dialog__icon--danger {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.dialog p {
+  margin: 0;
+}
+
+.pd-field.inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 37.4375rem) {
+  .dialog {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    align-self: end;
+  }
+}

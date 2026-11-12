@@ -25,7 +25,9 @@ describe('BarChartComponent', () => {
     (element.querySelector('svg g.bar-chart__bar') as SVGGElement).dispatchEvent(
       new MouseEvent('click', { bubbles: true }),
     );
-    (element.querySelectorAll('.pd-visually-hidden button')[1] as HTMLButtonElement).click();
+    (element.querySelectorAll('svg g.bar-chart__bar')[1] as SVGGElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+    );
     expect(events).toEqual(['2026-S44', '2026-S45']);
   });
 

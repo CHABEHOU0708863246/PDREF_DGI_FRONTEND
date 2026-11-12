@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SuiviDetail, SuiviPage } from '../../core/models/suivis/suivi.model';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
+import { RejetGateway } from '../../core/services/rejets/rejet.gateway';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { SuiviCorrectionPageComponent } from './suivi-correction-page.component';
 import { SuiviDetailPageComponent } from './suivi-detail-page.component';
@@ -88,6 +89,7 @@ const gateway = {
   correct: vi.fn(() => of({ id: 'c1' })),
   transmit: vi.fn(() => of({ id: 't1', destinatairesCount: 1, emisLe: '' })),
   signature: vi.fn(() => of({ jobId: 'j1', courrierId: 'c1', statut: 'EN_ATTENTE' })),
+  verifierGudef: vi.fn(() => of(detail)),
   depot: vi.fn(() =>
     of({ courrierId: 'c1', statut: 'DEPOSE', referenceDepot: 'R1', demandeCloturee: true }),
   ),
@@ -114,6 +116,21 @@ function providers(
   return [
     provideRouter([]),
     { provide: SuivisGateway, useValue: gatewayOverride },
+    {
+      provide: RejetGateway,
+      useValue: {
+        motifs: () =>
+          of([
+            {
+              code: 'PIECE_JUSTIFICATIVE_MANQUANTE',
+              libelle: 'Piece',
+              legacy: false,
+              selectionnable: true,
+            },
+          ]),
+        create: () => of({ id: 'r1' }),
+      },
+    },
     { provide: ActivatedRoute, useValue: route },
     { provide: Router, useValue: router },
     { provide: PermissionsService, useValue: permissions },
@@ -159,6 +176,7 @@ describe('Pages suivis', () => {
           'Courriers_Deposer_EImpots',
           'Suivis_Decide',
           'Suivis_Corriger',
+          'Rejets_Create',
         ],
         ['DECIDEUR_DERAR', 'SD_GUDEF'],
       ),
@@ -170,6 +188,24 @@ describe('Pages suivis', () => {
     expect(component.canAvis(avis)).toBe(true);
     expect(component.canDecide()).toBe(true);
     expect(component.canCorrect()).toBe(true);
+    expect(component.canTransmettre()).toBe(true);
+    expect(component.canSign()).toBe(true);
+    expect(component.canDepot()).toBe(true);
+    expect(component.motifLabel('AUTRE')).toBe('Autre');
+    expect(component.article24Value(true)).toBe('Oui');
+    component.item.set({
+      ...detail,
+      etapeCourante: 'VERIF_GUDEF',
+      assigneeUserId: 'u1',
+    });
+    expect(component.canReject()).toBe(true);
+    component.openRejet();
+    expect(component.rejetOpen()).toBe(true);
+    component.confirmerRejet({
+      motifCode: 'PIECE_JUSTIFICATIVE_MANQUANTE',
+      commentaire: 'Commentaire de rejet suffisant.',
+      pieceComplementaireRequise: false,
+    });
     component.draft[avis.etapeCode] = {
       decision: 'FAVORABLE',
       motifCode: '',
@@ -186,6 +222,7 @@ describe('Pages suivis', () => {
     component.transmit();
     component.sign();
     component.depot();
+    component.verify();
     expect(component.stepLabel('AVIS_DVFN')).toBe('DVFN');
     expect(component.statutLabel('CLOTURE')).toBe('Cloture');
     expect(gateway.decideAvis).toHaveBeenCalled();
@@ -204,6 +241,7 @@ describe('Pages suivis', () => {
       correct: vi.fn(() => throwError(() => new Error('correction'))),
       transmit: vi.fn(() => throwError(() => new Error('transmission'))),
       signature: vi.fn(() => throwError(() => new Error('signature'))),
+      verifierGudef: vi.fn(() => of(detail)),
       depot: vi.fn(() => throwError(() => new Error('depot'))),
       exportBase: vi.fn(() => throwError(() => new Error('export'))),
     };
