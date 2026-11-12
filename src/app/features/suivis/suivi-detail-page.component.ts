@@ -84,6 +84,13 @@ import { normalizeProblem } from '../../core/utils/problem';
           <span class="pd-label">Etape</span><strong>{{ detail.etapeCourante || '-' }}</strong>
         </div>
         <div>
+          <span class="pd-label">Agent designe</span
+          ><strong>{{ detail.assigneeUserId || '-' }}</strong>
+        </div>
+        <div>
+          <span class="pd-label">Instruction</span><strong>{{ detail.instruction || '-' }}</strong>
+        </div>
+        <div>
           <span class="pd-label">Avis</span
           ><strong>{{ detail.avisRecus }} / {{ detail.avisTotal }}</strong>
         </div>

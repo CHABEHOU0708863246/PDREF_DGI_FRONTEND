@@ -6,6 +6,7 @@
   signal,
   type OnDestroy,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import type {
   DashboardKpis,
@@ -69,7 +70,13 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
 @Component({
   selector: 'pdref-dashboard-home',
   standalone: true,
-  imports: [PageHeaderComponent, KpiCardComponent, BarChartComponent, StatePanelComponent],
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    KpiCardComponent,
+    BarChartComponent,
+    StatePanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -100,6 +107,9 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
         </label>
         <button type="button" class="pd-btn pd-btn--primary" (click)="load()">Actualiser</button>
         <span class="pd-muted">{{ kpis()?.dateCalcul || '' }}</span>
+        @if (canImputation()) {
+          <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/imputations">Imputation GUDEF</a>
+        }
       </section>
 
       <section class="kpis" aria-label="Indicateurs cles">
@@ -320,6 +330,7 @@ export class DashboardHomeComponent implements OnDestroy {
       : [];
   });
   readonly canNominatif = () => this.permissions.hasPermission('Dashboard_ReadDg');
+  readonly canImputation = () => this.permissions.hasPermission('Suivis_Read');
 
   constructor() {
     if (isLighthouseEnabled()) {

@@ -67,8 +67,25 @@ async function logout(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/auth\/login/);
 }
 
+async function attribuerGudef(page: Page, numero: string): Promise<void> {
+  await loginAs(page, 'sd.gudef');
+  await page.goto('/dashboard/imputations');
+  const row = page.locator('tr').filter({ hasText: numero }).first();
+  await expect(row).toBeVisible();
+  await row.getByRole('button', { name: /Attribuer/ }).click();
+  const panel = page.locator('section.assign-panel');
+  await expect(panel).toBeVisible();
+  await panel.getByRole('combobox', { name: 'Agent' }).selectOption({ label: 'M. Yao' });
+  const response = page.waitForResponse(
+    (item) => item.url().includes('/attribuer') && item.request().method() === 'POST',
+  );
+  await panel.getByRole('button', { name: /Attribuer/ }).click();
+  expect((await response).ok()).toBe(true);
+  await logout(page);
+}
+
 async function verifierGudef(page: Page, demandeId: string): Promise<void> {
-  await loginAs(page, 'collab.gudef');
+  await loginAs(page, 'agent.gudef');
   await page.goto(`/dashboard/demandes/${demandeId}`);
   const button = page.getByRole('button', { name: 'Verifier GUDEF' });
   await expect(button).toBeVisible();
@@ -399,6 +416,17 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const demandeId = await createDemande(request, token, '1234567A', courrier.id, 'favorable');
     favorableDossierNumber = await getDemandeNumero(request, token, demandeId);
 
+    await attribuerGudef(page, favorableDossierNumber);
+    const collabToken = await apiLogin(
+      request,
+      'collab.gudef',
+      passwordFor(credentials, 'collab.gudef'),
+      mfaSecretFor(credentials, 'collab.gudef'),
+    );
+    const forbidden = await request.post(`${API}/demandes/${demandeId}/verification-gudef`, {
+      headers: authHeaders(collabToken),
+    });
+    expect(forbidden.status()).toBe(403);
     await verifierGudef(page, demandeId);
     await emettreAvis(page, 'decideur.dvfn', demandeId);
     await emettreAvis(page, 'decideur.derar', demandeId);
@@ -419,7 +447,9 @@ test.describe('L19a - recette sur la vraie pile', () => {
     );
     const courrier = await createCourrier(request, token, '7654321B', 'nonfavorable');
     const demandeId = await createDemande(request, token, '7654321B', courrier.id, 'nonfavorable');
+    const numero = await getDemandeNumero(request, token, demandeId);
 
+    await attribuerGudef(page, numero);
     await verifierGudef(page, demandeId);
     await emettreAvis(page, 'decideur.dvfn', demandeId, 'NON_FAVORABLE');
     await emettreAvis(page, 'decideur.derar', demandeId);
@@ -738,6 +768,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const courrier = await createCourrier(request, token, '7654321B', `l22-${suffix}`);
     const demandeId = await createDemande(request, token, '7654321B', courrier.id, `l22-${suffix}`);
     const numero = await getDemandeNumero(request, token, demandeId);
+    await attribuerGudef(page, numero);
     await verifierGudef(page, demandeId);
     await emettreAvis(page, 'decideur.dvfn', demandeId, 'NON_FAVORABLE');
     await emettreAvis(page, 'decideur.derar', demandeId);

@@ -1,4 +1,4 @@
-import type { Routes } from '@angular/router';
+﻿import type { Routes } from '@angular/router';
 import { accessGuard } from '../../core/guards/access.guard';
 import { adhesionFeatureGuard } from '../../core/guards/adhesion-feature.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
@@ -278,6 +278,16 @@ export const DASHBOARD_ROUTES: Routes = [
           renderMode: 'client',
         },
         title: 'Fiche demande - PDREF',
+      },
+      {
+        path: 'imputations',
+        loadComponent: () =>
+          import('../suivis/imputation-page.component').then(
+            (module) => module.ImputationPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Suivis_Read'], breadcrumb: 'Imputation GUDEF' },
+        title: 'Imputation GUDEF - PDREF',
       },
       {
         path: 'suivis',
