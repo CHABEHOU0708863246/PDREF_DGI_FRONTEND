@@ -110,7 +110,6 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
           </select>
         </label>
         <button type="button" class="pd-btn pd-btn--primary" (click)="load()">Actualiser</button>
-        <span class="pd-muted">{{ kpis()?.dateCalcul || '' }}</span>
         @if (canImputation()) {
           <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/imputations">Imputation GUDEF</a>
         }

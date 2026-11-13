@@ -31,7 +31,10 @@ import type { OnDestroy } from '@angular/core';
 
       .live-clock__date {
         font-weight: 600;
-        text-transform: capitalize;
+      }
+
+      .live-clock__date::first-letter {
+        text-transform: uppercase;
       }
 
       .live-clock__refresh {
@@ -39,7 +42,7 @@ import type { OnDestroy } from '@angular/core';
         font-size: var(--text-sm);
       }
 
-      @media (max-width: 767px) {
+      @media (max-width: 47.9375rem) {
         .live-clock {
           align-items: flex-start;
         }
@@ -58,7 +61,7 @@ export class LiveClockComponent implements OnDestroy {
   }
 
   formattedDate(): string {
-    const parts = new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat('fr-FR', {
       timeZone: 'Africa/Abidjan',
       weekday: 'long',
       day: 'numeric',
@@ -66,11 +69,10 @@ export class LiveClockComponent implements OnDestroy {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      hourCycle: 'h23',
-    }).formatToParts(this.now());
-    const value = (type: Intl.DateTimeFormatPartTypes): string =>
-      parts.find((part) => part.type === type)?.value ?? '';
-    return `${value('weekday')} ${value('day')} ${value('month')} ${value('year')} · ${value('hour')}:${value('minute')}`;
+      hour12: false,
+    })
+      .format(this.now())
+      .replace(',', ' à');
   }
 
   elapsedSeconds(): number {
