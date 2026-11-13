@@ -50,6 +50,20 @@
     max-width: 100%;
   }
 
+  td .pd-btn {
+    min-height: var(--control-height-sm);
+    padding: 0.2rem var(--space-2);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+
+  td .pd-btn--icon {
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    min-height: var(--control-height-sm);
+    padding: 0;
+  }
+
   td[class*='actions'],
   td .actions {
     white-space: nowrap;
