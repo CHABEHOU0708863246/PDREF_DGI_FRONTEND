@@ -1,4 +1,4 @@
-export interface AuditEvent {
+﻿export interface AuditEvent {
   id: string;
   eventCode: string;
   phase: 'INTENT' | 'OUTCOME';
@@ -19,6 +19,8 @@ export interface AuditEvent {
   actorDisplayName?: string | null;
   actorLogin?: string | null;
   targetDisplayName?: string | null;
+  dossierNumber?: string | null;
+  contribuableRaisonSociale?: string | null;
 }
 
 export interface AuditPage {

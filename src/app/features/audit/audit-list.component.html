@@ -1,4 +1,4 @@
-<pdref-page-header
+﻿<pdref-page-header
   title="Journal d'audit"
   subtitle="Lecture seule : recherche, chronologie, integrite et export. Aucune modification n'est possible depuis cet ecran."
 />
@@ -161,9 +161,10 @@
             <th scope="col">Date</th>
             <th scope="col">Evenement</th>
             <th scope="col">Resultat</th>
-            <th scope="col">Utilisateur</th>
-            <th scope="col">Cible</th>
-            <th scope="col">Trace</th>
+            <th scope="col">Acteur</th>
+            <th scope="col">Dossier</th>
+            <th scope="col">Contribuable</th>
+            <th scope="col">Element vise</th>
             <th scope="col">Detail</th>
           </tr>
         </thead>
@@ -178,15 +179,14 @@
               <td>
                 @if (item.actorDisplayName) {
                   <span>{{ item.actorDisplayName }}</span
-                  ><br /><small class="pd-muted">{{ item.actorLogin || item.actorUserId }}</small>
+                  ><br /><small class="pd-muted">{{ item.actorRoles.join(', ') }}</small>
                 } @else {
-                  {{ item.actorUserId || '-' }}
+                  <span class="pd-muted">Utilisateur desactive</span>
                 }
               </td>
-              <td>{{ item.targetType || '-' }} / {{ item.targetId || '-' }}</td>
-              <td>
-                <code>{{ item.traceId }}</code>
-              </td>
+              <td>{{ item.dossierNumber || '-' }}</td>
+              <td>{{ item.contribuableRaisonSociale || '-' }}</td>
+              <td>{{ targetLabel(item) }}</td>
               <td>
                 <button type="button" class="pd-btn pd-btn--ghost" (click)="openDetail(item)">
                   Voir
@@ -214,27 +214,31 @@
 }
 
 @if (detail(); as item) {
-  <section class="audit-card pd-card" aria-labelledby="audit-detail-title">
-    <h2 id="audit-detail-title">Detail de l'evenement</h2>
+  <pdref-side-panel
+    [open]="true"
+    title="Detail de l'evenement"
+    size="lg"
+    (closeRequested)="closeDetail()"
+  >
     <dl class="audit-detail">
       <dt>Evenement</dt>
       <dd>{{ item.eventCode }}</dd>
       <dt>Date</dt>
       <dd>{{ item.occurredAt | date: 'medium' }}</dd>
       <dt>Acteur</dt>
-      <dd>{{ item.actorLogin || item.actorUserId || '-' }} ({{ item.actorRoles.join(', ') }})</dd>
-      <dt>Correlation</dt>
       <dd>
-        <code>{{ item.correlationId }}</code>
+        @if (item.actorDisplayName) {
+          {{ item.actorDisplayName }} ({{ item.actorRoles.join(', ') }})
+        } @else {
+          Utilisateur desactive
+        }
       </dd>
-      <dt>Trace</dt>
-      <dd>
-        <code>{{ item.traceId }}</code>
-      </dd>
-      <dt>IP hachee</dt>
-      <dd>
-        <code>{{ item.ipTruncated || '-' }}</code>
-      </dd>
+      <dt>Dossier</dt>
+      <dd>{{ item.dossierNumber || '-' }}</dd>
+      <dt>Contribuable</dt>
+      <dd>{{ item.contribuableRaisonSociale || '-' }}</dd>
+      <dt>Element vise</dt>
+      <dd>{{ targetLabel(item) }}</dd>
       <dt>Motif</dt>
       <dd>{{ item.reason || '-' }}</dd>
     </dl>
@@ -265,5 +269,31 @@
         </tbody>
       </table>
     }
-  </section>
+
+    <details class="audit-technical">
+      <summary>Informations techniques</summary>
+      <dl class="audit-detail">
+        <dt>Identifiant</dt>
+        <dd>
+          <code>{{ item.id }}</code>
+        </dd>
+        <dt>Correlation</dt>
+        <dd>
+          <code>{{ item.correlationId }}</code>
+        </dd>
+        <dt>Trace</dt>
+        <dd>
+          <code>{{ item.traceId }}</code>
+        </dd>
+        <dt>IP hachee</dt>
+        <dd>
+          <code>{{ item.ipTruncated || '-' }}</code>
+        </dd>
+        <dt>Identifiant cible</dt>
+        <dd>
+          <code>{{ item.targetId || '-' }}</code>
+        </dd>
+      </dl>
+    </details>
+  </pdref-side-panel>
 }

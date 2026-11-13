@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+﻿import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -15,11 +15,18 @@ import { PermissionsService } from '../../core/services/permissions/permissions.
 import { normalizeProblem } from '../../core/utils/problem';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 
 @Component({
   selector: 'pdref-audit-list',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, PageHeaderComponent, StatePanelComponent],
+  imports: [
+    DatePipe,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    StatePanelComponent,
+    SidePanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './audit-list.component.html',
   styleUrl: './audit-list.component.scss',
@@ -98,6 +105,17 @@ export class AuditListComponent {
         this.problem.set(normalizeProblem(error, this.correlation.last));
       },
     });
+  }
+
+  closeDetail(): void {
+    this.detail.set(null);
+  }
+
+  targetLabel(item: AuditEvent): string {
+    if (item.targetDisplayName) {
+      return item.targetDisplayName;
+    }
+    return item.targetId ? 'Element supprime' : '-';
   }
 
   openDetail(item: AuditEvent): void {
