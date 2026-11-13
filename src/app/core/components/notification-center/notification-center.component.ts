@@ -28,7 +28,7 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
         class="pd-icon-btn notification-center__button"
         [attr.aria-label]="'Notifications, ' + service.unreadCount() + ' non lue(s)'"
         [attr.aria-expanded]="open()"
-        aria-controls="notification-panel"
+        [attr.aria-controls]="open() ? 'notification-panel' : null"
         (click)="toggle()"
       >
         <pdref-icon name="bell" />

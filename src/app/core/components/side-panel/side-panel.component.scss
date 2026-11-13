@@ -1,7 +1,7 @@
 ﻿.side-panel {
   position: fixed;
   inset: 0 0 0 auto;
-  width: min(480px, 100vw);
+  width: min(30rem, 100vw);
   max-width: 100vw;
   height: 100dvh;
   max-height: 100dvh;
@@ -14,16 +14,16 @@
 }
 
 .side-panel--lg {
-  width: min(720px, 100vw);
+  width: min(45rem, 100vw);
 }
 
 .side-panel--xl {
-  width: min(960px, 100vw);
+  width: min(60rem, 100vw);
 }
 
 .side-panel::backdrop {
-  background: rgb(3 10 25 / 55%);
-  backdrop-filter: blur(2px);
+  background: var(--color-overlay);
+  backdrop-filter: blur(0.125rem);
 }
 
 .side-panel__surface {
@@ -31,7 +31,7 @@
   flex-direction: column;
   height: 100%;
   background: var(--color-surface);
-  border-left: 1px solid var(--color-border);
+  border-left: var(--border-width) solid var(--color-border);
   box-shadow: var(--elevation-3);
   animation: side-panel-in 180ms ease-out;
 }
@@ -42,7 +42,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border);
 }
 
 .side-panel__head h2 {
@@ -59,7 +59,7 @@
 
 @keyframes side-panel-in {
   from {
-    transform: translateX(24px);
+    transform: translateX(1.5rem);
     opacity: 0;
   }
   to {
@@ -68,7 +68,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 47.9375rem) {
   .side-panel,
   .side-panel--lg,
   .side-panel--xl {

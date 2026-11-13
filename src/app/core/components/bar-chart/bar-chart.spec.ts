@@ -17,17 +17,11 @@ describe('BarChartComponent', () => {
     fixture.componentInstance.barClick.subscribe((value) => events.push(value));
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelectorAll('svg g.bar-chart__bar')).toHaveLength(2);
-    expect(element.querySelector('.bar-chart__visual')?.getAttribute('role')).toBe('img');
-    expect(element.querySelector('.bar-chart__visual')?.getAttribute('aria-label')).toContain(
-      '2026-S45 6',
-    );
+    expect(element.querySelector('.bar-chart__visual')?.getAttribute('aria-hidden')).toBe('true');
+    expect(element.querySelectorAll('.pd-visually-hidden button')).toHaveLength(2);
     expect(element.querySelectorAll('table tbody tr')).toHaveLength(2);
-    (element.querySelector('svg g.bar-chart__bar') as SVGGElement).dispatchEvent(
-      new MouseEvent('click', { bubbles: true }),
-    );
-    (element.querySelectorAll('svg g.bar-chart__bar')[1] as SVGGElement).dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
-    );
+    (element.querySelectorAll('.pd-visually-hidden button')[0] as HTMLButtonElement).click();
+    (element.querySelectorAll('.pd-visually-hidden button')[1] as HTMLButtonElement).click();
     expect(events).toEqual(['2026-S44', '2026-S45']);
   });
 

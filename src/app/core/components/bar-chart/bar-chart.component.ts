@@ -15,19 +15,11 @@ export interface BarChartDatum {
         <p class="bar-chart__empty">Aucune alerte sur la periode.</p>
       } @else {
         <p class="bar-chart__unit">{{ unit() }}</p>
-        <div class="bar-chart__visual" role="img" [attr.aria-label]="summary()">
-          <svg class="bar-chart__svg" viewBox="0 0 640 260" aria-hidden="true">
+        <div class="bar-chart__visual" aria-hidden="true">
+          <svg class="bar-chart__svg" viewBox="0 0 640 260">
             <line class="bar-chart__axis" x1="24" y1="220" x2="616" y2="220" />
             @for (bar of bars(); track bar.label; let index = $index) {
-              <g
-                class="bar-chart__bar"
-                role="button"
-                tabindex="0"
-                [attr.aria-label]="bar.label + ' : ' + bar.value + ' ' + unit()"
-                (click)="select(bar.label)"
-                (keydown.enter)="select(bar.label)"
-                (keydown.space)="onSpace($event, bar.label)"
-              >
+              <g class="bar-chart__bar" (click)="select(bar.label)">
                 <rect
                   [attr.x]="bar.x"
                   [attr.y]="bar.y"
@@ -115,13 +107,6 @@ export class BarChartComponent {
       };
     });
   });
-
-  readonly summary = computed(
-    () =>
-      `${this.title()} : ${this.series()
-        .map((item) => `${item.label} ${item.value}`)
-        .join(', ')} ${this.unit()}.`,
-  );
 
   select(label: string): void {
     this.barClick.emit(label);

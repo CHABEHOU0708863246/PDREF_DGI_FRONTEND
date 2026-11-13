@@ -564,6 +564,37 @@ test.describe('L19a - recette sur la vraie pile', () => {
       page.getByRole('img', { name: "Direction Générale des Impôts de Côte d'Ivoire" }).first(),
     ).toBeVisible();
   });
+  test('axe 0 sur les pages representatives', async ({ page }) => {
+    await loginAs(page, 'admin.dsi');
+    const pages = [
+      '/dashboard',
+      '/dashboard/admin/utilisateurs',
+      '/dashboard/courriers',
+      '/dashboard/contribuables',
+      '/dashboard/audit',
+    ];
+    for (const path of pages) {
+      await page.goto(path);
+      await expect(page.locator('.theme-toggle')).toHaveAttribute('aria-label', /\S/);
+      await expect(page.locator('.notification-center__button')).toHaveAttribute(
+        'aria-label',
+        /\S/,
+      );
+      await expect(page.locator('button[aria-controls="app-sidebar"]')).toHaveAttribute(
+        'aria-label',
+        /\S/,
+      );
+      for (const width of [1280, 360]) {
+        await page.setViewportSize({ width, height: width === 360 ? 800 : 900 });
+        const audit = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+          .analyze();
+        expect(audit.violations, `${path} ${width}px`).toEqual([]);
+      }
+    }
+    await logout(page);
+  });
+
   test('fichier EICAR refuse par le vrai ClamAV', async ({ request }) => {
     const token = await apiLogin(
       request,
