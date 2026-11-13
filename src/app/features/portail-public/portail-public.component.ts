@@ -44,6 +44,11 @@ const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
       <header class="public-shell__head">
         <a class="brand" routerLink="/suivi">
           <img
+            class="brand__republic"
+            src="/assets/brand/Pepublique.jpg"
+            alt="République de Côte d'Ivoire"
+          />
+          <img
             class="brand__logo"
             src="/assets/brand/logo-dgi.png"
             alt="Direction Générale des Impôts de Côte d'Ivoire"

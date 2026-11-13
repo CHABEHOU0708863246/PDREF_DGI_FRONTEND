@@ -45,6 +45,15 @@
   background: var(--color-surface);
 }
 
+.brand__republic {
+  width: auto;
+  height: 2.5rem;
+  max-width: 3.5rem;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
 .search {
   display: flex;
   flex-wrap: wrap;

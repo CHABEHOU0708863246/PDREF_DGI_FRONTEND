@@ -12,6 +12,11 @@ import { ThemeToggleComponent } from '../../../core/components/theme-toggle/them
       <header class="auth-shell__head">
         <a class="brand" routerLink="/">
           <img
+            class="brand__republic"
+            src="/assets/brand/Pepublique.jpg"
+            alt="République de Côte d'Ivoire"
+          />
+          <img
             class="brand__logo"
             src="/assets/brand/logo-dgi.png"
             alt="Direction Générale des Impôts de Côte d'Ivoire"
