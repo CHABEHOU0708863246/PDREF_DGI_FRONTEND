@@ -8,9 +8,15 @@ if (!apiUrl) {
 
 const file = 'src/environments/environment.ts';
 const source = readFileSync(file, 'utf8');
-const updated = source.replace(/apiUrl:\s*'[^']*'/, `apiUrl: '${apiUrl}'`);
-if (source === updated) {
+const pattern = /apiUrl:\s*'[^']*'/;
+if (!pattern.test(source)) {
   throw new Error(`apiUrl introuvable dans ${file}`);
+}
+
+const updated = source.replace(pattern, `apiUrl: '${apiUrl}'`);
+if (source === updated) {
+  console.log(`apiUrl deja configuree sur ${apiUrl}`);
+  process.exit(0);
 }
 
 writeFileSync(file, updated, 'utf8');
