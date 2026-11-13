@@ -1,7 +1,7 @@
-{
-  "name": "PDREF — DGI Côte d'Ivoire",
+﻿{
+  "name": "PDREF â€” DGI CÃ´te d'Ivoire",
   "short_name": "PDREF",
-  "description": "Plateforme de Demande de Rectification des États Financiers.",
+  "description": "Plateforme de Demande de Rectification des Ã‰tats Financiers.",
   "lang": "fr",
   "start_url": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "theme_color": "#0B3D91",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/assets/brand/logo-dgi.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/assets/brand/logo-dgi.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

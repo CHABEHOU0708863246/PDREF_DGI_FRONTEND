@@ -1,7 +1,11 @@
 <div class="shell" [class.shell--collapsed]="collapsed()" [class.shell--mobile-open]="mobileOpen()">
   <aside id="app-sidebar" class="shell__sidebar" [class.shell__sidebar--open]="mobileOpen()">
     <a class="brand" routerLink="/dashboard">
-      <span class="brand__mark" aria-hidden="true">P</span>
+      <img
+        class="brand__logo"
+        src="/assets/brand/logo-dgi.png"
+        alt="Direction Générale des Impôts de Côte d'Ivoire"
+      />
       <span class="brand__text">PDREF<span>DGI</span></span>
     </a>
 

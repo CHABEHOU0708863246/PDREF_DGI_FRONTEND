@@ -43,7 +43,11 @@ const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
     <main class="public-shell">
       <header class="public-shell__head">
         <a class="brand" routerLink="/suivi">
-          <span class="brand__mark" aria-hidden="true">P</span>
+          <img
+            class="brand__logo"
+            src="/assets/brand/logo-dgi.png"
+            alt="Direction Générale des Impôts de Côte d'Ivoire"
+          />
           <span>PDREF</span>
         </a>
         <span class="pd-chip">

@@ -1,4 +1,4 @@
-.espace-shell {
+﻿.espace-shell {
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-text);
@@ -23,14 +23,13 @@
   text-decoration: none;
 }
 
-.espace-brand__mark {
-  display: inline-grid;
-  place-items: center;
-  width: var(--space-6);
-  height: var(--space-6);
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+.espace-brand__logo {
+  width: auto;
+  height: 2.25rem;
+  max-width: 4.5rem;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
 }
 
 .espace-nav {

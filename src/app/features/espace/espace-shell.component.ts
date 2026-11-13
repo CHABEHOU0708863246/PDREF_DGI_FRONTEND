@@ -11,7 +11,11 @@ import { AuthService } from '../../core/services/auth/auth.service';
     <div class="espace-shell">
       <header class="espace-shell__head">
         <a class="espace-brand" routerLink="/espace">
-          <span class="espace-brand__mark" aria-hidden="true">P</span>
+          <img
+            class="espace-brand__logo"
+            src="/assets/brand/logo-dgi.png"
+            alt="Direction Générale des Impôts de Côte d'Ivoire"
+          />
           <span>PDREF Contribuable</span>
         </a>
         <nav class="espace-nav" aria-label="Navigation contribuable">

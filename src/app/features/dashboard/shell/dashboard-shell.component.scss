@@ -58,15 +58,13 @@
   font-weight: var(--weight-bold);
 }
 
-.brand__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-7);
-  height: var(--space-7);
+.brand__logo {
+  width: auto;
+  height: 2.5rem;
+  max-width: 5rem;
+  object-fit: contain;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--color-surface);
 }
 
 .brand__text {

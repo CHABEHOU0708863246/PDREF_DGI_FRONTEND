@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle.component';
 
@@ -11,7 +11,11 @@ import { ThemeToggleComponent } from '../../../core/components/theme-toggle/them
     <main class="auth-shell">
       <header class="auth-shell__head">
         <a class="brand" routerLink="/">
-          <span class="brand__mark" aria-hidden="true">P</span>
+          <img
+            class="brand__logo"
+            src="/assets/brand/logo-dgi.png"
+            alt="Direction Générale des Impôts de Côte d'Ivoire"
+          />
           <span>PDREF</span>
         </a>
         <pdref-theme-toggle />
