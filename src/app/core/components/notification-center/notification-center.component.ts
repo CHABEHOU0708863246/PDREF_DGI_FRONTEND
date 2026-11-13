@@ -84,7 +84,7 @@ import { StatePanelComponent } from '../state-panel/state-panel.component';
                     <p>{{ item.message }}</p>
                     <time [attr.datetime]="item.createdAt">{{ item.createdAt | abidjanDate }}</time>
                     <span class="notification-item__state"
-                      >Envoyee Â· {{ item.read ? 'Lue' : 'Non lue' }}</span
+                      >Envoyee · {{ item.read ? 'Lue' : 'Non lue' }}</span
                     >
                     @if (item.demandeId) {
                       <a

@@ -35,7 +35,7 @@ function baseProviders() {
   ];
 }
 
-describe('features Ã¢â‚¬â€ smoke', () => {
+describe('features ââ‚¬â€ smoke', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
   it('App', () => {

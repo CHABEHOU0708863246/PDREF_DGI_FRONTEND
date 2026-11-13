@@ -14,7 +14,7 @@ export const routes: Routes = [
       import('./features/design-system/design-system-demo.component').then(
         (module) => module.DesignSystemDemoComponent,
       ),
-    title: 'Design system â€” PDREF',
+    title: 'Design system — PDREF',
     data: { breadcrumb: 'Design system' },
   },
   {
@@ -64,13 +64,13 @@ export const routes: Routes = [
       import('./features/errors/unauthorized.component').then(
         (module) => module.UnauthorizedComponent,
       ),
-    title: 'Acces refuse â€” PDREF',
+    title: 'Acces refuse — PDREF',
   },
   {
     path: 'error',
     loadComponent: () =>
       import('./features/errors/error-page.component').then((module) => module.ErrorPageComponent),
-    title: 'Erreur â€” PDREF',
+    title: 'Erreur — PDREF',
   },
   {
     path: 'introuvable',
