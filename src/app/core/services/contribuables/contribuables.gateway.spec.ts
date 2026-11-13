@@ -49,15 +49,15 @@ describe('ContribuablesGateway', () => {
     http.verify();
   });
 
-  it('exporte en CSV avec le nom de fichier', () => {
+  it('exporte en XLSX avec le nom de fichier', () => {
     const { gateway, http } = setup();
     gateway
-      .export({}, 'csv')
-      .subscribe((result) => expect(result.fileName).toBe('contribuables.csv'));
+      .export({}, 'xlsx')
+      .subscribe((result) => expect(result.fileName).toBe('contribuables.xlsx'));
     const request = http.expectOne((request) => request.url.endsWith('/contribuables/export'));
-    expect(request.request.params.get('format')).toBe('csv');
-    request.flush(new Blob(['csv']), {
-      headers: { 'content-disposition': 'attachment; filename="contribuables.csv"' },
+    expect(request.request.params.get('format')).toBe('xlsx');
+    request.flush(new Blob(['xlsx']), {
+      headers: { 'content-disposition': 'attachment; filename="contribuables.xlsx"' },
     });
     http.verify();
   });

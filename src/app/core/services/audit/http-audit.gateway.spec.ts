@@ -45,7 +45,7 @@ describe('HttpAuditGateway', () => {
       .expectOne((request) => request.url.endsWith('/audit/integrite'))
       .flush({ data: { total: 1, valid: 1, invalid: 0, checkedAt: '2026-11-11' } });
 
-    gateway.requestExport({ result: 'SUCCESS' }, 'EXCEL').subscribe();
+    gateway.requestExport({ result: 'SUCCESS' }).subscribe();
     const exportRequest = http.expectOne(
       (request) => request.url.endsWith('/audit/exports') && request.method === 'POST',
     );

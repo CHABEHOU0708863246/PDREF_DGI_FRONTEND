@@ -93,7 +93,7 @@ const gateway = {
   depot: vi.fn(() =>
     of({ courrierId: 'c1', statut: 'DEPOSE', referenceDepot: 'R1', demandeCloturee: true }),
   ),
-  exportBase: vi.fn(() => of({ blob: new Blob(), fileName: 'base.csv' })),
+  exportBase: vi.fn(() => of({ blob: new Blob(), fileName: 'base.xlsx' })),
 };
 
 const route = { snapshot: { paramMap: convertToParamMap({ id: 'd1' }) } };

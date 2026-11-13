@@ -153,7 +153,7 @@ export class AuditListComponent {
     });
   }
 
-  export(format: 'CSV' | 'EXCEL'): void {
+  export(): void {
     if (!this.canExport() || this.exporting()) {
       return;
     }
@@ -161,7 +161,7 @@ export class AuditListComponent {
     this.exporting.set(true);
     this.problem.set(null);
     this.notice.set(null);
-    this.gateway.requestExport(this.filterValue(), format).subscribe({
+    this.gateway.requestExport(this.filterValue()).subscribe({
       next: (item) => {
         this.notice.set('Export en preparation. Vous serez notifie lorsqu il sera pret.');
         this.pollExport(item.id);

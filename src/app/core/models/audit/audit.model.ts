@@ -64,7 +64,7 @@ export interface AuditExport {
 }
 
 export interface AuditExportRequest extends AuditFilter {
-  format: 'CSV' | 'EXCEL';
+  format: 'EXCEL';
 }
 
 export const AUDIT_EVENT_CODES = [

@@ -31,11 +31,11 @@ describe('SuivisGateway', () => {
       .expectOne((request) => request.url.endsWith('/suivis/motifs'))
       .flush({ data: [{ code: 'AUTRE', libelle: 'Autre' }] });
 
-    gateway.exportBase({}).subscribe((result) => expect(result.fileName).toBe('base.csv'));
+    gateway.exportBase({}).subscribe((result) => expect(result.fileName).toBe('base.xlsx'));
     http
       .expectOne((request) => request.url.endsWith('/suivis/base-demandes'))
-      .flush(new Blob(['csv']), {
-        headers: { 'content-disposition': 'attachment; filename="base.csv"' },
+      .flush(new Blob(['xlsx']), {
+        headers: { 'content-disposition': 'attachment; filename="base.xlsx"' },
       });
     http.verify();
   });

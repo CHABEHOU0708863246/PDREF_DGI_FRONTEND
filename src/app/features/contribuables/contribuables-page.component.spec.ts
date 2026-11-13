@@ -45,7 +45,7 @@ function setup() {
         pourcentageNccHorsFormat: 0,
       }),
     ),
-    export: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'contribuables.csv' })),
+    export: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'contribuables.xlsx' })),
   };
   TestBed.configureTestingModule({
     imports: [ContribuablesPageComponent],
@@ -69,8 +69,8 @@ describe('ContribuablesPageComponent', () => {
     fixture.componentInstance.filters.sansEmail = true;
     fixture.componentInstance.load(1);
     expect(gateway.list).toHaveBeenCalledTimes(2);
-    fixture.componentInstance.export('csv');
-    expect(gateway.export).toHaveBeenCalledWith({ ...fixture.componentInstance.filters }, 'csv');
+    fixture.componentInstance.export();
+    expect(gateway.export).toHaveBeenCalledWith({ ...fixture.componentInstance.filters }, 'xlsx');
   });
 });
 

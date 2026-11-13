@@ -60,10 +60,7 @@ const LIGHTHOUSE_ERRORS: ImportError[] = [
       <pdref-state-panel state="loading" title="Chargement de l'import" />
     } @else if (item(); as detail) {
       <div class="actions">
-        <button type="button" class="pd-btn pd-btn--primary" (click)="downloadReport('csv')">
-          Rapport CSV
-        </button>
-        <button type="button" class="pd-btn pd-btn--ghost" (click)="downloadReport('xlsx')">
+        <button type="button" class="pd-btn pd-btn--primary" (click)="downloadReport()">
           Rapport Excel
         </button>
         <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/imports">Retour aux imports</a>
@@ -263,8 +260,8 @@ export class ImportDetailPageComponent {
     this.filters.motif = (event.target as HTMLInputElement).value;
   }
 
-  downloadReport(format: 'csv' | 'xlsx'): void {
-    this.download(this.gateway.downloadReport(this.importId, format));
+  downloadReport(): void {
+    this.download(this.gateway.downloadReport(this.importId));
   }
 
   statutLabel(statut: string): string {

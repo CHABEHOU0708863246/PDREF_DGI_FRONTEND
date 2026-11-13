@@ -89,10 +89,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           >
           <div class="pd-actions">
             <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
-            <button type="button" class="pd-btn pd-btn--ghost" (click)="export('csv')">
-              Export CSV
-            </button>
-            <button type="button" class="pd-btn pd-btn--ghost" (click)="export('xls')">
+            <button type="button" class="pd-btn pd-btn--ghost" (click)="export()">
               Export Excel
             </button>
           </div>
@@ -231,8 +228,8 @@ export class ContribuablesPageComponent {
     });
   }
 
-  export(format: 'csv' | 'xls'): void {
-    this.gateway.export({ ...this.filters }, format).subscribe({
+  export(): void {
+    this.gateway.export({ ...this.filters }, 'xlsx').subscribe({
       next: ({ blob, fileName }) => {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');

@@ -50,7 +50,7 @@ export class ImportGateway {
       .pipe(map((response) => response.data));
   }
 
-  downloadReport(id: string, format: 'csv' | 'xlsx' = 'csv'): Observable<DownloadFile> {
+  downloadReport(id: string, format: 'xlsx' = 'xlsx'): Observable<DownloadFile> {
     return this.http
       .get(`${this.base}/${encodeURIComponent(id)}/rapport?format=${format}`, {
         observe: 'response',

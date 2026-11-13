@@ -74,7 +74,7 @@ describe('Pages Imports', () => {
     errors: vi.fn(() => of(errors)),
     upload: vi.fn(() => of(detail)),
     downloadTemplate: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'template.xlsx' })),
-    downloadReport: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'rapport.csv' })),
+    downloadReport: vi.fn(() => of({ blob: new Blob(['x']), fileName: 'rapport.xlsx' })),
   };
 
   beforeEach(() => {
@@ -86,7 +86,7 @@ describe('Pages Imports', () => {
     gateway.downloadTemplate.mockReturnValue(
       of({ blob: new Blob(['x']), fileName: 'template.xlsx' }),
     );
-    gateway.downloadReport.mockReturnValue(of({ blob: new Blob(['x']), fileName: 'rapport.csv' }));
+    gateway.downloadReport.mockReturnValue(of({ blob: new Blob(['x']), fileName: 'rapport.xlsx' }));
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
   });
@@ -167,7 +167,7 @@ describe('Pages Imports', () => {
     detailFixture.detectChanges();
     const detailComponent = detailFixture.componentInstance;
     expect(detailComponent.problem()).not.toBeNull();
-    detailComponent.downloadReport('csv');
+    detailComponent.downloadReport();
     expect(detailComponent.problem()).not.toBeNull();
   });
   it('charge le detail et les erreurs', () => {
@@ -187,8 +187,8 @@ describe('Pages Imports', () => {
     const motif = document.createElement('input');
     motif.value = 'DATE_INVALIDE';
     component.onMotif({ target: motif } as unknown as Event);
-    component.downloadReport('xlsx');
-    expect(gateway.downloadReport).toHaveBeenCalledWith('i1', 'xlsx');
+    component.downloadReport();
+    expect(gateway.downloadReport).toHaveBeenCalledWith('i1');
     expect(component.statutLabel('TERMINE')).toBe('Termine');
   });
 });

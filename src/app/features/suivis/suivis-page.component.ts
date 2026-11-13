@@ -222,7 +222,7 @@ export class SuivisPageComponent {
         const url = URL.createObjectURL(result.blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = result.fileName ?? 'base-demandes.csv';
+        anchor.download = result.fileName ?? 'base-demandes.xlsx';
         anchor.click();
         URL.revokeObjectURL(url);
       },

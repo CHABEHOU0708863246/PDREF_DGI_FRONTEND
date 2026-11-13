@@ -40,7 +40,7 @@ function setup(auditRead = true, auditExport = false) {
     requestExport: vi.fn(() =>
       of({
         id: 'e1',
-        format: 'CSV',
+        format: 'EXCEL',
         status: 'PRET',
         expiresAt: '2026-12-11',
         sizeBytes: 10,
@@ -49,14 +49,20 @@ function setup(auditRead = true, auditExport = false) {
     getExport: vi.fn(() =>
       of({
         id: 'e1',
-        format: 'CSV',
+        format: 'EXCEL',
         status: 'PRET',
         expiresAt: '2026-12-11',
-        fileName: 'audit.csv',
+        fileName: 'audit.xlsx',
         sizeBytes: 10,
       }),
     ),
-    downloadExport: vi.fn(() => of(new Blob(['id'], { type: 'text/csv' }))),
+    downloadExport: vi.fn(() =>
+      of(
+        new Blob(['id'], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }),
+      ),
+    ),
   };
   const permissions = new PermissionsService();
   permissions.load({
@@ -106,7 +112,7 @@ describe('AuditListComponent', () => {
   it('masque l export sans Audit_Export', () => {
     const { fixture } = setup(true, false);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).not.toContain('Exporter CSV');
+    expect(fixture.nativeElement.textContent).not.toContain('Exporter Excel');
   });
 
   it('exporte en arriere-plan avec Audit_Export', () => {
@@ -115,9 +121,9 @@ describe('AuditListComponent', () => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:audit');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 
-    expect(fixture.nativeElement.textContent).toContain('Exporter CSV');
-    fixture.componentInstance.export('CSV');
-    expect(gateway.requestExport).toHaveBeenCalledWith(expect.anything(), 'CSV');
+    expect(fixture.nativeElement.textContent).toContain('Exporter Excel');
+    fixture.componentInstance.export();
+    expect(gateway.requestExport).toHaveBeenCalledWith(expect.anything());
     expect(gateway.downloadExport).toHaveBeenCalledWith('e1');
   });
 

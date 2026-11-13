@@ -47,8 +47,8 @@ export class HttpAuditGateway {
       .pipe(map((response) => response.data));
   }
 
-  requestExport(filter: AuditFilter, format: 'CSV' | 'EXCEL'): Observable<AuditExport> {
-    const body: AuditExportRequest = { ...filter, format };
+  requestExport(filter: AuditFilter): Observable<AuditExport> {
+    const body: AuditExportRequest = { ...filter, format: 'EXCEL' };
     return this.http
       .post<ApiResponse<AuditExport>>(`${this.root}/exports`, body)
       .pipe(map((response) => response.data));

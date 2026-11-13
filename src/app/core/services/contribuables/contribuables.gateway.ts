@@ -61,7 +61,7 @@ export class ContribuablesGateway {
     return this.http.post(`${this.base}/${encodeURIComponent(id)}/sync-eimpots`, null);
   }
 
-  export(query: ContribuableQuery, format: 'csv' | 'xls'): Observable<ExportResult> {
+  export(query: ContribuableQuery, format: 'xlsx' = 'xlsx'): Observable<ExportResult> {
     return this.http
       .get(`${this.base}/export`, {
         params: this.params({ ...query, page: 1, pageSize: 100 }).set('format', format),
@@ -100,7 +100,7 @@ export class ContribuablesGateway {
     return params;
   }
 
-  private fileName(header: string | null, format: 'csv' | 'xls'): string {
+  private fileName(header: string | null, format: 'xlsx'): string {
     const match = header ? /filename="?([^";]+)"?/i.exec(header) : null;
     return match?.[1] ?? `contribuables.${format}`;
   }
