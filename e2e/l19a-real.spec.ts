@@ -533,10 +533,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Voir' }).first().click();
     const panel = page.getByRole('dialog', { name: "Detail de l'evenement" });
     await expect(panel).toBeVisible();
-    const technical = panel.getByText('Informations techniques');
-    await expect(technical).toBeVisible();
-    const details = panel.locator('details.audit-technical');
-    await expect(details).not.toHaveAttribute('open');
+    await expect(panel.getByText('Informations techniques')).toHaveCount(0);
     const visibleDetail = await panel.locator('dl.audit-detail').first().innerText();
     expect(visibleDetail).not.toMatch(/[a-f0-9]{24}/);
     await panel.getByRole('button', { name: 'Fermer le panneau' }).click();
@@ -749,9 +746,9 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(page.getByText(/0 invalide/)).toBeVisible();
 
     const downloadPromise = page.waitForEvent('download', { timeout: 90_000 });
-    await page.getByRole('button', { name: 'Exporter CSV' }).click();
+    await page.getByRole('button', { name: 'Exporter Excel' }).click();
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toMatch(/audit.*\.csv$/i);
+    expect(download.suggestedFilename()).toMatch(/audit.*\.xlsx$/i);
 
     await page.getByLabel('Dossier', { exact: true }).fill('');
     await page.getByLabel('Evenement', { exact: true }).selectOption('AUDIT.CONSULTE');
@@ -940,6 +937,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Filtrer' }).click();
     const row = page.locator('tr').filter({ hasText: matricule }).first();
     await expect(row).toBeVisible();
+    await row.locator('summary').click();
     await row.getByRole('button', { name: 'Reinitialiser la double authentification' }).click();
     const resetDialog = page.getByRole('dialog');
     await expect(resetDialog).toBeVisible();
@@ -955,6 +953,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(userPage).toHaveURL(/\/auth\/mfa\/enrollment/, { timeout: 30_000 });
     await enrollNewUser(userPage);
     page.once('dialog', (dialog) => dialog.accept());
+    await row.locator('summary').click();
     const deactivated = page.waitForResponse(
       (item) => item.url().includes('/deactivate') && item.request().method() === 'POST',
     );

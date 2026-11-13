@@ -82,6 +82,6 @@ export const routes: Routes = [
     path: '**',
     loadComponent: () =>
       import('./features/errors/not-found.component').then((module) => module.NotFoundComponent),
-    title: 'Page introuvable �?" PDREF',
+    title: 'Page introuvable — PDREF',
   },
 ];
