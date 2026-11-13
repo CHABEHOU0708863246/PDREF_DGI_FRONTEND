@@ -1,4 +1,4 @@
-<pdref-page-header
+﻿<pdref-page-header
   title="Adhesions a valider"
   subtitle="Verifiez les pieces, l'e-mail et le NCC avant de creer un compte contribuable."
 />
@@ -79,92 +79,90 @@
     }
   </section>
 
-  <section class="adhesions-detail pd-card" aria-labelledby="adhesion-detail-title">
-    <h2 id="adhesion-detail-title">Detail de la demande</h2>
-    @if (detailLoading()) {
-      <pdref-state-panel state="loading" />
-    } @else if (!detail()) {
-      <pdref-state-panel
-        state="empty"
-        title="Selectionnez une demande"
-        message="Choisissez une adhesion dans la liste pour afficher son detail."
-      />
-    } @else if (detail(); as item) {
-      <dl class="adhesions-facts">
-        <dt>NCC</dt>
-        <dd>{{ item.ncc }} - {{ item.raisonSociale }}</dd>
-        <dt>Demandeur</dt>
-        <dd>{{ item.prenom }} {{ item.nom }} - {{ item.fonction }}</dd>
-        <dt>E-mail</dt>
-        <dd>{{ item.email }}</dd>
-        <dt>Telephone</dt>
-        <dd>{{ item.telephone }}</dd>
-        <dt>Statut</dt>
-        <dd>{{ statutLabel(item.statut) }}</dd>
-        @if (!item.nccConnu) {
-          <dt>Alerte</dt>
-          <dd class="adhesions-alert">NCC inconnu</dd>
-        }
-        @if (item.emailEcart) {
-          <dt>Alerte</dt>
-          <dd class="adhesions-alert">E-mail different de la fiche contribuable</dd>
-        }
-      </dl>
-
-      <h3>Pieces</h3>
-      @if (item.pieces.length === 0) {
-        <p class="pd-help">Aucune piece fournie.</p>
-      } @else {
-        <ul class="adhesions-pieces">
-          @for (piece of item.pieces; track piece.versionId) {
-            <li>
-              <span>{{ piece.type }} - {{ piece.fileName }}</span>
-              <button
-                class="pd-btn pd-btn--ghost pd-btn--sm"
-                type="button"
-                (click)="downloadPiece(piece.versionId, piece.fileName)"
-              >
-                Telecharger
-              </button>
-            </li>
+  @if (detail()) {
+    <pdref-side-panel
+      [open]="true"
+      title="Detail de la demande"
+      size="lg"
+      (closeRequested)="closeDetail()"
+    >
+      @if (detail(); as item) {
+        <dl class="adhesions-facts">
+          <dt>NCC</dt>
+          <dd>{{ item.ncc }} - {{ item.raisonSociale }}</dd>
+          <dt>Demandeur</dt>
+          <dd>{{ item.prenom }} {{ item.nom }} - {{ item.fonction }}</dd>
+          <dt>E-mail</dt>
+          <dd>{{ item.email }}</dd>
+          <dt>Telephone</dt>
+          <dd>{{ item.telephone }}</dd>
+          <dt>Statut</dt>
+          <dd>{{ statutLabel(item.statut) }}</dd>
+          @if (!item.nccConnu) {
+            <dt>Alerte</dt>
+            <dd class="adhesions-alert">NCC inconnu</dd>
           }
-        </ul>
-      }
+          @if (item.emailEcart) {
+            <dt>Alerte</dt>
+            <dd class="adhesions-alert">E-mail different de la fiche contribuable</dd>
+          }
+        </dl>
 
-      @if (item.statut === 'EN_ATTENTE_VALIDATION') {
-        <div class="adhesions-actions">
-          <button
-            class="pd-btn pd-btn--primary"
-            type="button"
-            [disabled]="busy()"
-            (click)="accept()"
-          >
-            Accepter
-          </button>
-          <label class="pd-field">
-            <span class="pd-label">Motif de refus</span>
-            <select
-              class="pd-input"
-              [ngModel]="motifCode()"
-              (ngModelChange)="motifCode.set($event)"
+        <h3>Pieces</h3>
+        @if (item.pieces.length === 0) {
+          <p class="pd-help">Aucune piece fournie.</p>
+        } @else {
+          <ul class="adhesions-pieces">
+            @for (piece of item.pieces; track piece.versionId) {
+              <li>
+                <span>{{ piece.type }} - {{ piece.fileName }}</span>
+                <button
+                  class="pd-btn pd-btn--ghost pd-btn--sm"
+                  type="button"
+                  (click)="downloadPiece(piece.versionId, piece.fileName)"
+                >
+                  Telecharger
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (item.statut === 'EN_ATTENTE_VALIDATION') {
+          <div class="adhesions-actions">
+            <button
+              class="pd-btn pd-btn--primary"
+              type="button"
+              [disabled]="busy()"
+              (click)="accept()"
             >
-              @for (motif of motifs(); track motif.code) {
-                <option [value]="motif.code">{{ motif.libelle }}</option>
-              }
-            </select>
-          </label>
-          <button
-            class="pd-btn pd-btn--danger"
-            type="button"
-            [disabled]="busy() || !motifCode()"
-            (click)="refuse()"
-          >
-            Refuser
-          </button>
-        </div>
+              Accepter
+            </button>
+            <label class="pd-field">
+              <span class="pd-label">Motif de refus</span>
+              <select
+                class="pd-input"
+                [ngModel]="motifCode()"
+                (ngModelChange)="motifCode.set($event)"
+              >
+                @for (motif of motifs(); track motif.code) {
+                  <option [value]="motif.code">{{ motif.libelle }}</option>
+                }
+              </select>
+            </label>
+            <button
+              class="pd-btn pd-btn--danger"
+              type="button"
+              [disabled]="busy() || !motifCode()"
+              (click)="refuse()"
+            >
+              Refuser
+            </button>
+          </div>
+        }
       }
-    }
-  </section>
+    </pdref-side-panel>
+  }
 </div>
 
 <section class="adhesions-accounts pd-card" aria-labelledby="comptes-title">

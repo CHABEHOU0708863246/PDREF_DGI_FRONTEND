@@ -1,4 +1,4 @@
-import { KeyValuePipe } from '@angular/common';
+﻿import { KeyValuePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import {
 import { ConfirmDialogWithInputComponent } from '../../core/components/confirm-dialog-with-input/confirm-dialog-with-input.component';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { AdhesionGateway } from '../../core/services/adhesions/adhesion.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -24,6 +25,7 @@ import { normalizeProblem } from '../../core/utils/problem';
     KeyValuePipe,
     FormsModule,
     PageHeaderComponent,
+    SidePanelComponent,
     StatePanelComponent,
     ConfirmDialogWithInputComponent,
   ],
@@ -114,6 +116,10 @@ export class AdhesionsAgentPageComponent implements OnInit {
         this.problem.set(normalizeProblem(error, this.correlation.last));
       },
     });
+  }
+
+  closeDetail(): void {
+    this.detail.set(null);
   }
 
   accept(): void {

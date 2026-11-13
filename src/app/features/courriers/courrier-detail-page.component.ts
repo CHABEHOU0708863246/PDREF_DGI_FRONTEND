@@ -1,11 +1,11 @@
 ﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CourrierDetail } from '../../core/models/courriers/courrier.model';
 import type { FileGroup } from '../../core/models/files/file.model';
-import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
@@ -16,217 +16,229 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-courrier-detail-page',
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent, StatePanelComponent],
+  imports: [RouterLink, SidePanelComponent, StatePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pdref-page-header title="Fiche courrier" [subtitle]="item()?.numero || ''" />
-    @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
-    } @else if (loading()) {
-      <pdref-state-panel state="loading" title="Chargement du courrier" />
-    } @else if (item(); as courrier) {
-      <section class="detail-grid">
-        <article class="pd-card">
-          <h2>Identification</h2>
-          <dl>
-            <dt>Numero</dt>
-            <dd>{{ courrier.numero }}</dd>
-            <dt>Type</dt>
-            <dd>{{ typeLabel(courrier.typeCourrier) }}</dd>
-            <dt>Sens</dt>
-            <dd>{{ courrier.sens === 'ENTRANT' ? 'Entrant' : 'Sortant' }}</dd>
-            <dt>Date</dt>
-            <dd>{{ courrier.dateArrivee || courrier.dateEmission || '-' }}</dd>
-            <dt>Imputation</dt>
-            <dd>{{ courrier.imputation }}</dd>
-            <dt>Expediteur</dt>
-            <dd>{{ courrier.expediteur }}</dd>
-          </dl>
-        </article>
-
-        <article class="pd-card">
-          <h2>Objet et references</h2>
-          <dl>
-            <dt>Objet</dt>
-            <dd>{{ courrier.objet }}</dd>
-            <dt>References</dt>
-            <dd>{{ courrier.references || '-' }}</dd>
-            <dt>Reference depot</dt>
-            <dd>{{ courrier.referenceDepot || '-' }}</dd>
-          </dl>
-        </article>
-
-        @if (courrier.contribuable; as contribuable) {
+    <pdref-side-panel
+      [open]="true"
+      [title]="'Fiche courrier ' + (item()?.numero || '')"
+      size="lg"
+      (closeRequested)="close()"
+    >
+      @if (problem(); as issue) {
+        <pdref-state-panel
+          state="error"
+          [problem]="issue"
+          actionLabel="Reessayer"
+          (retry)="load()"
+        />
+      } @else if (loading()) {
+        <pdref-state-panel state="loading" title="Chargement du courrier" />
+      } @else if (item(); as courrier) {
+        <section class="detail-grid">
           <article class="pd-card">
-            <h2>Contribuable</h2>
+            <h2>Identification</h2>
             <dl>
-              <dt>Raison sociale</dt>
-              <dd>{{ contribuable.raisonSociale }}</dd>
-              <dt>NCC</dt>
-              <dd>{{ contribuable.ncc || contribuable.nccMasque }}</dd>
-              <dt>Lien</dt>
+              <dt>Numero</dt>
+              <dd>{{ courrier.numero }}</dd>
+              <dt>Type</dt>
+              <dd>{{ typeLabel(courrier.typeCourrier) }}</dd>
+              <dt>Sens</dt>
+              <dd>{{ courrier.sens === 'ENTRANT' ? 'Entrant' : 'Sortant' }}</dd>
+              <dt>Date</dt>
+              <dd>{{ courrier.dateArrivee || courrier.dateEmission || '-' }}</dd>
+              <dt>Imputation</dt>
+              <dd>{{ courrier.imputation }}</dd>
+              <dt>Expediteur</dt>
+              <dd>{{ courrier.expediteur }}</dd>
+            </dl>
+          </article>
+
+          <article class="pd-card">
+            <h2>Objet et references</h2>
+            <dl>
+              <dt>Objet</dt>
+              <dd>{{ courrier.objet }}</dd>
+              <dt>References</dt>
+              <dd>{{ courrier.references || '-' }}</dd>
+              <dt>Reference depot</dt>
+              <dd>{{ courrier.referenceDepot || '-' }}</dd>
+            </dl>
+          </article>
+
+          @if (courrier.contribuable; as contribuable) {
+            <article class="pd-card">
+              <h2>Contribuable</h2>
+              <dl>
+                <dt>Raison sociale</dt>
+                <dd>{{ contribuable.raisonSociale }}</dd>
+                <dt>NCC</dt>
+                <dd>{{ contribuable.ncc || contribuable.nccMasque }}</dd>
+                <dt>Lien</dt>
+                <dd>
+                  @if (canLinkContribuable()) {
+                    <a class="pd-link" [routerLink]="['/dashboard/contribuables', contribuable.id]">
+                      Ouvrir la fiche
+                    </a>
+                  } @else {
+                    <span class="pd-muted">Fiche contribuable non accessible.</span>
+                  }
+                </dd>
+              </dl>
+            </article>
+          }
+
+          <article class="pd-card">
+            <h2>Rattachement</h2>
+            <dl>
+              <dt>Demande</dt>
               <dd>
-                @if (canLinkContribuable()) {
-                  <a class="pd-link" [routerLink]="['/dashboard/contribuables', contribuable.id]">
-                    Ouvrir la fiche
-                  </a>
+                @if (courrier.demandeId) {
+                  <span>{{ courrier.demandeId }}</span>
                 } @else {
-                  <span class="pd-muted">Fiche contribuable non accessible.</span>
+                  <span class="pd-muted">Disponible.</span>
                 }
               </dd>
+              <dt>Statut</dt>
+              <dd>{{ courrier.estLie ? 'Lie' : 'Non lie' }}</dd>
             </dl>
           </article>
-        }
 
-        <article class="pd-card">
-          <h2>Rattachement</h2>
-          <dl>
-            <dt>Demande</dt>
-            <dd>
-              @if (courrier.demandeId) {
-                <span>{{ courrier.demandeId }}</span>
-              } @else {
-                <span class="pd-muted">Disponible.</span>
-              }
-            </dd>
-            <dt>Statut</dt>
-            <dd>{{ courrier.estLie ? 'Lie' : 'Non lie' }}</dd>
-          </dl>
-        </article>
-
-        @if (canInternal() && (courrier.instructionsDirecteur || courrier.annotationsSdGudef)) {
-          <article class="pd-card detail-full">
-            <h2>Donnees internes C3</h2>
-            <dl>
-              @if (courrier.instructionsDirecteur) {
-                <dt>Instructions du Directeur</dt>
-                <dd>{{ courrier.instructionsDirecteur }}</dd>
-              }
-              @if (courrier.annotationsSdGudef) {
-                <dt>Annotations SD-GUDEF</dt>
-                <dd>{{ courrier.annotationsSdGudef }}</dd>
-              }
-            </dl>
-          </article>
-        }
-      </section>
-
-      @if (manualSignature()) {
-        <p><span class="pd-chip">Mode manuel</span></p>
-      }
-      @if (canSigner() && manualSignature()) {
-        <section class="pd-card">
-          <h2>Deposer le courrier signe</h2>
-          <label class="pd-field">
-            <span class="pd-label">Signataire declare</span>
-            <input class="pd-input" [value]="signataire()" (input)="onSignataire($event)" />
-          </label>
-          <label class="pd-field">
-            <span class="pd-label">Date de signature</span>
-            <input
-              class="pd-input"
-              type="date"
-              [value]="dateSignature()"
-              (input)="onDateSignature($event)"
-            />
-          </label>
-          <label class="pd-btn pd-btn--ghost">
-            Choisir le PDF signe
-            <input type="file" accept="application/pdf" hidden (change)="signer($event)" />
-          </label>
+          @if (canInternal() && (courrier.instructionsDirecteur || courrier.annotationsSdGudef)) {
+            <article class="pd-card detail-full">
+              <h2>Donnees internes C3</h2>
+              <dl>
+                @if (courrier.instructionsDirecteur) {
+                  <dt>Instructions du Directeur</dt>
+                  <dd>{{ courrier.instructionsDirecteur }}</dd>
+                }
+                @if (courrier.annotationsSdGudef) {
+                  <dt>Annotations SD-GUDEF</dt>
+                  <dd>{{ courrier.annotationsSdGudef }}</dd>
+                }
+              </dl>
+            </article>
+          }
         </section>
-      }
-      @if (canUpdate()) {
-        <section class="pd-card">
-          <h2>Declarer la remise</h2>
-          <label class="pd-field">
-            <span class="pd-label">Canal</span>
-            <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
-              <option value="DEPOT_EIMPOTS_MANUEL">Depot e-impots manuel</option>
-              <option value="REMISE_PAPIER">Remise papier</option>
-            </select>
-          </label>
-          <label class="pd-field">
-            <span class="pd-label">Date de remise</span>
-            <input
-              class="pd-input"
-              type="date"
-              [value]="dateRemise()"
-              (input)="onDateRemise($event)"
-            />
-          </label>
-          <label class="pd-field">
-            <span class="pd-label">Reference</span>
-            <input
-              class="pd-input"
-              [value]="referenceRemise()"
-              (input)="onReferenceRemise($event)"
-            />
-          </label>
-          <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
-            Declarer la remise
-          </button>
-        </section>
-      }
 
-      <section class="pd-card detail-full">
-        <div class="courriers-head">
-          <h2>Pieces jointes</h2>
-          @if (canUpload()) {
-            <label class="pd-btn pd-btn--ghost">
-              Ajouter un fichier
-              <input type="file" hidden (change)="upload($event)" />
+        @if (manualSignature()) {
+          <p><span class="pd-chip">Mode manuel</span></p>
+        }
+        @if (canSigner() && manualSignature()) {
+          <section class="pd-card">
+            <h2>Deposer le courrier signe</h2>
+            <label class="pd-field">
+              <span class="pd-label">Signataire declare</span>
+              <input class="pd-input" [value]="signataire()" (input)="onSignataire($event)" />
             </label>
-          }
-        </div>
-        @if (attachmentsLoading()) {
-          <pdref-state-panel state="loading" title="Chargement des pieces jointes" />
-        } @else if (attachments().length === 0) {
-          <pdref-state-panel
-            state="empty"
-            title="Aucune piece jointe"
-            message="Aucun fichier rattache."
-          />
-        } @else {
-          <ul class="attachments">
-            @for (file of attachments(); track file.id) {
-              @if (file.currentFile; as current) {
-                <li class="attachment-row">
-                  <span>{{ current.originalName }}</span>
-                  <button
-                    type="button"
-                    class="pd-btn pd-btn--ghost pd-btn--sm"
-                    (click)="download(current.id)"
-                  >
-                    Telecharger
-                  </button>
-                </li>
-              }
-            }
-          </ul>
+            <label class="pd-field">
+              <span class="pd-label">Date de signature</span>
+              <input
+                class="pd-input"
+                type="date"
+                [value]="dateSignature()"
+                (input)="onDateSignature($event)"
+              />
+            </label>
+            <label class="pd-btn pd-btn--ghost">
+              Choisir le PDF signe
+              <input type="file" accept="application/pdf" hidden (change)="signer($event)" />
+            </label>
+          </section>
         }
-        @if (message()) {
-          <p class="pd-muted" role="status">{{ message() }}</p>
+        @if (canUpdate()) {
+          <section class="pd-card">
+            <h2>Declarer la remise</h2>
+            <label class="pd-field">
+              <span class="pd-label">Canal</span>
+              <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
+                <option value="DEPOT_EIMPOTS_MANUEL">Depot e-impots manuel</option>
+                <option value="REMISE_PAPIER">Remise papier</option>
+              </select>
+            </label>
+            <label class="pd-field">
+              <span class="pd-label">Date de remise</span>
+              <input
+                class="pd-input"
+                type="date"
+                [value]="dateRemise()"
+                (input)="onDateRemise($event)"
+              />
+            </label>
+            <label class="pd-field">
+              <span class="pd-label">Reference</span>
+              <input
+                class="pd-input"
+                [value]="referenceRemise()"
+                (input)="onReferenceRemise($event)"
+              />
+            </label>
+            <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
+              Declarer la remise
+            </button>
+          </section>
         }
-      </section>
 
-      <section class="pd-card">
-        <div class="pd-actions">
-          @if (canUpdate()) {
-            <a
-              class="pd-btn pd-btn--ghost"
-              [routerLink]="['/dashboard/courriers', courrier.id, 'modifier']"
-              >Modifier</a
-            >
+        <section class="pd-card detail-full">
+          <div class="courriers-head">
+            <h2>Pieces jointes</h2>
+            @if (canUpload()) {
+              <label class="pd-btn pd-btn--ghost">
+                Ajouter un fichier
+                <input type="file" hidden (change)="upload($event)" />
+              </label>
+            }
+          </div>
+          @if (attachmentsLoading()) {
+            <pdref-state-panel state="loading" title="Chargement des pieces jointes" />
+          } @else if (attachments().length === 0) {
+            <pdref-state-panel
+              state="empty"
+              title="Aucune piece jointe"
+              message="Aucun fichier rattache."
+            />
+          } @else {
+            <ul class="attachments">
+              @for (file of attachments(); track file.id) {
+                @if (file.currentFile; as current) {
+                  <li class="attachment-row">
+                    <span>{{ current.originalName }}</span>
+                    <button
+                      type="button"
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      (click)="download(current.id)"
+                    >
+                      Telecharger
+                    </button>
+                  </li>
+                }
+              }
+            </ul>
           }
-        </div>
-      </section>
-    }
+          @if (message()) {
+            <p class="pd-muted" role="status">{{ message() }}</p>
+          }
+        </section>
+
+        <section class="pd-card">
+          <div class="pd-actions">
+            @if (canUpdate()) {
+              <a
+                class="pd-btn pd-btn--ghost"
+                [routerLink]="['/dashboard/courriers', courrier.id, 'modifier']"
+                >Modifier</a
+              >
+            }
+          </div>
+        </section>
+      }
+    </pdref-side-panel>
   `,
   styleUrl: './courrier-detail-page.component.scss',
 })
 export class CourrierDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly gateway = inject(CourriersGateway);
   private readonly integrations = inject(IntegrationGateway);
   private readonly permissions = inject(PermissionsService);
@@ -318,6 +330,10 @@ export class CourrierDetailPageComponent {
 
   canUpdate(): boolean {
     return this.permissions.hasPermission('Courriers_Update');
+  }
+
+  close(): void {
+    void this.router.navigate(['/dashboard/courriers']);
   }
 
   load(): void {

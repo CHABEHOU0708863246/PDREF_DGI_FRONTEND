@@ -64,6 +64,12 @@ describe('ContribuableDetailPageComponent', () => {
     expect(permissions.hasPermission).toHaveBeenCalledWith('Contribuables_ReadPii');
   });
 
+  it('ferme le panneau vers la liste', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+    expect(() => fixture.componentInstance.close()).not.toThrow();
+  });
+
   it('revele les contacts et trace le message', () => {
     const { fixture, gateway } = setup();
     fixture.detectChanges();

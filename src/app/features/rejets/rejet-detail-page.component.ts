@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { RejetDetail } from '../../core/models/rejets/rejet.model';
 import { ConfirmDialogComponent } from '../../core/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogWithInputComponent } from '../../core/components/confirm-dialog-with-input/confirm-dialog-with-input.component';
-import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
@@ -64,7 +64,7 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
   standalone: true,
   imports: [
     RouterLink,
-    PageHeaderComponent,
+    SidePanelComponent,
     StatePanelComponent,
     AbidjanDatePipe,
     ConfirmDialogComponent,
@@ -72,135 +72,142 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pdref-page-header
+    <pdref-side-panel
+      [open]="true"
       [title]="'Rejet - ' + (item()?.numeroDemande || '')"
-      subtitle="Detail du rejet et historique des cycles."
-    />
-
-    @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
-    } @else if (loading()) {
-      <pdref-state-panel state="loading" title="Chargement du rejet" />
-    } @else if (item(); as detail) {
-      <div class="actions">
-        @if (canReprendre() && isActionable(detail)) {
-          <button type="button" class="pd-btn pd-btn--primary" (click)="repriseOpen.set(true)">
-            Reprendre
-          </button>
-        }
-        @if (canAbandonner() && isActionable(detail)) {
-          <button type="button" class="pd-btn pd-btn--danger" (click)="abandonOpen.set(true)">
-            Abandonner
-          </button>
-        }
-        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/rejets">Retour aux rejets</a>
-      </div>
-
-      <section class="pd-card summary">
-        <div>
-          <span class="pd-label">Demande</span><strong>{{ detail.numeroDemande }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Famille</span><strong>{{ familleLabel(detail.famille) }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Cycle du rejet</span><strong>{{ detail.cycle }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Cycle courant</span><strong>{{ detail.cycleCourant }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Statut</span><strong>{{ statutLabel(detail.statut) }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Motif</span><strong>{{ detail.motifLibelle }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Piece complementaire</span
-          ><strong>{{ detail.pieceComplementaireRequise ? 'Requise' : 'Non requise' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Date du rejet</span
-          ><strong>{{ detail.dateCreation | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Date de reprise</span
-          ><strong>{{ detail.dateReprise | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Date d'abandon</span
-          ><strong>{{ detail.dateAbandon | abidjanDate }}</strong>
-        </div>
-      </section>
-
-      @if (detail.commentaire) {
-        <section class="pd-card">
-          <h2>Commentaire</h2>
-          <p>{{ detail.commentaire }}</p>
-        </section>
-      }
-
-      @if (detail.piecesContribuable?.length) {
-        <section class="pd-card">
-          <h2>Pièces reçues</h2>
-          @for (envoi of detail.piecesContribuable; track envoi.id) {
-            <article class="piece-depot">
-              <strong>{{ envoi.createdAt | abidjanDate }}</strong>
-              @if (envoi.message) {
-                <p>{{ envoi.message }}</p>
-              }
-              <ul>
-                @for (file of envoi.files; track file.fileGroupId) {
-                  <li>{{ file.fileName }} ({{ file.sizeBytes }} octets)</li>
-                }
-              </ul>
-            </article>
+      size="lg"
+      (closeRequested)="close()"
+    >
+      @if (problem(); as issue) {
+        <pdref-state-panel
+          state="error"
+          [problem]="issue"
+          actionLabel="Reessayer"
+          (retry)="load()"
+        />
+      } @else if (loading()) {
+        <pdref-state-panel state="loading" title="Chargement du rejet" />
+      } @else if (item(); as detail) {
+        <div class="actions">
+          @if (canReprendre() && isActionable(detail)) {
+            <button type="button" class="pd-btn pd-btn--primary" (click)="repriseOpen.set(true)">
+              Reprendre
+            </button>
           }
-        </section>
-      }
-
-      @if (detail.motifAbandon) {
-        <section class="pd-card">
-          <h2>Motif d'abandon</h2>
-          <p>{{ detail.motifAbandon }}</p>
-        </section>
-      }
-
-      <section class="pd-card">
-        <h2>Historique des cycles</h2>
-        <div
-          class="table-wrap"
-          tabindex="0"
-          role="region"
-          aria-label="Historique des cycles de rejet"
-        >
-          <table class="pd-table">
-            <thead>
-              <tr>
-                <th>Cycle</th>
-                <th>Famille</th>
-                <th>Motif</th>
-                <th>Statut</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (cycle of detail.historique; track cycle.id) {
-                <tr>
-                  <td>{{ cycle.cycle }}</td>
-                  <td>{{ familleLabel(cycle.famille) }}</td>
-                  <td>{{ cycle.motifLibelle }}</td>
-                  <td>
-                    <span class="pd-chip">{{ statutLabel(cycle.statut) }}</span>
-                  </td>
-                  <td>{{ cycle.dateCreation | abidjanDate }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          @if (canAbandonner() && isActionable(detail)) {
+            <button type="button" class="pd-btn pd-btn--danger" (click)="abandonOpen.set(true)">
+              Abandonner
+            </button>
+          }
+          <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/rejets">Retour aux rejets</a>
         </div>
-      </section>
-    }
+
+        <section class="pd-card summary">
+          <div>
+            <span class="pd-label">Demande</span><strong>{{ detail.numeroDemande }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Famille</span><strong>{{ familleLabel(detail.famille) }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Cycle du rejet</span><strong>{{ detail.cycle }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Cycle courant</span><strong>{{ detail.cycleCourant }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Statut</span><strong>{{ statutLabel(detail.statut) }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Motif</span><strong>{{ detail.motifLibelle }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Piece complementaire</span
+            ><strong>{{ detail.pieceComplementaireRequise ? 'Requise' : 'Non requise' }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Date du rejet</span
+            ><strong>{{ detail.dateCreation | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Date de reprise</span
+            ><strong>{{ detail.dateReprise | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Date d'abandon</span
+            ><strong>{{ detail.dateAbandon | abidjanDate }}</strong>
+          </div>
+        </section>
+
+        @if (detail.commentaire) {
+          <section class="pd-card">
+            <h2>Commentaire</h2>
+            <p>{{ detail.commentaire }}</p>
+          </section>
+        }
+
+        @if (detail.piecesContribuable?.length) {
+          <section class="pd-card">
+            <h2>Pièces reçues</h2>
+            @for (envoi of detail.piecesContribuable; track envoi.id) {
+              <article class="piece-depot">
+                <strong>{{ envoi.createdAt | abidjanDate }}</strong>
+                @if (envoi.message) {
+                  <p>{{ envoi.message }}</p>
+                }
+                <ul>
+                  @for (file of envoi.files; track file.fileGroupId) {
+                    <li>{{ file.fileName }} ({{ file.sizeBytes }} octets)</li>
+                  }
+                </ul>
+              </article>
+            }
+          </section>
+        }
+
+        @if (detail.motifAbandon) {
+          <section class="pd-card">
+            <h2>Motif d'abandon</h2>
+            <p>{{ detail.motifAbandon }}</p>
+          </section>
+        }
+
+        <section class="pd-card">
+          <h2>Historique des cycles</h2>
+          <div
+            class="table-wrap"
+            tabindex="0"
+            role="region"
+            aria-label="Historique des cycles de rejet"
+          >
+            <table class="pd-table">
+              <thead>
+                <tr>
+                  <th>Cycle</th>
+                  <th>Famille</th>
+                  <th>Motif</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cycle of detail.historique; track cycle.id) {
+                  <tr>
+                    <td>{{ cycle.cycle }}</td>
+                    <td>{{ familleLabel(cycle.famille) }}</td>
+                    <td>{{ cycle.motifLibelle }}</td>
+                    <td>
+                      <span class="pd-chip">{{ statutLabel(cycle.statut) }}</span>
+                    </td>
+                    <td>{{ cycle.dateCreation | abidjanDate }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    </pdref-side-panel>
 
     <pdref-confirm-dialog
       [open]="repriseOpen()"
@@ -262,6 +269,7 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
 export class RejetDetailPageComponent {
   private readonly gateway = inject(RejetGateway);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly permissions = inject(PermissionsService);
   private readonly rejetId = this.route.snapshot.paramMap.get('id') ?? '';
 
@@ -280,6 +288,10 @@ export class RejetDetailPageComponent {
     }
 
     this.load();
+  }
+
+  close(): void {
+    void this.router.navigate(['/dashboard/rejets']);
   }
 
   load(): void {

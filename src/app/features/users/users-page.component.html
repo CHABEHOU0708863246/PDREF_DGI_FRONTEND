@@ -53,8 +53,13 @@
 </section>
 
 @if (showForm()) {
-  <section class="users-form" aria-labelledby="users-form-title">
-    <h2 id="users-form-title">{{ title() }}</h2>
+  <pdref-side-panel
+    [open]="true"
+    [title]="title()"
+    size="md"
+    [dirty]="form.dirty"
+    (closeRequested)="cancel()"
+  >
     <form [formGroup]="form" (ngSubmit)="submit()">
       <div class="users-form__grid">
         <label class="pd-field">
@@ -114,7 +119,7 @@
         <button class="pd-btn pd-btn--ghost" type="button" (click)="cancel()">Annuler</button>
       </div>
     </form>
-  </section>
+  </pdref-side-panel>
 }
 
 <section class="users-list" aria-label="Liste des utilisateurs">

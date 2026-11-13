@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { ContribuableWrite } from '../../core/models/contribuables/contribuable.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { ContribuablesGateway } from '../../core/services/contribuables/contribuables.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -12,7 +13,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-contribuable-form-page',
   standalone: true,
-  imports: [FormsModule, PageHeaderComponent, StatePanelComponent],
+  imports: [FormsModule, PageHeaderComponent, SidePanelComponent, StatePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header [title]="isEdit() ? 'Modifier le contribuable' : 'Nouveau contribuable'" />
@@ -21,83 +22,90 @@ import { normalizeProblem } from '../../core/utils/problem';
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de la fiche" />
     } @else {
-      <section class="pd-card form-card">
-        @if (!form.email) {
-          <p class="pd-warning" role="status">
-            Notifications automatiques impossibles : aucun email renseigne.
-          </p>
-        }
-        @if (!form.centreImpotId) {
-          <p class="pd-warning" role="status">Le centre de rattachement est obligatoire.</p>
-        }
-        <form (ngSubmit)="save()">
-          <div class="form-grid">
-            <label class="pd-field"
-              ><span class="pd-label">NCC *</span
-              ><input
-                class="pd-input"
-                [(ngModel)]="form.ncc"
-                name="ncc"
-                [disabled]="isEdit()"
-                required
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Raison sociale *</span
-              ><input
-                class="pd-input"
-                [(ngModel)]="form.raisonSociale"
-                name="raisonSociale"
-                required
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Systeme comptable *</span
-              ><input
-                class="pd-input"
-                [(ngModel)]="form.systemeComptable"
-                name="systemeComptable"
-                required
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Centre de rattachement *</span
-              ><input
-                class="pd-input"
-                [(ngModel)]="form.centreImpotId"
-                name="centreImpotId"
-                required
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Secteur</span
-              ><input class="pd-input" [(ngModel)]="form.secteur" name="secteur"
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Forme juridique</span
-              ><input class="pd-input" [(ngModel)]="form.formeJuridique" name="formeJuridique"
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Zone</span
-              ><input class="pd-input" [(ngModel)]="form.zoneId" name="zoneId"
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Adresse</span
-              ><input class="pd-input" [(ngModel)]="form.adresse" name="adresse"
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Email</span
-              ><input class="pd-input" type="email" [(ngModel)]="form.email" name="email"
-            /></label>
-            <label class="pd-field"
-              ><span class="pd-label">Telephone</span
-              ><input class="pd-input" [(ngModel)]="form.telephone" name="telephone"
-            /></label>
-          </div>
-          <div class="pd-actions">
-            <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
-              {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
-            </button>
-            <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
-          </div>
-        </form>
-      </section>
+      <pdref-side-panel
+        [open]="true"
+        [title]="isEdit() ? 'Modifier le contribuable' : 'Nouveau contribuable'"
+        size="lg"
+        (closeRequested)="cancel()"
+      >
+        <section class="pd-card form-card">
+          @if (!form.email) {
+            <p class="pd-warning" role="status">
+              Notifications automatiques impossibles : aucun email renseigne.
+            </p>
+          }
+          @if (!form.centreImpotId) {
+            <p class="pd-warning" role="status">Le centre de rattachement est obligatoire.</p>
+          }
+          <form (ngSubmit)="save()">
+            <div class="form-grid">
+              <label class="pd-field"
+                ><span class="pd-label">NCC *</span
+                ><input
+                  class="pd-input"
+                  [(ngModel)]="form.ncc"
+                  name="ncc"
+                  [disabled]="isEdit()"
+                  required
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Raison sociale *</span
+                ><input
+                  class="pd-input"
+                  [(ngModel)]="form.raisonSociale"
+                  name="raisonSociale"
+                  required
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Systeme comptable *</span
+                ><input
+                  class="pd-input"
+                  [(ngModel)]="form.systemeComptable"
+                  name="systemeComptable"
+                  required
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Centre de rattachement *</span
+                ><input
+                  class="pd-input"
+                  [(ngModel)]="form.centreImpotId"
+                  name="centreImpotId"
+                  required
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Secteur</span
+                ><input class="pd-input" [(ngModel)]="form.secteur" name="secteur"
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Forme juridique</span
+                ><input class="pd-input" [(ngModel)]="form.formeJuridique" name="formeJuridique"
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Zone</span
+                ><input class="pd-input" [(ngModel)]="form.zoneId" name="zoneId"
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Adresse</span
+                ><input class="pd-input" [(ngModel)]="form.adresse" name="adresse"
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Email</span
+                ><input class="pd-input" type="email" [(ngModel)]="form.email" name="email"
+              /></label>
+              <label class="pd-field"
+                ><span class="pd-label">Telephone</span
+                ><input class="pd-input" [(ngModel)]="form.telephone" name="telephone"
+              /></label>
+            </div>
+            <div class="pd-actions">
+              <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
+                {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+              <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
+            </div>
+          </form>
+        </section>
+      </pdref-side-panel>
     }
   `,
   styleUrl: './contribuable-form-page.component.scss',

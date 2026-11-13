@@ -303,8 +303,13 @@
 }
 
 @if (showForm()) {
-  <section class="admin-form" aria-label="Formulaire d'administration">
-    <h2>{{ editingId() ? 'Modifier' : 'Ajouter' }} — {{ title() }}</h2>
+  <pdref-side-panel
+    [open]="true"
+    [title]="(editingId() ? 'Modifier' : 'Ajouter') + ' - ' + title()"
+    size="lg"
+    [dirty]="form.dirty"
+    (closeRequested)="cancel()"
+  >
     <form [formGroup]="form" (ngSubmit)="submit()">
       @switch (screen) {
         @case ('directions') {
@@ -478,5 +483,5 @@
         </button>
       </div>
     </form>
-  </section>
+  </pdref-side-panel>
 }

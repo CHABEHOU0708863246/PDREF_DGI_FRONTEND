@@ -104,6 +104,12 @@ describe('CourrierDetailPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Instruction C3');
   });
 
+  it('ferme le panneau vers la liste', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+    expect(() => fixture.componentInstance.close()).not.toThrow();
+  });
+
   it('couvre les actions manuelles de signature et de remise', () => {
     const { fixture, gateway } = setup();
     fixture.detectChanges();

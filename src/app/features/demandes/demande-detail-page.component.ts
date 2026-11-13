@@ -4,8 +4,8 @@ import type { ApiProblemDetails } from '../../core/models/common/api-problem.mod
 import type { DemandeDetail } from '../../core/models/demandes/demande.model';
 import type { SuiviDetail } from '../../core/models/suivis/suivi.model';
 import type { FileGroup } from '../../core/models/files/file.model';
-import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import {
   RejetDialogComponent,
   type RejetDialogValue,
@@ -164,244 +164,252 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
   standalone: true,
   imports: [
     RouterLink,
-    PageHeaderComponent,
+    SidePanelComponent,
     StatePanelComponent,
     AbidjanDatePipe,
     RejetDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pdref-page-header [title]="title()" subtitle="Fiche de demande de rectification." />
+    <pdref-side-panel [open]="true" [title]="title()" size="xl" (closeRequested)="close()">
+      @if (problem(); as issue) {
+        <pdref-state-panel
+          state="error"
+          [problem]="issue"
+          actionLabel="Réessayer"
+          (retry)="load()"
+        />
+      } @else if (loading()) {
+        <pdref-state-panel state="loading" title="Chargement de la demande" />
+      } @else if (item(); as demande) {
+        <div class="detail-actions">
+          @if (canVerify()) {
+            <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
+              Verifier GUDEF
+            </button>
+          }
+          @if (canReject()) {
+            <button type="button" class="pd-btn pd-btn--danger" (click)="openRejet()">
+              Rejeter
+            </button>
+          }
+          @if (canExport()) {
+            <button type="button" class="pd-btn pd-btn--primary" (click)="exportPdf()">
+              Exporter en PDF
+            </button>
+          }
+          <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/demandes">Retour à la liste</a>
+        </div>
 
-    @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
-    } @else if (loading()) {
-      <pdref-state-panel state="loading" title="Chargement de la demande" />
-    } @else if (item(); as demande) {
-      <div class="detail-actions">
-        @if (canVerify()) {
-          <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
-            Verifier GUDEF
-          </button>
-        }
-        @if (canReject()) {
-          <button type="button" class="pd-btn pd-btn--danger" (click)="openRejet()">Rejeter</button>
-        }
-        @if (canExport()) {
-          <button type="button" class="pd-btn pd-btn--primary" (click)="exportPdf()">
-            Exporter en PDF
-          </button>
-        }
-        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/demandes">Retour à la liste</a>
-      </div>
+        <nav class="tabs" aria-label="Onglets de la demande">
+          @for (tab of tabs; track tab) {
+            <button
+              type="button"
+              class="tabs__item"
+              [class.is-active]="activeTab() === tab"
+              (click)="activeTab.set(tab)"
+            >
+              {{ tabLabel(tab) }}
+            </button>
+          }
+        </nav>
 
-      <nav class="tabs" aria-label="Onglets de la demande">
-        @for (tab of tabs; track tab) {
-          <button
-            type="button"
-            class="tabs__item"
-            [class.is-active]="activeTab() === tab"
-            (click)="activeTab.set(tab)"
-          >
-            {{ tabLabel(tab) }}
-          </button>
-        }
-      </nav>
+        @switch (activeTab()) {
+          @case ('synthese') {
+            <section class="pd-card detail-grid">
+              <div>
+                <span class="pd-label">Numéro</span
+                ><strong>{{ demande.numero || 'Brouillon' }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Statut</span><strong>{{ demande.statut }}</strong>
+                @if (demande.pdfManquant) {
+                  <span class="pd-chip pd-chip--danger">PDF a joindre</span>
+                }
+              </div>
+              <div>
+                <span class="pd-label">Origine</span><strong>{{ demande.origine }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Déposée le</span
+                ><strong>{{ demande.dateDepot | abidjanDate }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">NCC</span><strong>{{ demande.contribuable.ncc }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Raison sociale</span
+                ><strong>{{ demande.contribuable.raisonSociale }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Centre</span
+                ><strong>{{
+                  demande.contribuable.centreImpotLibelle || demande.contribuable.centreImpotId
+                }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Direction</span
+                ><strong>{{ demande.contribuable.directionRattachementId }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Référence dépôt</span
+                ><strong>{{ demande.referenceDepot || '-' }}</strong>
+              </div>
+              <div>
+                <span class="pd-label">Courrier</span
+                ><strong>{{ demande.courrierId || '-' }}</strong>
+              </div>
+            </section>
+          }
 
-      @switch (activeTab()) {
-        @case ('synthese') {
-          <section class="pd-card detail-grid">
-            <div>
-              <span class="pd-label">Numéro</span
-              ><strong>{{ demande.numero || 'Brouillon' }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Statut</span><strong>{{ demande.statut }}</strong>
-              @if (demande.pdfManquant) {
-                <span class="pd-chip pd-chip--danger">PDF a joindre</span>
+          @case ('exercices') {
+            <section class="pd-card">
+              @for (exercise of demande.exercices; track exercise.annee) {
+                <article class="exercise-detail">
+                  <h3>Exercice {{ exercise.annee }}</h3>
+                  <p>
+                    <strong>Périmètre :</strong>
+                    {{ exercise.touteLaLiasse ? 'Toute la liasse' : 'États sélectionnés' }}
+                  </p>
+                  <p><strong>États :</strong> {{ labels(exercise.etatsFinanciers) }}</p>
+                  <p><strong>Motifs :</strong> {{ motives(exercise.motifs) }}</p>
+                  @if (exercise.variables.length > 0) {
+                    <table class="pd-table">
+                      <thead>
+                        <tr>
+                          <th>Variable</th>
+                          <th>Type</th>
+                          <th>Valeur</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (variable of exercise.variables; track variable.code) {
+                          <tr>
+                            <td>{{ variable.libelle }}</td>
+                            <td>{{ variable.type }}</td>
+                            <td>
+                              {{ variable.type === 'MONTANT' ? variable.montant : variable.texte }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                </article>
               }
-            </div>
-            <div>
-              <span class="pd-label">Origine</span><strong>{{ demande.origine }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Déposée le</span
-              ><strong>{{ demande.dateDepot | abidjanDate }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">NCC</span><strong>{{ demande.contribuable.ncc }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Raison sociale</span
-              ><strong>{{ demande.contribuable.raisonSociale }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Centre</span
-              ><strong>{{
-                demande.contribuable.centreImpotLibelle || demande.contribuable.centreImpotId
-              }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Direction</span
-              ><strong>{{ demande.contribuable.directionRattachementId }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Référence dépôt</span
-              ><strong>{{ demande.referenceDepot || '-' }}</strong>
-            </div>
-            <div>
-              <span class="pd-label">Courrier</span><strong>{{ demande.courrierId || '-' }}</strong>
-            </div>
-          </section>
-        }
+            </section>
+          }
 
-        @case ('exercices') {
-          <section class="pd-card">
-            @for (exercise of demande.exercices; track exercise.annee) {
-              <article class="exercise-detail">
-                <h3>Exercice {{ exercise.annee }}</h3>
+          @case ('conformite') {
+            <section class="pd-card">
+              <p><span class="pd-label">Statut</span> {{ demande.conformite.statut }}</p>
+              @if (demande.conformite.motifRejetCode) {
+                <p class="pd-error">Motif de rejet : {{ demande.conformite.motifRejetCode }}</p>
+              }
+              @if (demande.conformite.champsManquants.length > 0) {
+                <p>Champs manquants : {{ demande.conformite.champsManquants.join(', ') }}</p>
+              }
+              <p class="pd-muted">Vérifiée le {{ demande.conformite.verifieLe | abidjanDate }}</p>
+            </section>
+          }
+
+          @case ('circuit') {
+            <section class="pd-card">
+              @if (demande.circuit; as circuit) {
                 <p>
-                  <strong>Périmètre :</strong>
-                  {{ exercise.touteLaLiasse ? 'Toute la liasse' : 'États sélectionnés' }}
+                  <strong>{{ circuit.code }}</strong> v{{ circuit.version }} — {{ circuit.statut }}
                 </p>
-                <p><strong>États :</strong> {{ labels(exercise.etatsFinanciers) }}</p>
-                <p><strong>Motifs :</strong> {{ motives(exercise.motifs) }}</p>
-                @if (exercise.variables.length > 0) {
+                <p>Étape courante : {{ circuit.etapeCourante || '-' }}</p>
+                <div class="table-wrap">
                   <table class="pd-table">
                     <thead>
                       <tr>
-                        <th>Variable</th>
-                        <th>Type</th>
-                        <th>Valeur</th>
+                        <th>Étape</th>
+                        <th>Statut</th>
+                        <th>Échéance</th>
                       </tr>
                     </thead>
                     <tbody>
-                      @for (variable of exercise.variables; track variable.code) {
+                      @for (step of circuitEntries(demande); track step[0]) {
                         <tr>
-                          <td>{{ variable.libelle }}</td>
-                          <td>{{ variable.type }}</td>
-                          <td>
-                            {{ variable.type === 'MONTANT' ? variable.montant : variable.texte }}
-                          </td>
+                          <td>{{ step[0] }}</td>
+                          <td>{{ step[1].statut }}</td>
+                          <td>{{ step[1].echeance | abidjanDate }}</td>
                         </tr>
                       }
                     </tbody>
                   </table>
-                }
-              </article>
-            }
-          </section>
-        }
-
-        @case ('conformite') {
-          <section class="pd-card">
-            <p><span class="pd-label">Statut</span> {{ demande.conformite.statut }}</p>
-            @if (demande.conformite.motifRejetCode) {
-              <p class="pd-error">Motif de rejet : {{ demande.conformite.motifRejetCode }}</p>
-            }
-            @if (demande.conformite.champsManquants.length > 0) {
-              <p>Champs manquants : {{ demande.conformite.champsManquants.join(', ') }}</p>
-            }
-            <p class="pd-muted">Vérifiée le {{ demande.conformite.verifieLe | abidjanDate }}</p>
-          </section>
-        }
-
-        @case ('circuit') {
-          <section class="pd-card">
-            @if (demande.circuit; as circuit) {
-              <p>
-                <strong>{{ circuit.code }}</strong> v{{ circuit.version }} — {{ circuit.statut }}
-              </p>
-              <p>Étape courante : {{ circuit.etapeCourante || '-' }}</p>
-              <div class="table-wrap">
-                <table class="pd-table">
-                  <thead>
-                    <tr>
-                      <th>Étape</th>
-                      <th>Statut</th>
-                      <th>Échéance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (step of circuitEntries(demande); track step[0]) {
-                      <tr>
-                        <td>{{ step[0] }}</td>
-                        <td>{{ step[1].statut }}</td>
-                        <td>{{ step[1].echeance | abidjanDate }}</td>
-                      </tr>
+                </div>
+                @if (suivi(); as dossier) {
+                  <div class="section-head">
+                    <h3>Avis des directions</h3>
+                    <a class="pd-link" [routerLink]="['/dashboard/suivis', dossier.demandeId]">
+                      Ouvrir le suivi
+                    </a>
+                  </div>
+                  <div class="avis-grid">
+                    @for (avis of dossier.avis; track avis.id) {
+                      <article class="avis-card">
+                        <strong>{{ avis.etapeCode }}</strong>
+                        <span class="pd-chip">{{ avis.statut }}</span>
+                        <span>{{ avis.decision || 'En attente' }}</span>
+                        <span class="pd-muted">{{ avis.directionCode }}</span>
+                      </article>
                     }
-                  </tbody>
-                </table>
-              </div>
-              @if (suivi(); as dossier) {
-                <div class="section-head">
-                  <h3>Avis des directions</h3>
-                  <a class="pd-link" [routerLink]="['/dashboard/suivis', dossier.demandeId]">
-                    Ouvrir le suivi
-                  </a>
-                </div>
-                <div class="avis-grid">
-                  @for (avis of dossier.avis; track avis.id) {
-                    <article class="avis-card">
-                      <strong>{{ avis.etapeCode }}</strong>
-                      <span class="pd-chip">{{ avis.statut }}</span>
-                      <span>{{ avis.decision || 'En attente' }}</span>
-                      <span class="pd-muted">{{ avis.directionCode }}</span>
-                    </article>
-                  }
-                </div>
-              }
-            } @else {
-              <pdref-state-panel
-                state="empty"
-                title="Circuit non activé"
-                message="Le circuit n'a pas été activé pour cette demande."
-              />
-            }
-          </section>
-        }
-
-        @case ('pieces') {
-          <section class="pd-card">
-            <div class="section-head">
-              <h2>Pièces jointes</h2>
-              @if (canUpload()) {
-                <label class="pd-btn pd-btn--primary pd-btn--sm">
-                  Ajouter un PDF
-                  <input type="file" accept="application/pdf" hidden (change)="upload($event)" />
-                </label>
-              }
-            </div>
-            @if (attachmentsLoading()) {
-              <pdref-state-panel state="loading" title="Chargement des pièces jointes" />
-            } @else if (attachments().length === 0) {
-              <pdref-state-panel
-                state="empty"
-                title="Aucune pièce jointe"
-                message="Ajoutez au moins un PDF."
-              />
-            } @else {
-              <ul class="attachments">
-                @for (group of attachments(); track group.id) {
-                  @if (group.currentFile; as file) {
-                    <li>
-                      <span>{{ file.originalName }}</span>
-                      <button
-                        type="button"
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        (click)="download(file.id)"
-                      >
-                        Télécharger
-                      </button>
-                    </li>
-                  }
+                  </div>
                 }
-              </ul>
-            }
-          </section>
+              } @else {
+                <pdref-state-panel
+                  state="empty"
+                  title="Circuit non activé"
+                  message="Le circuit n'a pas été activé pour cette demande."
+                />
+              }
+            </section>
+          }
+
+          @case ('pieces') {
+            <section class="pd-card">
+              <div class="section-head">
+                <h2>Pièces jointes</h2>
+                @if (canUpload()) {
+                  <label class="pd-btn pd-btn--primary pd-btn--sm">
+                    Ajouter un PDF
+                    <input type="file" accept="application/pdf" hidden (change)="upload($event)" />
+                  </label>
+                }
+              </div>
+              @if (attachmentsLoading()) {
+                <pdref-state-panel state="loading" title="Chargement des pièces jointes" />
+              } @else if (attachments().length === 0) {
+                <pdref-state-panel
+                  state="empty"
+                  title="Aucune pièce jointe"
+                  message="Ajoutez au moins un PDF."
+                />
+              } @else {
+                <ul class="attachments">
+                  @for (group of attachments(); track group.id) {
+                    @if (group.currentFile; as file) {
+                      <li>
+                        <span>{{ file.originalName }}</span>
+                        <button
+                          type="button"
+                          class="pd-btn pd-btn--ghost pd-btn--sm"
+                          (click)="download(file.id)"
+                        >
+                          Télécharger
+                        </button>
+                      </li>
+                    }
+                  }
+                </ul>
+              }
+            </section>
+          }
         }
       }
-    }
+    </pdref-side-panel>
 
     <pdref-rejet-dialog
       [(open)]="rejetOpen"
@@ -417,6 +425,7 @@ export class DemandeDetailPageComponent {
   private readonly suivisGateway = inject(SuivisGateway);
   private readonly rejets = inject(RejetGateway);
   private readonly router = inject(Router);
+
   private readonly route = inject(ActivatedRoute);
   private readonly permissions = inject(PermissionsService);
   private readonly correlation = inject(CorrelationService);
@@ -507,6 +516,10 @@ export class DemandeDetailPageComponent {
 
   canUpload(): boolean {
     return this.permissions.hasPermission('Demandes_Create');
+  }
+
+  close(): void {
+    void this.router.navigate(['/dashboard/demandes']);
   }
 
   load(): void {

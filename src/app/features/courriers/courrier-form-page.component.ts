@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
@@ -6,6 +6,7 @@ import type { ApiProblemDetails } from '../../core/models/common/api-problem.mod
 import type { CourrierDetail, CourrierWrite } from '../../core/models/courriers/courrier.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { ContribuableSelectComponent } from '../../core/components/contribuable-select/contribuable-select.component';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
@@ -15,7 +16,13 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-courrier-form-page',
   standalone: true,
-  imports: [FormsModule, PageHeaderComponent, StatePanelComponent, ContribuableSelectComponent],
+  imports: [
+    FormsModule,
+    PageHeaderComponent,
+    SidePanelComponent,
+    StatePanelComponent,
+    ContribuableSelectComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header [title]="isEdit() ? 'Modifier le courrier' : 'Nouveau courrier'" />
@@ -24,136 +31,147 @@ import { normalizeProblem } from '../../core/utils/problem';
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement du courrier" />
     } @else {
-      <section class="pd-card form-card">
-        <form (ngSubmit)="save()">
-          <div class="form-grid">
-            <label class="pd-field">
-              <span class="pd-label">Type *</span>
-              <select
-                class="pd-input"
-                [(ngModel)]="form.typeCourrier"
-                name="typeCourrier"
-                [disabled]="isEdit()"
-              >
-                <option value="COURRIER">Courrier</option>
-                <option value="SIGICI">SIGICI</option>
-              </select>
-            </label>
-            <label class="pd-field">
-              <span class="pd-label">Sens *</span>
-              <select class="pd-input" [(ngModel)]="form.sens" name="sens" [disabled]="isEdit()">
-                <option value="ENTRANT">Entrant</option>
-                <option value="SORTANT">Sortant</option>
-              </select>
-            </label>
-            <label class="pd-field">
-              <span class="pd-label">Numero *</span>
-              <input
-                class="pd-input"
-                [(ngModel)]="form.numero"
-                name="numero"
-                [disabled]="isEdit()"
-                required
-              />
-            </label>
-            @if (isEdit()) {
-              <div class="pd-field">
-                <span class="pd-label">Imputation</span>
-                <div class="readonly-value">GUDEF</div>
-              </div>
-            }
-            @if (form.sens === 'ENTRANT') {
+      <pdref-side-panel
+        [open]="true"
+        [title]="isEdit() ? 'Modifier le courrier' : 'Nouveau courrier'"
+        size="lg"
+        (closeRequested)="cancel()"
+      >
+        <section class="pd-card form-card">
+          <form (ngSubmit)="save()">
+            <div class="form-grid">
               <label class="pd-field">
-                <span class="pd-label">Date d arrivee *</span>
+                <span class="pd-label">Type *</span>
+                <select
+                  class="pd-input"
+                  [(ngModel)]="form.typeCourrier"
+                  name="typeCourrier"
+                  [disabled]="isEdit()"
+                >
+                  <option value="COURRIER">Courrier</option>
+                  <option value="SIGICI">SIGICI</option>
+                </select>
+              </label>
+              <label class="pd-field">
+                <span class="pd-label">Sens *</span>
+                <select class="pd-input" [(ngModel)]="form.sens" name="sens" [disabled]="isEdit()">
+                  <option value="ENTRANT">Entrant</option>
+                  <option value="SORTANT">Sortant</option>
+                </select>
+              </label>
+              <label class="pd-field">
+                <span class="pd-label">Numero *</span>
                 <input
                   class="pd-input"
-                  type="date"
-                  [(ngModel)]="form.dateArrivee"
-                  name="dateArrivee"
+                  [(ngModel)]="form.numero"
+                  name="numero"
+                  [disabled]="isEdit()"
                   required
                 />
               </label>
-            } @else {
-              <label class="pd-field">
-                <span class="pd-label">Date d emission *</span>
-                <input
-                  class="pd-input"
-                  type="date"
-                  [(ngModel)]="form.dateEmission"
-                  name="dateEmission"
-                  required
-                />
-              </label>
-            }
-            <label class="pd-field">
-              <span class="pd-label">Expediteur *</span>
-              <input
-                class="pd-input"
-                list="expediteurs"
-                [(ngModel)]="form.expediteur"
-                name="expediteur"
-                (input)="onExpediteurInput($event)"
-                required
-              />
-              <datalist id="expediteurs">
-                @for (item of expediteurs(); track item) {
-                  <option [value]="item"></option>
-                }
-              </datalist>
-            </label>
-            <label class="pd-field full">
-              <span class="pd-label">Objet *</span>
-              <input class="pd-input" [(ngModel)]="form.objet" name="objet" required />
-            </label>
-            <label class="pd-field full">
-              <span class="pd-label">References</span>
-              <textarea class="pd-input" [(ngModel)]="form.references" name="references"></textarea>
-            </label>
-            @if (!isEdit() && canLinkContribuable()) {
-              <div class="pd-field full">
-                <pdref-contribuable-select
-                  label="Contribuable (optionnel)"
-                  [(ngModel)]="form.contribuableId"
-                  name="contribuableId"
-                />
-              </div>
-            }
-            @if (isEdit() && item()?.contribuable; as contribuable) {
-              <div class="pd-field full">
-                <span class="pd-label">Contribuable</span>
-                <div class="readonly-value">
-                  {{ contribuable.raisonSociale }} -
-                  {{ contribuable.ncc || contribuable.nccMasque }}
+              @if (isEdit()) {
+                <div class="pd-field">
+                  <span class="pd-label">Imputation</span>
+                  <div class="readonly-value">GUDEF</div>
                 </div>
-              </div>
-            }
-            @if (canInternal()) {
-              <label class="pd-field full">
-                <span class="pd-label">Instructions du Directeur (C3)</span>
-                <textarea
+              }
+              @if (form.sens === 'ENTRANT') {
+                <label class="pd-field">
+                  <span class="pd-label">Date d arrivee *</span>
+                  <input
+                    class="pd-input"
+                    type="date"
+                    [(ngModel)]="form.dateArrivee"
+                    name="dateArrivee"
+                    required
+                  />
+                </label>
+              } @else {
+                <label class="pd-field">
+                  <span class="pd-label">Date d emission *</span>
+                  <input
+                    class="pd-input"
+                    type="date"
+                    [(ngModel)]="form.dateEmission"
+                    name="dateEmission"
+                    required
+                  />
+                </label>
+              }
+              <label class="pd-field">
+                <span class="pd-label">Expediteur *</span>
+                <input
                   class="pd-input"
-                  [(ngModel)]="form.instructionsDirecteur"
-                  name="instructionsDirecteur"
-                ></textarea>
+                  list="expediteurs"
+                  [(ngModel)]="form.expediteur"
+                  name="expediteur"
+                  (input)="onExpediteurInput($event)"
+                  required
+                />
+                <datalist id="expediteurs">
+                  @for (item of expediteurs(); track item) {
+                    <option [value]="item"></option>
+                  }
+                </datalist>
               </label>
               <label class="pd-field full">
-                <span class="pd-label">Annotations SD-GUDEF (C3)</span>
+                <span class="pd-label">Objet *</span>
+                <input class="pd-input" [(ngModel)]="form.objet" name="objet" required />
+              </label>
+              <label class="pd-field full">
+                <span class="pd-label">References</span>
                 <textarea
                   class="pd-input"
-                  [(ngModel)]="form.annotationsSdGudef"
-                  name="annotationsSdGudef"
+                  [(ngModel)]="form.references"
+                  name="references"
                 ></textarea>
               </label>
-            }
-          </div>
-          <div class="pd-actions">
-            <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
-              {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
-            </button>
-            <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
-          </div>
-        </form>
-      </section>
+              @if (!isEdit() && canLinkContribuable()) {
+                <div class="pd-field full">
+                  <pdref-contribuable-select
+                    label="Contribuable (optionnel)"
+                    [(ngModel)]="form.contribuableId"
+                    name="contribuableId"
+                  />
+                </div>
+              }
+              @if (isEdit() && item()?.contribuable; as contribuable) {
+                <div class="pd-field full">
+                  <span class="pd-label">Contribuable</span>
+                  <div class="readonly-value">
+                    {{ contribuable.raisonSociale }} -
+                    {{ contribuable.ncc || contribuable.nccMasque }}
+                  </div>
+                </div>
+              }
+              @if (canInternal()) {
+                <label class="pd-field full">
+                  <span class="pd-label">Instructions du Directeur (C3)</span>
+                  <textarea
+                    class="pd-input"
+                    [(ngModel)]="form.instructionsDirecteur"
+                    name="instructionsDirecteur"
+                  ></textarea>
+                </label>
+                <label class="pd-field full">
+                  <span class="pd-label">Annotations SD-GUDEF (C3)</span>
+                  <textarea
+                    class="pd-input"
+                    [(ngModel)]="form.annotationsSdGudef"
+                    name="annotationsSdGudef"
+                  ></textarea>
+                </label>
+              }
+            </div>
+            <div class="pd-actions">
+              <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
+                {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+              <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
+            </div>
+          </form>
+        </section>
+      </pdref-side-panel>
     }
   `,
   styleUrl: './courrier-form-page.component.scss',

@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfDetail } from '../../core/models/ctf/ctf.model';
 import type { IntegrationModes } from '../../core/models/integrations/integration.model';
-import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { UploadFieldComponent } from '../../core/components/upload-field/upload-field.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
@@ -19,169 +19,185 @@ import { ctfStatutLabel } from './ctf-status';
   standalone: true,
   imports: [
     RouterLink,
-    PageHeaderComponent,
+    SidePanelComponent,
     StatePanelComponent,
     AbidjanDatePipe,
     UploadFieldComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pdref-page-header
+    <pdref-side-panel
+      [open]="true"
       [title]="'CTF - ' + (item()?.numeroDemande || '')"
-      subtitle="Detail de l'autorisation de rectification."
-    />
-
-    @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
-    } @else if (loading()) {
-      <pdref-state-panel state="loading" title="Chargement de l'autorisation CTF" />
-    } @else if (item(); as detail) {
-      @if (manualEImpots()) {
-        <p><span class="pd-chip">Mode manuel</span></p>
-      }
-      <div class="actions">
-        @if (canActiver() && detail.statut === 'A_ACTIVER') {
-          @if (manualEImpots()) {
+      size="lg"
+      (closeRequested)="close()"
+    >
+      @if (problem(); as issue) {
+        <pdref-state-panel
+          state="error"
+          [problem]="issue"
+          actionLabel="Reessayer"
+          (retry)="load()"
+        />
+      } @else if (loading()) {
+        <pdref-state-panel state="loading" title="Chargement de l'autorisation CTF" />
+      } @else if (item(); as detail) {
+        @if (manualEImpots()) {
+          <p><span class="pd-chip">Mode manuel</span></p>
+        }
+        <div class="actions">
+          @if (canActiver() && detail.statut === 'A_ACTIVER') {
+            @if (manualEImpots()) {
+              <label class="pd-field">
+                <span class="pd-label">Reference e-impots</span>
+                <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
+              </label>
+              <label class="pd-field">
+                <span class="pd-label">Date d'activation</span>
+                <input
+                  class="pd-input"
+                  type="date"
+                  [value]="dateActivation()"
+                  (input)="onDateActivation($event)"
+                />
+              </label>
+              <pdref-upload-field
+                label="Preuve d'activation (facultatif)"
+                hint="PDF, PNG ou JPEG, 5 Mo maximum."
+                accept=".pdf,image/png,image/jpeg"
+                [multiple]="false"
+                [maxFiles]="1"
+                (filesSelected)="onProofSelected($event)"
+              />
+              @if (proofName(); as name) {
+                <p class="pd-muted">Preuve selectionnee : {{ name }}</p>
+              }
+              <button
+                type="button"
+                class="pd-btn pd-btn--primary"
+                [disabled]="busy() || uploadingProof()"
+                (click)="declarerActivation()"
+              >
+                Declarer l'activation
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="pd-btn pd-btn--primary"
+                [disabled]="busy()"
+                (click)="activer()"
+              >
+                Activer
+              </button>
+            }
+          }
+          @if (
+            canActiver() &&
+            manualEImpots() &&
+            detail.statut !== 'A_ACTIVER' &&
+            detail.dateRetourGudef &&
+            !detail.dateDepotRectifie
+          ) {
             <label class="pd-field">
-              <span class="pd-label">Reference e-impots</span>
-              <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
+              <span class="pd-label">Reference depot rectifie</span>
+              <input
+                class="pd-input"
+                [value]="referenceDepot()"
+                (input)="onReferenceDepot($event)"
+              />
             </label>
             <label class="pd-field">
-              <span class="pd-label">Date d'activation</span>
+              <span class="pd-label">Date du depot</span>
               <input
                 class="pd-input"
                 type="date"
-                [value]="dateActivation()"
-                (input)="onDateActivation($event)"
+                [value]="dateDepot()"
+                (input)="onDateDepot($event)"
               />
             </label>
-            <pdref-upload-field
-              label="Preuve d'activation (facultatif)"
-              hint="PDF, PNG ou JPEG, 5 Mo maximum."
-              accept=".pdf,image/png,image/jpeg"
-              [multiple]="false"
-              [maxFiles]="1"
-              (filesSelected)="onProofSelected($event)"
-            />
-            @if (proofName(); as name) {
-              <p class="pd-muted">Preuve selectionnee : {{ name }}</p>
-            }
-            <button
-              type="button"
-              class="pd-btn pd-btn--primary"
-              [disabled]="busy() || uploadingProof()"
-              (click)="declarerActivation()"
-            >
-              Declarer l'activation
-            </button>
-          } @else {
             <button
               type="button"
               class="pd-btn pd-btn--primary"
               [disabled]="busy()"
-              (click)="activer()"
+              (click)="declarerDepot()"
             >
-              Activer
+              Declarer le depot rectifie
             </button>
           }
-        }
-        @if (
-          canActiver() &&
-          manualEImpots() &&
-          detail.statut !== 'A_ACTIVER' &&
-          detail.dateRetourGudef &&
-          !detail.dateDepotRectifie
-        ) {
-          <label class="pd-field">
-            <span class="pd-label">Reference depot rectifie</span>
-            <input class="pd-input" [value]="referenceDepot()" (input)="onReferenceDepot($event)" />
-          </label>
-          <label class="pd-field">
-            <span class="pd-label">Date du depot</span>
-            <input
-              class="pd-input"
-              type="date"
-              [value]="dateDepot()"
-              (input)="onDateDepot($event)"
-            />
-          </label>
-          <button
-            type="button"
-            class="pd-btn pd-btn--primary"
-            [disabled]="busy()"
-            (click)="declarerDepot()"
-          >
-            Declarer le depot rectifie
-          </button>
-        }
-        @if (
-          canRetour() && (detail.statut === 'ACTIVEE' || detail.statut === 'CONTRIBUABLE_INFORME')
-        ) {
-          <button type="button" class="pd-btn pd-btn--ghost" [disabled]="busy()" (click)="retour()">
-            Retour GUDEF
-          </button>
-        }
-        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/ctf/suivi">Retour au suivi</a>
-      </div>
+          @if (
+            canRetour() && (detail.statut === 'ACTIVEE' || detail.statut === 'CONTRIBUABLE_INFORME')
+          ) {
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost"
+              [disabled]="busy()"
+              (click)="retour()"
+            >
+              Retour GUDEF
+            </button>
+          }
+          <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/ctf/suivi">Retour au suivi</a>
+        </div>
 
-      <section class="pd-card summary">
-        <div>
-          <span class="pd-label">Demande</span><strong>{{ detail.numeroDemande }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Contribuable</span><strong>{{ detail.raisonSociale }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">NCC</span><strong>{{ detail.ncc }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Cycle</span><strong>{{ detail.cycle }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Statut</span><strong>{{ statutLabel(detail.statut) }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Activation</span
-          ><strong>{{ detail.echeanceActivation | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Depot</span
-          ><strong>{{ detail.echeanceDepot | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Delai depot</span
-          ><strong>{{ detail.joursRestantsDepot }} JO</strong>
-        </div>
-        <div>
-          <span class="pd-label">Courrier</span><strong>{{ detail.courrierId }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Reference activation</span
-          ><strong>{{ detail.referenceActivation || '-' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Retour GUDEF</span
-          ><strong>{{ detail.dateRetourGudef | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Cloture</span
-          ><strong>{{ detail.dateCloture | abidjanDate }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Motif</span><strong>{{ detail.motifCloture || '-' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Tentatives</span><strong>{{ detail.tentatives }}</strong>
-        </div>
-      </section>
-
-      @if (detail.derniereErreur) {
-        <section class="pd-card">
-          <h2>Derniere erreur</h2>
-          <p class="pd-error">{{ detail.derniereErreur }}</p>
+        <section class="pd-card summary">
+          <div>
+            <span class="pd-label">Demande</span><strong>{{ detail.numeroDemande }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Contribuable</span><strong>{{ detail.raisonSociale }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">NCC</span><strong>{{ detail.ncc }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Cycle</span><strong>{{ detail.cycle }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Statut</span><strong>{{ statutLabel(detail.statut) }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Activation</span
+            ><strong>{{ detail.echeanceActivation | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Depot</span
+            ><strong>{{ detail.echeanceDepot | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Delai depot</span
+            ><strong>{{ detail.joursRestantsDepot }} JO</strong>
+          </div>
+          <div>
+            <span class="pd-label">Courrier</span><strong>{{ detail.courrierId }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Reference activation</span
+            ><strong>{{ detail.referenceActivation || '-' }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Retour GUDEF</span
+            ><strong>{{ detail.dateRetourGudef | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Cloture</span
+            ><strong>{{ detail.dateCloture | abidjanDate }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Motif</span><strong>{{ detail.motifCloture || '-' }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Tentatives</span><strong>{{ detail.tentatives }}</strong>
+          </div>
         </section>
+
+        @if (detail.derniereErreur) {
+          <section class="pd-card">
+            <h2>Derniere erreur</h2>
+            <p class="pd-error">{{ detail.derniereErreur }}</p>
+          </section>
+        }
       }
-    }
+    </pdref-side-panel>
   `,
   styles: [
     `
@@ -207,6 +223,7 @@ export class CtfDetailPageComponent {
   private readonly integrations = inject(IntegrationGateway);
   private readonly files = inject(FilesGateway);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly permissions = inject(PermissionsService);
   private readonly demandeId = this.route.snapshot.paramMap.get('id') ?? '';
 
@@ -230,6 +247,10 @@ export class CtfDetailPageComponent {
 
   manualEImpots(): boolean {
     return this.modes()?.eImpots === 'MANUEL';
+  }
+
+  close(): void {
+    void this.router.navigate(['/dashboard/ctf/suivi']);
   }
 
   load(): void {

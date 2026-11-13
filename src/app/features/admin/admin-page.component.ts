@@ -1,8 +1,9 @@
-import { SlicePipe } from '@angular/common';
+﻿import { SlicePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import type { Observable } from 'rxjs';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -29,7 +30,13 @@ type AdminItem =
 @Component({
   selector: 'pdref-admin-page',
   standalone: true,
-  imports: [SlicePipe, ReactiveFormsModule, PageHeaderComponent, StatePanelComponent],
+  imports: [
+    SlicePipe,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SidePanelComponent,
+    StatePanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.scss',

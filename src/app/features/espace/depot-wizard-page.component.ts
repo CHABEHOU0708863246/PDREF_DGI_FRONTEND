@@ -15,8 +15,8 @@ import type {
   DepotDraftRequest,
 } from '../../core/models/depots/depot.model';
 import type { FileGroup } from '../../core/models/files/file.model';
-import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
+import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { DepotGateway } from '../../core/services/depots/depot.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
@@ -33,7 +33,7 @@ const ETAPES = [
 @Component({
   selector: 'pdref-depot-wizard-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, PageHeaderComponent, StatePanelComponent],
+  imports: [DatePipe, RouterLink, SidePanelComponent, StatePanelComponent],
   templateUrl: './depot-wizard-page.component.html',
   styleUrl: './depot-wizard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,6 +90,10 @@ export class DepotWizardPageComponent implements OnInit {
     }
 
     void this.load();
+  }
+
+  close(): void {
+    void this.router.navigate(['/espace']);
   }
 
   async load(): Promise<void> {
