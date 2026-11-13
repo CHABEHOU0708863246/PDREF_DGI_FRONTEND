@@ -100,6 +100,19 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Parametres - Administration PDREF',
       },
       {
+        path: 'admin/emails',
+        loadComponent: () =>
+          import('../admin/email-admin-page.component').then(
+            (module) => module.EmailAdminPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: {
+          permissions: ['Parametres_Read'],
+          breadcrumb: 'E-mails transactionnels',
+        },
+        title: 'E-mails transactionnels - Administration PDREF',
+      },
+      {
         path: 'admin/modeles-notifications',
         loadComponent: () =>
           import('../admin/admin-page.component').then((module) => module.AdminPageComponent),

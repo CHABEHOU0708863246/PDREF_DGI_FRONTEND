@@ -28,7 +28,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
   }
 
   return router.createUrlTree(['/auth/login'], {
-    queryParams: { returnUrl: sanitizeReturnUrl(state.url) },
+    queryParams: {
+      returnUrl: sanitizeReturnUrl(state.url),
+      ...(auth.sessionExpired() ? { expired: '1' } : {}),
+    },
   });
 };
 

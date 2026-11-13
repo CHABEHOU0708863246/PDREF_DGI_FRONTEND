@@ -71,6 +71,13 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Parametres_Read',
   },
   {
+    label: 'E-mails transactionnels',
+    route: '/dashboard/admin/emails',
+    icon: 'mail',
+    exact: false,
+    permission: 'Parametres_Read',
+  },
+  {
     label: 'Modeles de notification',
     route: '/dashboard/admin/modeles-notifications',
     icon: 'bell',

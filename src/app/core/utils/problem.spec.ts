@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
 import { buildProblem, normalizeProblem, sanitizeDetail, statusToCode } from './problem';
 
@@ -62,9 +62,25 @@ describe('problem+json', () => {
   it('gere une erreur reseau et une erreur inconnue', () => {
     const network = normalizeProblem(new HttpErrorResponse({ status: 0, error: null }), null);
     expect(network.code).toBe('NETWORK_ERROR');
+    expect(network.title).toBe('Serveur injoignable');
 
     const unknown = normalizeProblem({ strange: true }, null);
     expect(unknown.code).toBe('INTERNAL_ERROR');
+  });
+
+  it('traite une reponse HTML comme un serveur injoignable', () => {
+    const problem = normalizeProblem(
+      new HttpErrorResponse({
+        status: 200,
+        url: '/api/v1/auth/login',
+        error: '<!doctype html><html><body>Angular</body></html>',
+      }),
+      'trace-html',
+    );
+
+    expect(problem.code).toBe('NETWORK_ERROR');
+    expect(problem.title).toBe('Serveur injoignable');
+    expect(problem.status).toBe(0);
   });
 
   it('filtre les erreurs de champ invalides et les titres techniques', () => {

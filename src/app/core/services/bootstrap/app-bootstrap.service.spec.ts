@@ -1,4 +1,4 @@
-import { PLATFORM_ID } from '@angular/core';
+﻿import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -25,7 +25,7 @@ function setup(
   platform: 'browser' | 'server' = 'browser',
   mode: 'http' | 'demo' = 'http',
 ) {
-  const auth = { restoreSession: vi.fn(restore) };
+  const auth = { restoreSession: vi.fn(restore), markSessionExpired: vi.fn() };
   const permissions = { markReady: vi.fn() };
 
   TestBed.configureTestingModule({

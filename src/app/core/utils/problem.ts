@@ -70,6 +70,20 @@ export function normalizeProblem(
       return sanitizeProblem(body, error.status);
     }
 
+    if (isHtmlPayload(body)) {
+      return {
+        type: `urn:pdref:error:${ERROR_CODES.NETWORK_ERROR}`,
+        title: 'Serveur injoignable',
+        status: 0,
+        detail: null,
+        instance: error.url,
+        code: ERROR_CODES.NETWORK_ERROR,
+        traceId: validTraceId(correlationId),
+        reference: null,
+        errors: [],
+      };
+    }
+
     const status = error.status === 0 ? 0 : error.status;
     const code = statusToCode(status);
     return {
@@ -147,6 +161,13 @@ function sanitizeProblem(problem: ApiProblemDetails, fallbackStatus?: number): A
   };
 }
 
+function isHtmlPayload(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return /<!doctype\s+html|<html[\s>]|<head[\s>]|<body[\s>]/i.test(value.slice(0, 2_000));
+}
+
 function validTraceId(value: string | null | undefined): string {
   return isCorrelationId(value) ? value : newCorrelationId();
 }
@@ -154,7 +175,7 @@ function validTraceId(value: string | null | undefined): string {
 function defaultTitle(code: string): string {
   switch (code) {
     case ERROR_CODES.NETWORK_ERROR:
-      return 'Connexion perdue';
+      return 'Serveur injoignable';
     case ERROR_CODES.UNAUTHENTICATED:
     case ERROR_CODES.SESSION_EXPIRED:
       return 'Session expiree';

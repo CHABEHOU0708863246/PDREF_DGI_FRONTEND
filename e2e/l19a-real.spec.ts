@@ -412,6 +412,72 @@ test.describe('L19a - recette sur la vraie pile', () => {
     expect(() => page.route('**/*', (route) => route.continue())).toThrow(/MOCK_INTERDIT/);
   });
 
+  test('session conservee au rafraichissement et reconnexion', async ({ page }) => {
+    await loginAs(page, 'agent.gudef');
+    await page.goto('/dashboard/suivis');
+    await expect(page.getByRole('heading', { name: 'Suivis' })).toBeVisible();
+
+    await page.reload();
+    await expect(page).toHaveURL(/\/dashboard\/suivis/);
+    await expect(page.getByRole('heading', { name: 'Suivis' })).toBeVisible();
+
+    await logout(page);
+    await page.reload();
+    await expect(page).toHaveURL(/\/auth\/login/);
+    await loginAs(page, 'agent.gudef');
+    await expect(page).toHaveURL(/\/dashboard/);
+
+    await page.context().clearCookies();
+    await page.goto('/dashboard/suivis');
+    await expect(page).toHaveURL(/\/auth\/login\?.*expired=1/);
+    await expect(
+      page.getByText('Votre session a expire. Reconnectez-vous pour continuer.'),
+    ).toBeVisible();
+  });
+
+  test('ecran e-mails et envoi de test via Mailpit', async ({ page, request }) => {
+    const recipient = `recette.emails.${Date.now()}@example.test`;
+    await loginAs(page, 'admin.dsi');
+    await page.goto('/dashboard/admin/emails');
+    await expect(page.getByRole('heading', { name: 'E-mails transactionnels' })).toBeVisible();
+    await expect(page.getByRole('table')).toBeVisible();
+
+    await page.getByLabel('Destinataire').fill(recipient);
+    const response = page.waitForResponse(
+      (item) =>
+        item.url().includes('/api/v1/admin/emails/test') && item.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: 'Envoyer le test' }).click();
+    const posted = await response;
+    expect(posted.ok()).toBe(true);
+    await expect(page.getByText('E-mail de test envoye.')).toBeVisible();
+
+    await expect
+      .poll(
+        async () => {
+          const messages = await request.get(`${MAILPIT}/api/v1/messages`);
+          if (!messages.ok()) {
+            return '';
+          }
+          const body = (await messages.json()) as {
+            messages?: { To?: { Address?: string }[] | string }[];
+          };
+          for (const message of body.messages ?? []) {
+            const recipients = Array.isArray(message.To)
+              ? message.To.map((item) => item.Address)
+              : [message.To];
+            if (recipients.includes(recipient)) {
+              return recipient;
+            }
+          }
+          return '';
+        },
+        { timeout: 30_000, intervals: [500, 1_000, 2_000] },
+      )
+      .toBe(recipient);
+    await logout(page);
+  });
+
   test('fichier EICAR refuse par le vrai ClamAV', async ({ request }) => {
     const token = await apiLogin(
       request,

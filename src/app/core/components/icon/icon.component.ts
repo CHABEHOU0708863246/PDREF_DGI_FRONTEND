@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { IconName } from '../../models/common/icon.model';
 
 @Component({
@@ -131,6 +131,10 @@ import type { IconName } from '../../models/common/icon.model';
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <path d="m16 17 5-5-5-5" />
           <path d="M21 12H9" />
+        }
+        @case ('mail') {
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m3 7 9 6 9-6" />
         }
         @case ('menu') {
           <path d="M4 6h16M4 12h16M4 18h16" />

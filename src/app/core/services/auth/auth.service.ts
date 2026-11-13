@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+﻿import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
@@ -23,9 +23,11 @@ export class AuthService {
   private readonly router = inject(Router);
 
   private readonly sessionState = signal<AuthSession | null>(null);
+  private readonly sessionExpiredState = signal(false);
   private refreshInFlight: Observable<AuthSession> | null = null;
 
   readonly session = this.sessionState.asReadonly();
+  readonly sessionExpired = this.sessionExpiredState.asReadonly();
   readonly currentUser = computed(() => this.sessionState()?.user ?? null);
   readonly isAuthenticated = computed(() => this.tokenStore.hasValidAccessToken());
 
@@ -113,6 +115,7 @@ export class AuthService {
 
   applySession(tokens: AuthTokens, user: AuthSession['user']): AuthSession {
     const session: AuthSession = { ...tokens, user };
+    this.sessionExpiredState.set(false);
     this.sessionState.set(session);
     this.tokenStore.set(tokens);
     this.permissions.load(user);
@@ -120,13 +123,19 @@ export class AuthService {
   }
 
   clearSession(): void {
+    this.sessionExpiredState.set(false);
     this.sessionState.set(null);
     this.tokenStore.clear();
     this.permissions.clear();
   }
 
+  markSessionExpired(): void {
+    this.sessionExpiredState.set(true);
+  }
+
   expireSession(): void {
     this.clearSession();
+    this.sessionExpiredState.set(true);
     if (isLighthouseEnabled()) {
       return;
     }

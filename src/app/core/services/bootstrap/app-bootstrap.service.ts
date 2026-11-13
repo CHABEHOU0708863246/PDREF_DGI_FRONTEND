@@ -89,7 +89,10 @@ export class AppBootstrapService {
       await firstValueFrom(
         this.auth.restoreSession().pipe(
           timeout(5_000),
-          catchError(() => of(null)),
+          catchError(() => {
+            this.auth.markSessionExpired();
+            return of(null);
+          }),
         ),
       );
     } finally {

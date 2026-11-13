@@ -1,6 +1,6 @@
-export const environment = {
+﻿export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5080',
+  apiUrl: '',
   authMode: 'http' as 'http' | 'demo',
   showDesignSystemDemo: true,
   demoNotifications: true,

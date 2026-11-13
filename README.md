@@ -29,7 +29,30 @@ Application : `http://localhost:4200`. Demo design system :
 `http://localhost:4200/design-system-demo` (publique, donnees fictives).
 
 Le serveur de developpement recoit `API_ORIGIN=http://localhost:5080` via
-`cross-env` pour que la CSP `connect-src` autorise l'API locale.
+`cross-env` pour que la CSP `connect-src` autorise l'API locale. Toutes les URL
+API sont des chemins absolus `/api/v1/...` ; `proxy.conf.json` les relaie vers
+`http://localhost:5080`, ce qui evite les reponses HTML du serveur Angular en
+developpement et en prerendu.
+
+### E-mails en developpement
+
+Le worker doit tourner a cote de l'API : sans lui, les e-mails restent en
+attente dans l'outbox. Avec le compose de developpement du backend :
+
+```bash
+docker compose up -d mongo mailpit api worker
+```
+
+Configuration SMTP : section `EmailSettings` (`Host`, `Port`, `UseSSL`,
+`From`, `FromDisplayName`, `UserName`, `Password`, `ReplyTo`). Ne jamais
+committer de secret ; en local, `EmailSettings__Host=mailpit` et
+`EmailSettings__Port=1025` suffisent.
+
+Mailpit : `http://localhost:8025`. L'ecran d'administration
+`/dashboard/admin/emails` (`Parametres_Read`) affiche les statuts, le
+destinataire masque, l'erreur technique et permet de renvoyer un echec ou
+d'envoyer un e-mail de test (`Parametres_Manage`). `/ready` signale un worker
+inactif ou une outbox en retard.
 
 Build et rendu SSR :
 

@@ -1,4 +1,4 @@
-export type IconName =
+﻿export type IconName =
   | 'alert-circle'
   | 'alert-triangle'
   | 'arrow-down'
@@ -24,6 +24,7 @@ export type IconName =
   | 'layout'
   | 'loader'
   | 'logout'
+  | 'mail'
   | 'menu'
   | 'minus'
   | 'moon'

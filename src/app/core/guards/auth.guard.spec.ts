@@ -1,4 +1,4 @@
-import { PLATFORM_ID } from '@angular/core';
+﻿import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import type { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
@@ -8,7 +8,7 @@ import { authGuard, loginGuard } from './auth.guard';
 
 function setup(authenticated: boolean, platform: 'browser' | 'server' = 'browser') {
   const createUrlTree = vi.fn((commands: unknown, extras: unknown) => ({ commands, extras }));
-  const auth = { isAuthenticated: () => authenticated };
+  const auth = { isAuthenticated: () => authenticated, sessionExpired: () => false };
 
   TestBed.configureTestingModule({
     providers: [
