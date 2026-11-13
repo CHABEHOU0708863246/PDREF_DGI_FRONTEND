@@ -97,8 +97,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: var(--space-8);
-  padding: 0 var(--space-4);
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   font-weight: var(--weight-semibold);
@@ -164,7 +164,7 @@
 }
 
 .pd-btn--sm {
-  min-height: var(--space-7);
+  min-height: var(--control-height-sm);
   padding-inline: var(--space-3);
   font-size: var(--text-xs);
 }
@@ -173,8 +173,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-8);
-  height: var(--space-8);
+  width: var(--control-height);
+  height: var(--control-height);
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -198,7 +198,7 @@
 
 .pd-input {
   width: 100%;
-  min-height: var(--space-8);
+  min-height: var(--control-height);
   padding: 0 var(--space-3);
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-sm);

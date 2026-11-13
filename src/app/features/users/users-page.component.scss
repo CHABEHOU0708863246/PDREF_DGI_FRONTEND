@@ -59,11 +59,41 @@
 .users-list__table {
   overflow-x: auto;
 }
+.users-list__table table {
+  table-layout: fixed;
+}
 
-.users-list__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--iam-space-1);
+.users-list__table th:nth-child(1) {
+  width: 14%;
+}
+
+.users-list__table th:nth-child(2) {
+  width: 12%;
+}
+
+.users-list__table th:nth-child(3) {
+  width: 14%;
+}
+
+.users-list__table th:nth-child(4) {
+  width: 11%;
+}
+
+.users-list__table th:nth-child(5) {
+  width: 9%;
+}
+
+.users-list__table th:nth-child(6) {
+  width: 17%;
+}
+
+.users-list__table th:nth-child(7),
+.users-list__table th:nth-child(8) {
+  width: 8%;
+}
+
+.users-list__table th:nth-child(9) {
+  width: 8%;
 }
 
 .users-pagination {

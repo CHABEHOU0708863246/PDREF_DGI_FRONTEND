@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { forkJoin, type Observable } from 'rxjs';
 import { ConfirmDialogWithInputComponent } from '../../core/components/confirm-dialog-with-input/confirm-dialog-with-input.component';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { IconComponent } from '../../core/components/icon/icon.component';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -19,6 +20,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   imports: [
     ReactiveFormsModule,
     PageHeaderComponent,
+    IconComponent,
     SidePanelComponent,
     StatePanelComponent,
     ConfirmDialogWithInputComponent,

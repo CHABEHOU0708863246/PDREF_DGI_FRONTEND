@@ -40,6 +40,39 @@
   font-size: var(--text-sm);
 }
 
+.audit-table {
+  table-layout: fixed;
+}
+
+.audit-table th:nth-child(1) {
+  width: 14%;
+}
+
+.audit-table th:nth-child(2) {
+  width: 23%;
+}
+
+.audit-table th:nth-child(3) {
+  width: 12%;
+}
+
+.audit-table th:nth-child(4) {
+  width: 21%;
+}
+
+.audit-table th:nth-child(5) {
+  width: 22%;
+}
+
+.audit-table th:nth-child(6) {
+  width: 8%;
+}
+
+.audit-table code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
 .audit-table caption {
   margin-bottom: var(--space-2);
   color: var(--color-text-muted);

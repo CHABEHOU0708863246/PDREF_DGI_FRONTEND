@@ -1,7 +1,11 @@
 ﻿<pdref-page-header
   title="Utilisateurs"
   subtitle="Creation, invitation, roles et directions des comptes agents."
-/>
+>
+  <button class="pd-btn pd-btn--primary" type="button" (click)="openCreate()">
+    Nouvel utilisateur
+  </button>
+</pdref-page-header>
 
 @if (notice(); as message) {
   <p class="pd-alert pd-alert--success" role="status">{{ message }}</p>
@@ -45,9 +49,6 @@
     <div class="users-filters__actions">
       <button class="pd-btn pd-btn--primary" type="submit">Filtrer</button>
       <button class="pd-btn pd-btn--ghost" type="button" (click)="reset()">Reinitialiser</button>
-      <button class="pd-btn pd-btn--primary" type="button" (click)="openCreate()">
-        Nouvel utilisateur
-      </button>
     </div>
   </form>
 </section>
@@ -164,18 +165,45 @@
                 }
               </td>
               <td class="users-list__actions">
-                <button class="pd-btn pd-btn--ghost" type="button" (click)="edit(user)">
-                  Modifier
-                </button>
-                <button class="pd-btn pd-btn--ghost" type="button" (click)="resend(user)">
-                  Renvoyer l invitation
-                </button>
-                <button class="pd-btn pd-btn--ghost" type="button" (click)="resetMfa(user)">
-                  Reinitialiser la double authentification
-                </button>
-                <button class="pd-btn pd-btn--ghost" type="button" (click)="toggleActive(user)">
-                  {{ user.isActive ? 'Desactiver' : 'Reactiver' }}
-                </button>
+                <details class="row-actions">
+                  <summary
+                    class="pd-btn pd-btn--ghost pd-btn--icon"
+                    aria-label="Actions de l utilisateur"
+                    title="Actions"
+                  >
+                    <pdref-icon name="menu" />
+                  </summary>
+                  <div class="row-actions__menu">
+                    <button
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      type="button"
+                      (click)="edit(user)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      type="button"
+                      (click)="resend(user)"
+                    >
+                      Renvoyer l invitation
+                    </button>
+                    <button
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      type="button"
+                      (click)="resetMfa(user)"
+                    >
+                      Reinitialiser la double authentification
+                    </button>
+                    <button
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      type="button"
+                      (click)="toggleActive(user)"
+                    >
+                      {{ user.isActive ? 'Desactiver' : 'Reactiver' }}
+                    </button>
+                  </div>
+                </details>
               </td>
             </tr>
           }

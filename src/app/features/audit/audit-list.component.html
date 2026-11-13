@@ -47,11 +47,6 @@
     </div>
 
     <div class="pd-field">
-      <label class="pd-label" for="audit-target-id">Identifiant cible</label>
-      <input id="audit-target-id" class="pd-input" formControlName="targetId" />
-    </div>
-
-    <div class="pd-field">
       <label class="pd-label" for="audit-request">Demande / correlation</label>
       <input id="audit-request" class="pd-input" formControlName="requestId" autocomplete="off" />
     </div>
@@ -80,15 +75,7 @@
           type="button"
           class="pd-btn pd-btn--ghost"
           [disabled]="exporting()"
-          (click)="export('CSV')"
-        >
-          Exporter CSV
-        </button>
-        <button
-          type="button"
-          class="pd-btn pd-btn--ghost"
-          [disabled]="exporting()"
-          (click)="export('EXCEL')"
+          (click)="export()"
         >
           Exporter Excel
         </button>
@@ -162,8 +149,6 @@
             <th scope="col">Evenement</th>
             <th scope="col">Resultat</th>
             <th scope="col">Acteur</th>
-            <th scope="col">Dossier</th>
-            <th scope="col">Contribuable</th>
             <th scope="col">Element vise</th>
             <th scope="col">Detail</th>
           </tr>
@@ -184,8 +169,6 @@
                   <span class="pd-muted">Utilisateur desactive</span>
                 }
               </td>
-              <td>{{ item.dossierNumber || '-' }}</td>
-              <td>{{ item.contribuableRaisonSociale || '-' }}</td>
               <td>{{ targetLabel(item) }}</td>
               <td>
                 <button type="button" class="pd-btn pd-btn--ghost" (click)="openDetail(item)">
@@ -269,31 +252,5 @@
         </tbody>
       </table>
     }
-
-    <details class="audit-technical">
-      <summary>Informations techniques</summary>
-      <dl class="audit-detail">
-        <dt>Identifiant</dt>
-        <dd>
-          <code>{{ item.id }}</code>
-        </dd>
-        <dt>Correlation</dt>
-        <dd>
-          <code>{{ item.correlationId }}</code>
-        </dd>
-        <dt>Trace</dt>
-        <dd>
-          <code>{{ item.traceId }}</code>
-        </dd>
-        <dt>IP hachee</dt>
-        <dd>
-          <code>{{ item.ipTruncated || '-' }}</code>
-        </dd>
-        <dt>Identifiant cible</dt>
-        <dd>
-          <code>{{ item.targetId || '-' }}</code>
-        </dd>
-      </dl>
-    </details>
   </pdref-side-panel>
 }
