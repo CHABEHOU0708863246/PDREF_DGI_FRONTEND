@@ -70,6 +70,11 @@ async function enrollNewUser(page: Page): Promise<string[]> {
 }
 
 async function logout(page: Page): Promise<void> {
+  const closePanel = page.getByRole('button', { name: 'Fermer le panneau' });
+  if (await closePanel.isVisible().catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await expect(closePanel).toBeHidden();
+  }
   await page.getByRole('button', { name: 'Se deconnecter' }).click();
   await expect(page).toHaveURL(/\/auth\/login/);
 }
@@ -478,6 +483,87 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await logout(page);
   });
 
+  test('panneau lateral accessible sans formulaire sous le tableau', async ({ page }) => {
+    await loginAs(page, 'admin.dsi');
+    await page.goto('/dashboard/admin/utilisateurs');
+    await expect(page.getByRole('heading', { name: 'Utilisateurs' })).toBeVisible();
+    await page.getByRole('button', { name: 'Nouvel utilisateur' }).click();
+    const panel = page.getByRole('dialog', { name: 'Nouvel utilisateur' });
+    await expect(panel).toBeVisible();
+    await expect(panel.getByLabel('Prenom', { exact: true })).toBeFocused();
+    await expect(panel.locator('form')).toHaveCount(1);
+    await expect(page.locator('table + .users-form')).toHaveCount(0);
+
+    await panel.getByLabel('Prenom', { exact: true }).fill('Test panneau');
+    await page.keyboard.press('Escape');
+    const confirmation = page.getByRole('dialog', { name: 'Modifications non enregistrees' });
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole('button', { name: 'Continuer la saisie' }).click();
+    await expect(panel).toBeVisible();
+    await panel.getByRole('button', { name: 'Fermer le panneau' }).click();
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole('button', { name: 'Fermer sans enregistrer' }).click();
+    await expect(panel).toBeHidden();
+    await logout(page);
+  });
+
+  test('horloge vivante Abidjan et compteur actualise', async ({ page }) => {
+    await loginAs(page, 'admin.dsi');
+    await page.goto('/dashboard');
+    const clock = page.getByTestId('dashboard-live-clock');
+    const counter = page.getByTestId('dashboard-refresh-counter');
+    await expect(clock).toContainText(/vendredi|samedi|dimanche|lundi|mardi|mercredi|jeudi/i);
+    await expect(clock).toContainText(/\d{2}:\d{2}/);
+    await expect(clock).toHaveAttribute('aria-live', 'off');
+    const first = await counter.innerText();
+    await page.waitForTimeout(2_000);
+    const second = await counter.innerText();
+    expect(second).not.toBe(first);
+    await page.getByRole('button', { name: 'Actualiser' }).click();
+    await expect(counter).toContainText(/il y a [01] s/);
+    await logout(page);
+  });
+
+  test('audit sans identifiant technique visible', async ({ page }) => {
+    await loginAs(page, 'auditeur');
+    await page.goto('/dashboard/audit');
+    await expect(page.locator('table.audit-table tbody tr').first()).toBeVisible();
+    const visibleTable = await page.locator('table.audit-table').first().innerText();
+    expect(visibleTable).not.toMatch(/[a-f0-9]{24}/);
+    await page.getByRole('button', { name: 'Voir' }).first().click();
+    const panel = page.getByRole('dialog', { name: "Detail de l'evenement" });
+    await expect(panel).toBeVisible();
+    const technical = panel.getByText('Informations techniques');
+    await expect(technical).toBeVisible();
+    const details = panel.locator('details.audit-technical');
+    await expect(details).not.toHaveAttribute('open');
+    const visibleDetail = await panel.locator('dl.audit-detail').first().innerText();
+    expect(visibleDetail).not.toMatch(/[a-f0-9]{24}/);
+    await panel.getByRole('button', { name: 'Fermer le panneau' }).click();
+    await logout(page);
+  });
+
+  test('logo DGI officiel et absence de debordement 360', async ({ page }) => {
+    await page.goto('/auth/login');
+    await expect(
+      page.getByRole('img', { name: "Direction Générale des Impôts de Côte d'Ivoire" }).first(),
+    ).toBeVisible();
+    await loginAs(page, 'admin.dsi');
+    await expect(
+      page.getByRole('img', { name: "Direction Générale des Impôts de Côte d'Ivoire" }).first(),
+    ).toBeVisible();
+    await page.goto('/dashboard/admin/utilisateurs');
+    await page.setViewportSize({ width: 360, height: 800 });
+    const noOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+    );
+    expect(noOverflow).toBe(true);
+    await logout(page);
+    await page.goto('/suivi');
+    await expect(
+      page.getByRole('img', { name: "Direction Générale des Impôts de Côte d'Ivoire" }).first(),
+    ).toBeVisible();
+  });
   test('fichier EICAR refuse par le vrai ClamAV', async ({ request }) => {
     const token = await apiLogin(
       request,
@@ -626,7 +712,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await chronology.getByRole('button', { name: 'Detail' }).first().click();
     await expect(page.getByRole('heading', { name: "Detail de l'evenement" })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Avant / apres' })).toBeVisible();
-
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: "Detail de l'evenement" })).toBeHidden();
     await page.getByRole('button', { name: "Verifier l'integrite" }).click();
     await expect(page.getByText(/0 invalide/)).toBeVisible();
 
@@ -727,7 +814,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await loginAs(page, 'admin.dsi');
     await page.goto('/dashboard/admin/utilisateurs');
     await page.getByRole('button', { name: 'Nouvel utilisateur' }).click();
-    const form = page.locator('section.users-form');
+    const form = page.getByRole('dialog', { name: 'Nouvel utilisateur' });
     await form.getByLabel('Prenom', { exact: true }).fill('Agent');
     await form.getByLabel('Nom', { exact: true }).fill('DVFN');
     await form.getByLabel('Email', { exact: true }).fill(email);
