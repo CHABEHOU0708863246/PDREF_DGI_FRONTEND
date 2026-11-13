@@ -19,6 +19,7 @@ import {
 } from '../../../core/components/bar-chart/bar-chart.component';
 import { KpiCardComponent } from '../../../core/components/kpi-card/kpi-card.component';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { LiveClockComponent } from '../../../core/components/live-clock/live-clock.component';
 import { StatePanelComponent } from '../../../core/components/state-panel/state-panel.component';
 import { PermissionsService } from '../../../core/services/permissions/permissions.service';
 import { DashboardGateway } from '../../../core/services/dashboard/dashboard.gateway';
@@ -73,6 +74,7 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
   imports: [
     RouterLink,
     PageHeaderComponent,
+    LiveClockComponent,
     KpiCardComponent,
     BarChartComponent,
     StatePanelComponent,
@@ -82,7 +84,9 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
     <pdref-page-header
       title="Tableau de bord"
       subtitle="Pilotage des courriers, demandes, circuits et qualite des donnees."
-    />
+    >
+      <pdref-live-clock [lastRefreshAt]="lastRefreshAt()" />
+    </pdref-page-header>
 
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
@@ -351,6 +355,7 @@ export class DashboardHomeComponent implements OnDestroy {
   });
   readonly canNominatif = () => this.permissions.hasPermission('Dashboard_ReadDg');
   readonly canImputation = () => this.permissions.hasPermission('Suivis_Read');
+  readonly lastRefreshAt = signal(Date.now());
 
   constructor() {
     if (isLighthouseEnabled()) {
@@ -373,7 +378,10 @@ export class DashboardHomeComponent implements OnDestroy {
   load(): void {
     this.problem.set(null);
     this.gateway.kpis(this.filters).subscribe({
-      next: (kpis) => this.kpis.set(kpis),
+      next: (kpis) => {
+        this.kpis.set(kpis);
+        this.lastRefreshAt.set(Date.now());
+      },
       error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
     });
     this.gateway.qualite().subscribe({
