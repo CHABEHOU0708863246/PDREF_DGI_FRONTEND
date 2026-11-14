@@ -243,9 +243,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               </div>
               <div>
                 <span class="pd-label">Centre</span
-                ><strong>{{
-                  demande.contribuable.centreImpotLibelle || demande.contribuable.centreImpotId
-                }}</strong>
+                ><strong>{{ demande.contribuable.centreImpotLibelle || '-' }}</strong>
               </div>
               <div>
                 <span class="pd-label">Direction</span

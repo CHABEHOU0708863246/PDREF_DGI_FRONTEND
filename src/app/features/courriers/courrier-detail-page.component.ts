@@ -94,7 +94,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dt>Demande</dt>
               <dd>
                 @if (courrier.demandeId) {
-                  <span>{{ courrier.demandeId }}</span>
+                  <span>{{ courrier.referenceDepot || 'Dossier lie' }}</span>
                 } @else {
                   <span class="pd-muted">Disponible.</span>
                 }

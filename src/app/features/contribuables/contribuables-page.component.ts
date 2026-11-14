@@ -124,7 +124,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                     <td>{{ item.ncc }}</td>
                     <td>{{ item.raisonSociale }}</td>
                     <td>{{ item.systemeComptable }}</td>
-                    <td>{{ item.centreImpotLibelle || item.centreImpotId }}</td>
+                    <td>{{ item.centreImpotLibelle || '-' }}</td>
                     <td>{{ item.emailMasque || '-' }}</td>
                     <td>{{ item.telephoneMasque || '-' }}</td>
                     <td>

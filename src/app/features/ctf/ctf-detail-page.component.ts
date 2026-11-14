@@ -168,7 +168,7 @@ import { ctfStatutLabel } from './ctf-status';
             ><strong>{{ detail.joursRestantsDepot }} JO</strong>
           </div>
           <div>
-            <span class="pd-label">Courrier</span><strong>{{ detail.courrierId }}</strong>
+            <span class="pd-label">Dossier</span><strong>{{ detail.numeroDemande }}</strong>
           </div>
           <div>
             <span class="pd-label">Reference activation</span
