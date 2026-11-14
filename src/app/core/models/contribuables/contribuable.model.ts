@@ -69,3 +69,9 @@ export interface ContribuableWrite {
   email?: string | null;
   telephone?: string | null;
 }
+
+export interface CentreOption {
+  id: string;
+  code: string;
+  libelle: string;
+}

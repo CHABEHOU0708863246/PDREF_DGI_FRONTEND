@@ -5,6 +5,7 @@ import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type { ApiResponse } from '../../models/common/api-response.model';
 import type {
+  CentreOption,
   Contribuable,
   ContribuablePage,
   ContribuableQuality,
@@ -25,6 +26,12 @@ export class ContribuablesGateway {
   list(query: ContribuableQuery): Observable<ContribuablePage> {
     return this.http
       .get<ApiResponse<ContribuablePage>>(this.base, { params: this.params(query) })
+      .pipe(map((response) => response.data));
+  }
+
+  centres(): Observable<CentreOption[]> {
+    return this.http
+      .get<ApiResponse<CentreOption[]>>(`${this.base}/centres`)
       .pipe(map((response) => response.data));
   }
 

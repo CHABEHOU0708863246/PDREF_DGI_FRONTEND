@@ -2,7 +2,10 @@
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
-import type { ContribuableWrite } from '../../core/models/contribuables/contribuable.model';
+import type {
+  CentreOption,
+  ContribuableWrite,
+} from '../../core/models/contribuables/contribuable.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
@@ -37,6 +40,19 @@ import { normalizeProblem } from '../../core/utils/problem';
           @if (!form.centreImpotId) {
             <p class="pd-warning" role="status">Le centre de rattachement est obligatoire.</p>
           }
+          @if (centresProblem()) {
+            <p class="pd-warning" role="status">
+              {{ centresProblem() }}
+              <button type="button" class="pd-btn pd-btn--ghost" (click)="loadCentres()">
+                Reessayer
+              </button>
+            </p>
+          }
+          @if (!centresLoading() && centres().length === 0 && !centresProblem()) {
+            <p class="pd-warning" role="status">
+              Aucun centre de rattachement actif n'est disponible.
+            </p>
+          }
           <form (ngSubmit)="save()">
             <div class="form-grid">
               <label class="pd-field"
@@ -66,12 +82,19 @@ import { normalizeProblem } from '../../core/utils/problem';
               /></label>
               <label class="pd-field"
                 ><span class="pd-label">Centre de rattachement *</span
-                ><input
+                ><select
                   class="pd-input"
                   [(ngModel)]="form.centreImpotId"
                   name="centreImpotId"
+                  [disabled]="centresLoading() || centres().length === 0"
                   required
-              /></label>
+                >
+                  <option value="">Selectionner un centre</option>
+                  @for (centre of centres(); track centre.id) {
+                    <option [value]="centre.id">{{ centre.code }} - {{ centre.libelle }}</option>
+                  }
+                </select>
+              </label>
               <label class="pd-field"
                 ><span class="pd-label">Secteur</span
                 ><input class="pd-input" [(ngModel)]="form.secteur" name="secteur"
@@ -98,7 +121,11 @@ import { normalizeProblem } from '../../core/utils/problem';
               /></label>
             </div>
             <div class="pd-actions">
-              <button type="submit" class="pd-btn pd-btn--primary" [disabled]="saving()">
+              <button
+                type="submit"
+                class="pd-btn pd-btn--primary"
+                [disabled]="saving() || centresLoading() || centres().length === 0"
+              >
                 {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
               </button>
               <button type="button" class="pd-btn pd-btn--ghost" (click)="cancel()">Annuler</button>
@@ -120,6 +147,9 @@ export class ContribuableFormPageComponent {
   readonly loading = signal(this.id !== null);
   readonly saving = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
+  readonly centres = signal<CentreOption[]>([]);
+  readonly centresLoading = signal(true);
+  readonly centresProblem = signal<string | null>(null);
   readonly form: ContribuableWrite = {
     ncc: '',
     raisonSociale: '',
@@ -128,9 +158,25 @@ export class ContribuableFormPageComponent {
   };
 
   constructor() {
+    this.loadCentres();
     if (this.id) {
       this.load();
     }
+  }
+
+  loadCentres(): void {
+    this.centresLoading.set(true);
+    this.centresProblem.set(null);
+    this.gateway.centres().subscribe({
+      next: (items) => {
+        this.centres.set(items);
+        this.centresLoading.set(false);
+      },
+      error: () => {
+        this.centresLoading.set(false);
+        this.centresProblem.set('Impossible de charger les centres de rattachement.');
+      },
+    });
   }
 
   load(): void {

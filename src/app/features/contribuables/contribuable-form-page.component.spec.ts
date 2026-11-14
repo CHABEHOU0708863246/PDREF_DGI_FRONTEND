@@ -7,7 +7,12 @@ import { ContribuablesGateway } from '../../core/services/contribuables/contribu
 
 function setup() {
   const router = { navigate: vi.fn().mockResolvedValue(true) };
-  const gateway = { create: vi.fn(() => of({ id: 'c1' })), update: vi.fn(), get: vi.fn() };
+  const gateway = {
+    create: vi.fn(() => of({ id: 'c1' })),
+    update: vi.fn(),
+    get: vi.fn(),
+    centres: vi.fn(() => of([{ id: 'd1', code: 'GUDEF', libelle: 'GUDEF' }])),
+  };
   TestBed.configureTestingModule({
     imports: [ContribuableFormPageComponent],
     providers: [
@@ -81,6 +86,7 @@ describe('ContribuableFormPageComponent load/edit', () => {
       ),
       create: vi.fn(),
       update: vi.fn(() => of({ id: 'c1' })),
+      centres: vi.fn(() => of([{ id: 'd1', code: 'GUDEF', libelle: 'GUDEF' }])),
     };
     TestBed.configureTestingModule({
       imports: [ContribuableFormPageComponent],
