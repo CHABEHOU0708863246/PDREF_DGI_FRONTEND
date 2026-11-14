@@ -6,6 +6,7 @@
   centreImpotId: string;
   centreImpotLibelle: string | null;
   directionRattachementId: string;
+  directionRattachementLibelle: string | null;
   secteur: string | null;
   formeJuridique: string | null;
   zoneId: string | null;

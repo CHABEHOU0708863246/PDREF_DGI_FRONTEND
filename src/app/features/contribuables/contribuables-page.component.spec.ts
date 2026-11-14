@@ -12,6 +12,7 @@ const item = {
   centreImpotId: 'c1',
   centreImpotLibelle: 'GUDEF',
   directionRattachementId: 'd1',
+  directionRattachementLibelle: 'GUDEF',
   secteur: null,
   formeJuridique: null,
   zoneId: null,

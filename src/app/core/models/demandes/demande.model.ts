@@ -52,6 +52,7 @@ export interface DemandeContribuable {
   centreImpotId: string;
   centreImpotLibelle: string | null;
   directionRattachementId: string;
+  directionLibelle?: string | null;
 }
 
 export interface DemandeSummary {
@@ -69,6 +70,7 @@ export interface DemandeSummary {
 
 export interface DemandeDetail extends DemandeSummary {
   courrierId: string | null;
+  courrierNumero?: string | null;
   referenceDepot: string | null;
   exercices: DemandeExercice[];
   conformite: DemandeConformite;

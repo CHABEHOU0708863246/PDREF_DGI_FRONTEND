@@ -69,7 +69,13 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dt>Centre</dt>
               <dd>{{ contribuable.centreImpotLibelle || contribuable.centreImpotId }}</dd>
               <dt>Direction</dt>
-              <dd>{{ contribuable.directionRattachementId }}</dd>
+              <dd>
+                {{
+                  contribuable.directionRattachementLibelle ||
+                    contribuable.centreImpotLibelle ||
+                    '-'
+                }}
+              </dd>
               <dt>Statut</dt>
               <dd>{{ contribuable.isArchived ? 'Archive' : 'Actif' }}</dd>
             </dl>

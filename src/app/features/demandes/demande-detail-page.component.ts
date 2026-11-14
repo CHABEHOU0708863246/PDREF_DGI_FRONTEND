@@ -249,7 +249,11 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               </div>
               <div>
                 <span class="pd-label">Direction</span
-                ><strong>{{ demande.contribuable.directionRattachementId }}</strong>
+                ><strong>{{
+                  demande.contribuable.directionLibelle ||
+                    demande.contribuable.centreImpotLibelle ||
+                    '-'
+                }}</strong>
               </div>
               <div>
                 <span class="pd-label">Référence dépôt</span
@@ -257,7 +261,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               </div>
               <div>
                 <span class="pd-label">Courrier</span
-                ><strong>{{ demande.courrierId || '-' }}</strong>
+                ><strong>{{ demande.courrierNumero || demande.referenceDepot || '-' }}</strong>
               </div>
             </section>
           }

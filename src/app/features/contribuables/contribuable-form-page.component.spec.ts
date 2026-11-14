@@ -67,6 +67,7 @@ describe('ContribuableFormPageComponent load/edit', () => {
           centreImpotId: 'GUDEF',
           centreImpotLibelle: 'GUDEF',
           directionRattachementId: 'd1',
+          directionRattachementLibelle: 'GUDEF',
           secteur: null,
           formeJuridique: null,
           zoneId: null,

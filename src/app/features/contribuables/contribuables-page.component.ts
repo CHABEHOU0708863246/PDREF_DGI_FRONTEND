@@ -255,6 +255,7 @@ const LIGHTHOUSE_CONTRIBUABLE: Contribuable = {
   centreImpotId: 'c-gudef',
   centreImpotLibelle: 'GUDEF',
   directionRattachementId: 'd-gudef',
+  directionRattachementLibelle: 'GUDEF',
   secteur: 'SERVICE',
   formeJuridique: 'SA',
   zoneId: null,
