@@ -21,7 +21,10 @@ import { ThemeToggleComponent } from '../../../core/components/theme-toggle/them
             src="/assets/brand/logo-dgi.png"
             alt="Direction Générale des Impôts de Côte d'Ivoire"
           />
-          <span>PDREF</span>
+          <span class="brand__text">
+            <strong>PDREF</strong>
+            <small>Direction Générale des Impôts</small>
+          </span>
         </a>
         <pdref-theme-toggle />
       </header>
@@ -44,7 +47,7 @@ import { ThemeToggleComponent } from '../../../core/components/theme-toggle/them
       </div>
 
       <footer class="auth-shell__foot">
-        <span>Direction Generale des Impots de Cote d'Ivoire</span>
+        <span>Direction Générale des Impôts de Côte d'Ivoire</span>
         <a routerLink="/design-system-demo">Design system</a>
       </footer>
     </main>

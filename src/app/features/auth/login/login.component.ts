@@ -25,9 +25,9 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-auth-layout
-      eyebrow="Connexion securisee"
-      title="Acceder a votre espace"
-      subtitle="Votre session est protegee par un cookie HttpOnly. Aucun jeton de renouvellement n'est stocke dans le navigateur."
+      eyebrow="République de Côte d'Ivoire — DGI"
+      title="Accédez à votre espace PDREF"
+      subtitle="Plateforme de Demande de Rectification des États Financiers de la Direction Générale des Impôts. Connectez-vous avec vos identifiants agents DGI."
     >
       <form class="pd-card auth-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         @if (expired()) {
@@ -84,7 +84,7 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
               Se connecter
             }
           </button>
-          <a class="pd-btn pd-btn--ghost" routerLink="/design-system-demo">Design system</a>
+          <a class="pd-btn pd-btn--ghost" routerLink="/suivi">Suivi public d'une demande</a>
         </div>
       </form>
     </pdref-auth-layout>

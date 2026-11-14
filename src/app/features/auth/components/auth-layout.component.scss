@@ -27,6 +27,24 @@
   font-weight: var(--weight-bold);
 }
 
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand__text strong {
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+}
+
+.brand__text small {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
 .brand__logo {
   width: auto;
   height: 2.5rem;

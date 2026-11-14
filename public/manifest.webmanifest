@@ -1,7 +1,7 @@
-﻿{
-  "name": "PDREF â€” DGI CÃ´te d'Ivoire",
+{
+  "name": "PDREF — DGI Côte d'Ivoire",
   "short_name": "PDREF",
-  "description": "Plateforme de Demande de Rectification des Ã‰tats Financiers.",
+  "description": "Plateforme de Demande de Rectification des États Financiers.",
   "lang": "fr",
   "start_url": "/",
   "display": "standalone",
