@@ -18,7 +18,7 @@
       </p>
       <pdref-upload-field
         label="Pieces jointes"
-        hint="PDF, JPEG ou PNG. Le serveur verifie le vrai type, la taille et l antivirus."
+        hint="PDF, JPEG ou PNG. Le serveur verifie le vrai type et la taille ; l antivirus est applique lorsqu il est active."
         [accept]="currentPolicy.allowedContentTypes.join(',')"
         [multiple]="true"
         [maxFiles]="currentPolicy.maximumFiles"
@@ -40,6 +40,11 @@
     </div>
     @if (message()) {
       <p class="pd-muted" role="status" aria-live="polite">{{ message() }}</p>
+    }
+    @if (files().some((file) => file.currentFile?.status === 'NON_ANALYSE')) {
+      <p class="pd-warning" role="status">
+        Mode pilote : certains fichiers sont acceptes sans analyse antivirus.
+      </p>
     }
   </section>
 
