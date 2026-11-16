@@ -193,6 +193,16 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               Rejeter
             </button>
           }
+          @if (canDeposit()) {
+            <button
+              type="button"
+              class="pd-btn pd-btn--primary"
+              [disabled]="depositing()"
+              (click)="deposer()"
+            >
+              {{ depositing() ? 'Depot...' : 'Deposer la demande' }}
+            </button>
+          }
           @if (canExport()) {
             <button type="button" class="pd-btn pd-btn--primary" (click)="exportPdf()">
               Exporter en PDF
@@ -443,6 +453,7 @@ export class DemandeDetailPageComponent {
   readonly attachmentsLoading = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly rejetOpen = signal(false);
+  readonly depositing = signal(false);
   readonly rejetMotifs = signal<readonly RejetMotif[]>([]);
   readonly rejetBusy = signal(false);
 
@@ -520,6 +531,63 @@ export class DemandeDetailPageComponent {
     return this.permissions.hasPermission('Demandes_Create');
   }
 
+  canDeposit(): boolean {
+    const demande = this.item();
+    return (
+      this.permissions.hasPermission('Demandes_Update') &&
+      demande?.statut === 'BROUILLON' &&
+      !demande.pdfManquant
+    );
+  }
+
+  deposer(): void {
+    const demande = this.item();
+    if (!demande || this.depositing()) {
+      return;
+    }
+
+    this.depositing.set(true);
+    this.problem.set(null);
+    this.gateway
+      .update(
+        demande.id,
+        {
+          contribuableId: demande.contribuable.id,
+          ncc: demande.contribuable.ncc,
+          referenceDepot: demande.referenceDepot,
+          brouillon: false,
+          deposer: true,
+          exercices: demande.exercices.map((exercice) => ({
+            annee: exercice.annee,
+            touteLaLiasse: exercice.touteLaLiasse,
+            etatsFinanciers: exercice.etatsFinanciers.map((etat) => etat.code),
+            motifs: exercice.motifs.map((motif) => ({
+              code: motif.code,
+              precision: motif.precision ?? null,
+            })),
+            variables: exercice.variables.map((variable) => ({
+              code: variable.code,
+              libelle: variable.libelle,
+              type: variable.type,
+              montant: variable.montant ?? null,
+              texte: variable.texte ?? null,
+            })),
+          })),
+        },
+        demande.version,
+      )
+      .subscribe({
+        next: () => {
+          this.depositing.set(false);
+          this.load();
+        },
+        error: (error: unknown) => {
+          this.depositing.set(false);
+          this.problem.set(normalizeProblem(error, this.correlation.last));
+        },
+      });
+  }
+
   close(): void {
     void this.router.navigate(['/dashboard/demandes']);
   }
@@ -570,8 +638,7 @@ export class DemandeDetailPageComponent {
     this.gateway.uploadAttachment(this.id, file).subscribe({
       next: (progress) => {
         if (progress >= 100) {
-          this.loadAttachments();
-          this.loadSuivi();
+          this.load();
         }
       },
       error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
