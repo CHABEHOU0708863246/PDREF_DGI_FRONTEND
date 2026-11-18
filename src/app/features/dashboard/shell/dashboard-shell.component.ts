@@ -27,6 +27,8 @@ interface NavigationItem {
 
 const NAVIGATION: readonly NavigationItem[] = [
   { label: 'Accueil', route: '/dashboard', icon: 'home', exact: true },
+  { label: 'Mon travail', route: '/dashboard/mon-travail', icon: 'layout', exact: false, permission: 'Suivis_Read' },
+  { label: 'Circuit du dossier', route: '/dashboard/aide/circuit', icon: 'layout', exact: false },
   { label: 'Design system', route: '/design-system-demo', icon: 'layout', exact: false },
   { label: 'Portail public', route: '/portail-public/suivi', icon: 'external-link', exact: false },
   {

@@ -1,4 +1,5 @@
-﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+﻿import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -15,6 +16,7 @@ import { ContribuableSelectComponent } from '../../core/components/contribuable-
 import { CourrierSelectComponent } from '../../core/components/courrier-select/courrier-select.component';
 import type { HasUnsavedChanges } from '../../core/guards/unsaved-changes.guard';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -52,6 +54,7 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
   selector: 'pdref-demande-form-page',
   standalone: true,
   imports: [
+    DatePipe,
     FormsModule,
     PageHeaderComponent,
     SidePanelComponent,
@@ -102,6 +105,15 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
                 <span class="pd-label">Référence de dépôt</span>
                 <input class="pd-input" [(ngModel)]="form.referenceDepot" name="referenceDepot" />
               </label>
+              <div class="pd-field">
+                <span class="pd-label">Date du jour</span>
+                <strong>{{ today | date: 'dd/MM/yyyy' }}</strong>
+              </div>
+              <div class="pd-field">
+                <span class="pd-label">Agent connecte</span>
+                <strong>{{ auth.currentUser()?.displayName || '-' }}</strong>
+              </div>
+              <p class="pd-help">Direction deduite du centre de rattachement du contribuable.</p>
             </div>
           </section>
 
@@ -314,6 +326,9 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly validationMessage = signal<string | null>(null);
   readonly selectedFile = signal<File | null>(null);
+  readonly auth = inject(AuthService);
+  readonly today = new Date();
+  readonly champsAcorriger = signal<string[]>([]);
   readonly exercises: ExerciceForm[] = [];
   readonly form: DemandeWrite = {
     contribuableId: null,
@@ -364,7 +379,7 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.problem.set(normalizeProblem(error, this.correlation.last));
+        this.setProblem(error);
       },
     });
   }
@@ -407,13 +422,13 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
           },
           error: (error: unknown) => {
             this.loading.set(false);
-            this.problem.set(normalizeProblem(error, this.correlation.last));
+            this.setProblem(error);
           },
         });
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.problem.set(normalizeProblem(error, this.correlation.last));
+        this.setProblem(error);
       },
     });
   }
@@ -526,7 +541,7 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
           },
           error: (error: unknown) => {
             this.saving.set(false);
-            this.problem.set(normalizeProblem(error, this.correlation.last));
+            this.setProblem(error);
           },
         });
       return;
@@ -548,14 +563,14 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
           },
           error: (error: unknown) => {
             this.saving.set(false);
-            this.problem.set(normalizeProblem(error, this.correlation.last));
+            this.setProblem(error);
             void this.router.navigate(['/dashboard/demandes', draft.id]);
           },
         });
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.problem.set(normalizeProblem(error, this.correlation.last));
+        this.setProblem(error);
       },
     });
   }
@@ -569,7 +584,7 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.problem.set(normalizeProblem(error, this.correlation.last));
+        this.setProblem(error);
       },
     });
   }
@@ -582,6 +597,13 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       return;
     }
     void this.router.navigate(['/dashboard/demandes']);
+  }
+
+  private setProblem(error: unknown): void {
+    const issue = normalizeProblem(error, this.correlation.last);
+    this.problem.set(issue);
+    const errors = issue.errors as Record<string, string[]> | undefined;
+    this.champsAcorriger.set(errors ? Object.keys(errors) : []);
   }
 
   private validate(): string | null {

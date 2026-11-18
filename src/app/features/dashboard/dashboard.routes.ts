@@ -16,6 +16,25 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'PDREF - Fondations',
       },
       {
+        path: 'mon-travail',
+        loadComponent: () =>
+          import('../travail/mon-travail-page.component').then(
+            (module) => module.MonTravailPageComponent,
+          ),
+        canActivate: [accessGuard],
+        data: { permissions: ['Suivis_Read'], breadcrumb: 'Mon travail' },
+        title: 'Mon travail - PDREF',
+      },
+      {
+        path: 'aide/circuit',
+        loadComponent: () =>
+          import('../aide/aide-circuit-page.component').then(
+            (module) => module.AideCircuitPageComponent,
+          ),
+        data: { breadcrumb: 'Circuit du dossier' },
+        title: 'Circuit du dossier - PDREF',
+      },
+      {
         path: 'pilotage/dossiers',
         loadComponent: () =>
           import('../pilotage/pilotage-list-page.component').then(

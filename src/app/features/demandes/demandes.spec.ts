@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONTRIBUABLE_LOOKUP } from '../../core/services/lookup/contribuable-lookup';
 import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { RejetGateway } from '../../core/services/rejets/rejet.gateway';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
@@ -71,6 +72,7 @@ function providers(gateway: Partial<DemandesGateway>) {
       useValue: { hasPermission: () => true, hasRole: () => false, currentUserId: () => 'u1' },
     },
     { provide: CorrelationService, useValue: { last: null } },
+    { provide: AuthService, useValue: { currentUser: () => ({ displayName: 'Agent Test' }) } },
   ];
 }
 
