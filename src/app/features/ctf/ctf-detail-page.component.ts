@@ -49,8 +49,17 @@ import { ctfStatutLabel } from './ctf-status';
           @if (canActiver() && detail.statut === 'A_ACTIVER') {
             @if (manualEImpots()) {
               <label class="pd-field">
-                <span class="pd-label">Reference d autorisation</span>
+                <span class="pd-label">Reference d autorisation (facultative)</span>
                 <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
+              </label>
+              <label class="pd-field">
+                <span class="pd-label">Observation (facultative)</span>
+                <textarea
+                  class="pd-input"
+                  rows="3"
+                  [value]="observation()"
+                  (input)="onObservation($event)"
+                ></textarea>
               </label>
               <label class="pd-field">
                 <span class="pd-label">Date d'activation</span>
@@ -233,6 +242,7 @@ export class CtfDetailPageComponent {
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly modes = signal<IntegrationModes | null>(null);
   readonly reference = signal('');
+  readonly observation = signal('');
   readonly referenceDepot = signal('');
   readonly dateActivation = signal(today());
   readonly dateDepot = signal(today());
@@ -280,6 +290,10 @@ export class CtfDetailPageComponent {
     this.reference.set((event.target as HTMLInputElement).value);
   }
 
+  onObservation(event: Event): void {
+    this.observation.set((event.target as HTMLTextAreaElement).value);
+  }
+
   onReferenceDepot(event: Event): void {
     this.referenceDepot.set((event.target as HTMLInputElement).value);
   }
@@ -324,6 +338,7 @@ export class CtfDetailPageComponent {
     this.gateway
       .activationManuelle(this.demandeId, {
         reference: this.reference(),
+        observation: this.observation(),
         dateActivation: this.dateActivation(),
         preuveVersionId: this.proofVersionId(),
       })

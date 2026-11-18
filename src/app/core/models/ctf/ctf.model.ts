@@ -19,6 +19,7 @@ export interface CtfDetail extends CtfListItem {
   courrierId: string;
   idempotencyKey: string;
   referenceActivation: string | null;
+  observationActivation: string | null;
   dateActivationDemandee: string | null;
   dateActivation: string | null;
   dateInformation: string | null;
@@ -37,7 +38,8 @@ export interface CtfQuery {
 }
 
 export interface CtfManualActivationRequest {
-  reference: string;
+  reference?: string | null;
+  observation?: string | null;
   dateActivation: string;
   preuveVersionId?: string | null;
 }

@@ -33,6 +33,7 @@ const detail: CtfDetail = {
   courrierId: 'courrier-1',
   idempotencyKey: 'courrier-1:1',
   referenceActivation: null,
+  observationActivation: null,
   dateActivationDemandee: null,
   dateActivation: null,
   dateInformation: null,
