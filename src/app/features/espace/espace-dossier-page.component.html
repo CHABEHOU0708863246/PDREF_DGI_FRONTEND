@@ -43,6 +43,52 @@
     }
   </section>
 
+
+  <section class="espace-card pd-card" aria-labelledby="dossier-depots-rectifies">
+    <h2 id="dossier-depots-rectifies">Depots rectifies</h2>
+    @if (depots().length === 0) {
+      <p class="pd-help">Aucun depot rectifie pour ce dossier.</p>
+    } @else {
+      <ul>
+        @for (depot of depots(); track depot.id) {
+          <li>
+            Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | date: 'dd/MM/yyyy HH:mm' }} -
+            <strong>{{ depot.statut }}</strong>
+            @if (depot.motifCode) {
+              <span> - motif : {{ depot.motifCode }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (rectifiedError()) {
+      <p class="pd-error" role="alert">{{ rectifiedError() }}</p>
+    }
+    <label class="pd-field">
+      <span class="pd-label">Nouveau depot rectifie (PDF, JPEG ou PNG)</span>
+      <input
+        class="pd-input"
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        multiple
+        (change)="onRectifiedFiles($event)"
+      />
+    </label>
+    <p class="pd-help">
+      {{ rectifiedFiles().length }} fichier(s) selectionne(s), maximum 2 Mo par fichier et 5 Mo
+      au total. Le delai de 15 jours ouvrables part de l autorisation et n est pas prolonge.
+    </p>
+    <button
+      class="pd-btn pd-btn--primary"
+      type="button"
+      [disabled]="rectifiedBusy() || rectifiedFiles().length === 0"
+      (click)="sendRectified()"
+    >
+      Transmettre le depot rectifie
+    </button>
+  </section>
+
   @if (pieces(); as depot) {
     <section class="espace-card pd-card pieces" aria-labelledby="dossier-pieces">
       <h2 id="dossier-pieces">Pieces demandees</h2>

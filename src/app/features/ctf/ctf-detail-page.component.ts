@@ -2,6 +2,7 @@
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfDetail } from '../../core/models/ctf/ctf.model';
+import type { DepotRectifie } from '../../core/models/ctf/depot-rectifie.model';
 import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { UploadFieldComponent } from '../../core/components/upload-field/upload-field.component';
@@ -9,6 +10,7 @@ import { StatePanelComponent } from '../../core/components/state-panel/state-pan
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { DepotRectifieGateway } from '../../core/services/ctf/depot-rectifie.gateway';
 import { FilesGateway } from '../../core/services/files/files.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
@@ -45,6 +47,32 @@ import { ctfStatutLabel } from './ctf-status';
         @if (manualEImpots()) {
           <p><span class="pd-chip">Autorisation dans PDREF</span></p>
         }
+
+        @if (depots().length > 0) {
+          <section class="pd-card">
+            <h2>Depots rectifies</h2>
+            <ul>
+              @for (depot of depots(); track depot.id) {
+                <li>
+                  Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | abidjanDate }} -
+                  <strong>{{ depot.statut }}</strong>
+                  @if (depot.motifCode) {
+                    <span> - motif : {{ depot.motifCode }}</span>
+                  }
+                  @if (depot.statut === 'SOUMIS' && canActiver()) {
+                    <button type="button" class="pd-btn pd-btn--primary" [disabled]="busy()" (click)="controler(depot, true)">
+                      Conforme
+                    </button>
+                    <button type="button" class="pd-btn pd-btn--danger" [disabled]="busy()" (click)="controler(depot, false)">
+                      Non conforme
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
         <div class="actions">
           @if (canActiver() && detail.statut === 'A_ACTIVER') {
             @if (manualEImpots()) {
@@ -229,6 +257,7 @@ import { ctfStatutLabel } from './ctf-status';
 })
 export class CtfDetailPageComponent {
   private readonly gateway = inject(CtfGateway);
+  private readonly depotsGateway = inject(DepotRectifieGateway);
   private readonly integrations = inject(IntegrationGateway);
   private readonly files = inject(FilesGateway);
   private readonly route = inject(ActivatedRoute);
@@ -237,6 +266,7 @@ export class CtfDetailPageComponent {
   private readonly demandeId = this.route.snapshot.paramMap.get('id') ?? '';
 
   readonly item = signal<CtfDetail | null>(null);
+  readonly depots = signal<DepotRectifie[]>([]);
   readonly loading = signal(true);
   readonly busy = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
@@ -253,6 +283,38 @@ export class CtfDetailPageComponent {
   constructor() {
     this.load();
     this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
+    this.loadDepots();
+  }
+
+  loadDepots(): void {
+    this.depotsGateway.listCtf(this.demandeId).subscribe({
+      next: (items) => this.depots.set(items),
+      error: () => this.depots.set([]),
+    });
+  }
+
+  controler(depot: DepotRectifie, conforme: boolean): void {
+    if (this.busy() || depot.statut !== 'SOUMIS') {
+      return;
+    }
+    const motif = conforme
+      ? null
+      : window.prompt('Code du motif non conforme (PIECES_MANQUANTES, PIECE_ILLISIBLE, FORMAT_INCORRECT, MONTANT_INCOHERENT, AUTRE)');
+    if (!conforme && !motif) {
+      return;
+    }
+    this.busy.set(true);
+    this.depotsGateway.control(this.demandeId, depot.id, { conforme, motifCode: motif }).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.loadDepots();
+        this.load();
+      },
+      error: (error: unknown) => {
+        this.busy.set(false);
+        this.problem.set(normalizeProblem(error, null));
+      },
+    });
   }
 
   manualEImpots(): boolean {

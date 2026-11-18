@@ -2,14 +2,18 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { EspaceDossier } from '../../core/models/adhesions/adhesion.model';
 import type { RejetPiecesDossier } from '../../core/models/rejets/rejet.model';
+import type { DepotRectifie } from '../../core/models/ctf/depot-rectifie.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AdhesionGateway } from '../../core/services/adhesions/adhesion.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { RejetPiecesGateway } from '../../core/services/rejets/rejet-pieces.gateway';
+import { DepotRectifieGateway } from '../../core/services/ctf/depot-rectifie.gateway';
+import { FilesGateway } from '../../core/services/files/files.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 
@@ -24,6 +28,8 @@ import { normalizeProblem } from '../../core/utils/problem';
 export class EspaceDossierPageComponent implements OnInit {
   private readonly gateway = inject(AdhesionGateway);
   private readonly rejetPieces = inject(RejetPiecesGateway);
+  private readonly depotsRectifies = inject(DepotRectifieGateway);
+  private readonly files = inject(FilesGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
 
@@ -37,6 +43,10 @@ export class EspaceDossierPageComponent implements OnInit {
   readonly selectedFiles = signal<readonly File[]>([]);
   readonly message = signal('');
   readonly piecesError = signal<string | null>(null);
+  readonly depots = signal<DepotRectifie[]>([]);
+  readonly rectifiedFiles = signal<readonly File[]>([]);
+  readonly rectifiedError = signal<string | null>(null);
+  readonly rectifiedBusy = signal(false);
 
   ngOnInit(): void {
     this.id.set(this.route.snapshot.paramMap.get('id') ?? '');
@@ -68,6 +78,7 @@ export class EspaceDossierPageComponent implements OnInit {
         this.dossier.set(dossier);
         this.loading.set(false);
         this.loadPieces();
+        this.loadDepots();
       },
       error: (error: unknown) => {
         this.loading.set(false);
@@ -80,6 +91,72 @@ export class EspaceDossierPageComponent implements OnInit {
     this.rejetPieces.get(this.id()).subscribe({
       next: (pieces) => this.pieces.set(pieces),
       error: () => this.pieces.set(null),
+    });
+  }
+
+  loadDepots(): void {
+    this.depotsRectifies.listEspace(this.id()).subscribe({
+      next: (items) => this.depots.set(items),
+      error: () => this.depots.set([]),
+    });
+  }
+
+  onRectifiedFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.rectifiedError.set(null);
+    if (files.length === 0) {
+      this.rectifiedFiles.set([]);
+      return;
+    }
+    if (files.some((file) => file.size > 2 * 1024 * 1024)) {
+      this.rectifiedError.set('Chaque piece doit faire au maximum 2 Mo.');
+      this.rectifiedFiles.set([]);
+      return;
+    }
+    if (files.reduce((total, file) => total + file.size, 0) > 5 * 1024 * 1024) {
+      this.rectifiedError.set('Le depot ne doit pas depasser 5 Mo.');
+      this.rectifiedFiles.set([]);
+      return;
+    }
+    this.rectifiedFiles.set(files);
+  }
+
+  sendRectified(): void {
+    if (this.rectifiedBusy() || this.rectifiedFiles().length === 0) {
+      return;
+    }
+    this.rectifiedBusy.set(true);
+    this.rectifiedError.set(null);
+    const uploads = this.rectifiedFiles().map((file) =>
+      this.files.uploadGroup(file, 'DEPOT_RECTIFIE', this.id(), 'CONTRIBUABLE'),
+    );
+    forkJoin(uploads).subscribe({
+      next: (groups) => {
+        this.depotsRectifies
+          .submitEspace(this.id(), {
+            fileGroupIds: groups.map((group) => group.id),
+            origine: 'CONTRIBUABLE',
+          })
+          .subscribe({
+            next: () => {
+              this.rectifiedBusy.set(false);
+              this.rectifiedFiles.set([]);
+              this.notice.set('Depot rectifie transmis. Le CTF va le controler.');
+              this.loadDepots();
+            },
+            error: (error: unknown) => {
+              this.rectifiedBusy.set(false);
+              const issue = normalizeProblem(error, this.correlation.last);
+              this.rectifiedError.set(issue.detail ?? issue.title);
+            },
+          });
+      },
+      error: (error: unknown) => {
+        this.rectifiedBusy.set(false);
+        const issue = normalizeProblem(error, this.correlation.last);
+        this.rectifiedError.set(issue.detail ?? issue.title);
+      },
     });
   }
 
