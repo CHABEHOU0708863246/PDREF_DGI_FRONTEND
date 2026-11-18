@@ -198,6 +198,13 @@
                     <button
                       class="pd-btn pd-btn--ghost pd-btn--sm"
                       type="button"
+                      (click)="unlock(user)"
+                    >
+                      Deverrouiller
+                    </button>
+                    <button
+                      class="pd-btn pd-btn--ghost pd-btn--sm"
+                      type="button"
                       (click)="toggleActive(user)"
                     >
                       {{ user.isActive ? 'Desactiver' : 'Reactiver' }}
@@ -233,4 +240,20 @@
   [minLength]="5"
   (confirmed)="confirmResetMfa($event)"
   (cancelled)="cancelResetMfa()"
+/>
+
+<pdref-confirm-dialog-with-input
+  [open]="unlockOpen()"
+  title="Deverrouiller le compte"
+  [message]="
+    'Le verrouillage de ' +
+    (unlockTarget()?.displayName ?? 'cet utilisateur') +
+    ' sera retire. Le motif est conserve dans le journal d audit.'
+  "
+  inputLabel="Motif obligatoire"
+  hint="Indiquez pourquoi le compte est debloque."
+  confirmLabel="Deverrouiller"
+  [minLength]="5"
+  (confirmed)="confirmUnlock($event)"
+  (cancelled)="cancelUnlock()"
 />

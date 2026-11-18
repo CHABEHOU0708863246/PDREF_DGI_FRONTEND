@@ -299,6 +299,17 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'Nouvelle demande - PDREF',
       },
       {
+        path: 'demandes/:id/modifier',
+        loadComponent: () =>
+          import('../demandes/demande-form-page.component').then(
+            (module) => module.DemandeFormPageComponent,
+          ),
+        canActivate: [accessGuard],
+        canDeactivate: [unsavedChangesGuard],
+        data: { permissions: ['Demandes_Update'], breadcrumb: 'Modifier la demande' },
+        title: 'Modifier la demande - PDREF',
+      },
+      {
         path: 'demandes/:id',
         loadComponent: () =>
           import('../demandes/demande-detail-page.component').then(

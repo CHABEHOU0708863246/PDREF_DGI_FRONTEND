@@ -1,6 +1,6 @@
 ﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type {
   DemandeExerciceWrite,
@@ -70,7 +70,7 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
     } @else {
       <pdref-side-panel
         [open]="true"
-        title="Nouvelle demande"
+        [title]="isEdit() ? 'Modifier la demande' : 'Nouvelle demande'"
         size="xl"
         [dirty]="formDirty()"
         (closeRequested)="cancel()"
@@ -303,7 +303,11 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
 export class DemandeFormPageComponent implements HasUnsavedChanges {
   private readonly gateway = inject(DemandesGateway);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
+  readonly id = this.route.snapshot.paramMap.get('id');
+  readonly isEdit = signal(this.id !== null);
+  readonly version = signal(0);
   readonly options = signal<DemandeFormulaire>(LIGHTHOUSE_FORM);
   readonly loading = signal(!isLighthouseEnabled());
   readonly saving = signal(false);
@@ -326,7 +330,11 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       this.markDirty();
       return;
     }
-    this.load();
+    if (this.id) {
+      this.loadForEdit();
+    } else {
+      this.load();
+    }
   }
 
   hasUnsavedChanges(): boolean {
@@ -353,6 +361,55 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
           this.exercises.push(this.emptyExercise(second));
         }
         this.loading.set(false);
+      },
+      error: (error: unknown) => {
+        this.loading.set(false);
+        this.problem.set(normalizeProblem(error, this.correlation.last));
+      },
+    });
+  }
+
+  loadForEdit(): void {
+    if (!this.id) {
+      return;
+    }
+    this.loading.set(true);
+    this.gateway.formulaire().subscribe({
+      next: (options) => {
+        this.options.set(options);
+        this.gateway.get(this.id!).subscribe({
+          next: (demande) => {
+            this.version.set(demande.version);
+            this.form.contribuableId = demande.contribuable.id;
+            this.form.courrierId = demande.courrierId;
+            this.form.referenceDepot = demande.referenceDepot;
+            this.exercises.splice(0, this.exercises.length);
+            for (const exercice of demande.exercices) {
+              const target = this.emptyExercise(exercice.annee);
+              target.touteLaLiasse = exercice.touteLaLiasse;
+              target.etatsFinanciers = exercice.etatsFinanciers.map((item) => item.code);
+              target.motifs = exercice.motifs.map((item) => item.code);
+              target.precisions = Object.fromEntries(
+                exercice.motifs
+                  .filter((item) => item.precision)
+                  .map((item) => [item.code, item.precision!]),
+              );
+              target.variables = exercice.variables.map((item) => ({
+                code: item.code,
+                libelle: item.libelle,
+                type: item.type,
+                montant: item.montant ?? null,
+                texte: item.texte ?? null,
+              }));
+              this.exercises.push(target);
+            }
+            this.loading.set(false);
+          },
+          error: (error: unknown) => {
+            this.loading.set(false);
+            this.problem.set(normalizeProblem(error, this.correlation.last));
+          },
+        });
       },
       error: (error: unknown) => {
         this.loading.set(false);
@@ -458,6 +515,23 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       ...this.form,
       exercices: this.exercises.map((exercise) => this.toWrite(exercise)),
     };
+    if (this.isEdit() && this.id) {
+      this.gateway
+        .update(this.id, { ...request, brouillon: false, deposer: false }, this.version())
+        .subscribe({
+          next: (item) => {
+            this.dirty = false;
+            this.formDirty.set(false);
+            void this.router.navigate(['/dashboard/demandes', item.id]);
+          },
+          error: (error: unknown) => {
+            this.saving.set(false);
+            this.problem.set(normalizeProblem(error, this.correlation.last));
+          },
+        });
+      return;
+    }
+
     const file = this.selectedFile();
     this.gateway.create({ ...request, brouillon: true }).subscribe({
       next: (draft) => {
@@ -503,6 +577,10 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
   cancel(): void {
     this.dirty = false;
     this.formDirty.set(false);
+    if (this.isEdit() && this.id) {
+      void this.router.navigate(['/dashboard/demandes', this.id]);
+      return;
+    }
     void this.router.navigate(['/dashboard/demandes']);
   }
 

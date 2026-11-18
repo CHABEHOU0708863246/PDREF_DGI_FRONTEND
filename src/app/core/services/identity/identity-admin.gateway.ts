@@ -79,4 +79,8 @@ export class IdentityAdminGateway {
   resetMfa(id: string, reason: string): Observable<unknown> {
     return this.http.post<ApiResponse<unknown>>(`${this.base}/users/${id}/mfa/reset`, { reason });
   }
+
+  unlock(id: string, reason: string): Observable<unknown> {
+    return this.http.post<ApiResponse<unknown>>(`${this.base}/users/${id}/unlock`, { reason });
+  }
 }

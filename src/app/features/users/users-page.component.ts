@@ -49,6 +49,8 @@ export class UsersPageComponent {
   readonly pageSize = 25;
   readonly resetMfaOpen = signal(false);
   readonly resetMfaTarget = signal<AdminUser | null>(null);
+  readonly unlockOpen = signal(false);
+  readonly unlockTarget = signal<AdminUser | null>(null);
 
   readonly title = computed(() =>
     this.editing() ? 'Modifier un utilisateur' : 'Nouvel utilisateur',
@@ -283,6 +285,33 @@ export class UsersPageComponent {
   cancelResetMfa(): void {
     this.resetMfaOpen.set(false);
     this.resetMfaTarget.set(null);
+  }
+
+  unlock(user: AdminUser): void {
+    this.unlockTarget.set(user);
+    this.unlockOpen.set(true);
+  }
+
+  confirmUnlock(reason: string): void {
+    const target = this.unlockTarget();
+    this.unlockOpen.set(false);
+    this.unlockTarget.set(null);
+    if (!target || !reason.trim()) {
+      return;
+    }
+
+    this.gateway.unlock(target.id, reason.trim()).subscribe({
+      next: () => {
+        this.notice.set('Compte debloque.');
+        this.load(this.page());
+      },
+      error: (error: unknown) => this.fail(error),
+    });
+  }
+
+  cancelUnlock(): void {
+    this.unlockOpen.set(false);
+    this.unlockTarget.set(null);
   }
 
   directionLabel(user: AdminUser): string {

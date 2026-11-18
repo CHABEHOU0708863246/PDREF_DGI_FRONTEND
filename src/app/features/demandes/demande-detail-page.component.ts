@@ -193,6 +193,14 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
               Rejeter
             </button>
           }
+          @if (canModify()) {
+            <a
+              class="pd-btn pd-btn--ghost"
+              [routerLink]="['/dashboard/demandes', demande.id, 'modifier']"
+            >
+              Modifier
+            </a>
+          }
           @if (canDeposit()) {
             <button
               type="button"
@@ -529,6 +537,10 @@ export class DemandeDetailPageComponent {
 
   canUpload(): boolean {
     return this.permissions.hasPermission('Demandes_Create');
+  }
+
+  canModify(): boolean {
+    return this.permissions.hasPermission('Demandes_Update') && this.item()?.statut === 'REJETEE';
   }
 
   canDeposit(): boolean {
