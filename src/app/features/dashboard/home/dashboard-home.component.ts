@@ -245,7 +245,7 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
                       <th>Niveau</th>
                       <th>Delai GUDEF</th>
                       <th>Delai directions</th>
-                      <th>Delai CTF</th>
+                      <th>Delai autorisation</th>
                     </tr>
                   </thead>
                   <tbody>

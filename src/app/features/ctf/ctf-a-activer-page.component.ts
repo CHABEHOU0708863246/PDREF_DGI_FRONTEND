@@ -38,19 +38,19 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
-      title="CTF - A activer"
+      title="Autorisations a activer"
       subtitle="Autorisations de rectification en attente d'activation."
     />
 
     @if (modes()?.eImpots === 'MANUEL') {
-      <p><span class="pd-chip">Mode manuel</span></p>
+      <p><span class="pd-chip">Autorisation dans PDREF</span></p>
     }
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
     } @else {
       <section class="pd-card">
         <div class="head">
-          <h2>Demandes a activer</h2>
+          <h2>Dossiers a autoriser</h2>
           <span class="pd-muted">{{ items().length }} dossier(s)</span>
         </div>
         <form class="filters" (submit)="$event.preventDefault(); load()">
@@ -80,7 +80,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
             class="table-wrap"
             tabindex="0"
             role="region"
-            aria-label="Liste des demandes CTF a activer"
+            aria-label="Liste des autorisations a activer"
           >
             <table class="pd-table">
               <thead>

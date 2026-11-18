@@ -74,11 +74,6 @@ import { normalizeProblem } from '../../core/utils/problem';
             Signer le courrier
           </button>
         }
-        @if (canDepot() && detail.validationGlobale?.depotEImpotsStatut === 'EN_ATTENTE') {
-          <button type="button" class="pd-btn pd-btn--primary" (click)="depot()">
-            Deposer e-impots
-          </button>
-        }
         <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/suivis">Retour a la liste</a>
       </div>
 
@@ -251,7 +246,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               ><strong>{{ validation.signatureStatut || '-' }}</strong>
             </div>
             <div>
-              <span class="pd-label">Depot e-impots</span
+              <span class="pd-label">Depot</span
               ><strong>{{ validation.depotEImpotsStatut || '-' }}</strong>
             </div>
             <div>

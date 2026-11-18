@@ -102,9 +102,6 @@ import { normalizeProblem } from '../../core/utils/problem';
               [routerLink]="['/dashboard/contribuables', contribuable.id, 'modifier']"
               >Modifier</a
             >
-            <button type="button" class="pd-btn pd-btn--ghost" (click)="sync()">
-              Synchroniser e-impots
-            </button>
             @if (!contribuable.isArchived) {
               <button type="button" class="pd-btn pd-btn--danger" (click)="archive()">
                 Archiver
@@ -189,7 +186,7 @@ export class ContribuableDetailPageComponent {
 
   sync(): void {
     this.gateway.syncEImpots(this.id).subscribe({
-      next: () => this.message.set('Synchronisation e-impots demandee.'),
+      next: () => this.message.set('Synchronisation demandee.'),
       error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
     });
   }

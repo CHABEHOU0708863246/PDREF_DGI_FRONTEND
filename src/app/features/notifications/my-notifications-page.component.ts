@@ -24,8 +24,8 @@ const LIGHTHOUSE_NOTIFICATIONS: NotificationApiItem[] = [
   {
     id: 'lhci-n2',
     eventType: 'CTF_A_ACTIVER',
-    title: 'Action CTF requise',
-    message: 'Un dossier attend une action du CTF.',
+    title: 'Action autorisation requise',
+    message: 'Un dossier attend une autorisation de rectification.',
     readAt: '2026-11-01T13:31:00Z',
     isRead: true,
     createdAt: '2026-11-01T12:30:00Z',

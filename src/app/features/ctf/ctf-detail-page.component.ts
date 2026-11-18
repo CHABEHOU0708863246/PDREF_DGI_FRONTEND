@@ -28,7 +28,7 @@ import { ctfStatutLabel } from './ctf-status';
   template: `
     <pdref-side-panel
       [open]="true"
-      [title]="'CTF - ' + (item()?.numeroDemande || '')"
+      [title]="'Autorisation - ' + (item()?.numeroDemande || '')"
       size="lg"
       (closeRequested)="close()"
     >
@@ -40,16 +40,16 @@ import { ctfStatutLabel } from './ctf-status';
           (retry)="load()"
         />
       } @else if (loading()) {
-        <pdref-state-panel state="loading" title="Chargement de l'autorisation CTF" />
+        <pdref-state-panel state="loading" title="Chargement de l'autorisation" />
       } @else if (item(); as detail) {
         @if (manualEImpots()) {
-          <p><span class="pd-chip">Mode manuel</span></p>
+          <p><span class="pd-chip">Autorisation dans PDREF</span></p>
         }
         <div class="actions">
           @if (canActiver() && detail.statut === 'A_ACTIVER') {
             @if (manualEImpots()) {
               <label class="pd-field">
-                <span class="pd-label">Reference e-impots</span>
+                <span class="pd-label">Reference d autorisation</span>
                 <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
               </label>
               <label class="pd-field">
@@ -78,7 +78,7 @@ import { ctfStatutLabel } from './ctf-status';
                 [disabled]="busy() || uploadingProof()"
                 (click)="declarerActivation()"
               >
-                Declarer l'activation
+                Enregistrer l'autorisation
               </button>
             } @else {
               <button
@@ -99,7 +99,7 @@ import { ctfStatutLabel } from './ctf-status';
             !detail.dateDepotRectifie
           ) {
             <label class="pd-field">
-              <span class="pd-label">Reference depot rectifie</span>
+              <span class="pd-label">Reference du depot rectifie</span>
               <input
                 class="pd-input"
                 [value]="referenceDepot()"
@@ -121,7 +121,7 @@ import { ctfStatutLabel } from './ctf-status';
               [disabled]="busy()"
               (click)="declarerDepot()"
             >
-              Declarer le depot rectifie
+              Enregistrer le depot rectifie
             </button>
           }
           @if (

@@ -90,7 +90,7 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
             <span class="pd-label">Origine</span>
             <select class="pd-input" [(ngModel)]="filters.origine" name="origine">
               <option value="">Toutes</option>
-              <option value="PORTAIL_EIMPOTS">Portail e-impôts</option>
+              <option value="PORTAIL">Portail</option>
               <option value="AGENT">Agent</option>
               <option value="IMPORT">Import</option>
               <option value="MIGRATION">Migration</option>
@@ -252,7 +252,7 @@ export class DemandesPageComponent {
   origineLabel(value: string): string {
     return (
       {
-        PORTAIL_EIMPOTS: 'Portail e-impôts',
+        PORTAIL: 'Portail',
         AGENT: 'Agent',
         IMPORT: 'Import',
         MIGRATION: 'Migration',

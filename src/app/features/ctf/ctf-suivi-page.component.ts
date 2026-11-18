@@ -43,7 +43,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
-      title="CTF - Suivi"
+      title="Suivi des autorisations"
       subtitle="Activations, retours GUDEF et clotures des rectifications."
     />
 
@@ -52,7 +52,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
     } @else {
       <section class="pd-card">
         <div class="head">
-          <h2>Autorisations CTF</h2>
+          <h2>Autorisations de rectification</h2>
           <span class="pd-muted">{{ items().length }} dossier(s)</span>
         </div>
         <form class="filters" (submit)="$event.preventDefault(); load()">
@@ -84,7 +84,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
         </form>
 
         @if (loading()) {
-          <pdref-state-panel state="loading" title="Chargement du suivi CTF" />
+          <pdref-state-panel state="loading" title="Chargement du suivi des autorisations" />
         } @else if (items().length === 0) {
           <pdref-state-panel
             state="empty"

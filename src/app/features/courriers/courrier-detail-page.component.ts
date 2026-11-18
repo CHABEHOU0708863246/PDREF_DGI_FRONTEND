@@ -152,7 +152,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <label class="pd-field">
               <span class="pd-label">Canal</span>
               <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
-                <option value="DEPOT_EIMPOTS_MANUEL">Depot e-impots manuel</option>
+                <option value="DEPOT_EIMPOTS_MANUEL">Depot au guichet</option>
                 <option value="REMISE_PAPIER">Remise papier</option>
               </select>
             </label>

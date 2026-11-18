@@ -200,16 +200,16 @@ export const DASHBOARD_ROUTES: Routes = [
             (module) => module.CtfAActiverPageComponent,
           ),
         canActivate: [accessGuard],
-        data: { permissions: ['Ctf_Read'], breadcrumb: 'CTF a activer' },
-        title: 'CTF a activer - PDREF',
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Autorisations a activer' },
+        title: 'Autorisations a activer - PDREF',
       },
       {
         path: 'ctf/suivi',
         loadComponent: () =>
           import('../ctf/ctf-suivi-page.component').then((module) => module.CtfSuiviPageComponent),
         canActivate: [accessGuard],
-        data: { permissions: ['Ctf_Read'], breadcrumb: 'Suivi CTF' },
-        title: 'Suivi CTF - PDREF',
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Suivi des autorisations' },
+        title: 'Suivi des autorisations - PDREF',
       },
       {
         path: 'ctf/:id',
@@ -218,8 +218,8 @@ export const DASHBOARD_ROUTES: Routes = [
             (module) => module.CtfDetailPageComponent,
           ),
         canActivate: [accessGuard],
-        data: { permissions: ['Ctf_Read'], breadcrumb: 'Detail CTF', renderMode: 'client' },
-        title: 'Detail CTF - PDREF',
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Detail autorisation', renderMode: 'client' },
+        title: 'Detail autorisation - PDREF',
       },
       {
         path: 'rejets',
