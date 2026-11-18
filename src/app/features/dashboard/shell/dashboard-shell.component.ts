@@ -9,6 +9,7 @@ import {
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { BreadcrumbComponent } from '../../../core/components/breadcrumb/breadcrumb.component';
 import { IconComponent } from '../../../core/components/icon/icon.component';
+import { LocalClockComponent } from '../../../core/components/local-clock/local-clock.component';
 import { NotificationCenterComponent } from '../../../core/components/notification-center/notification-center.component';
 import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle.component';
 import type { IconName } from '../../../core/models/common/icon.model';
@@ -192,6 +193,7 @@ const NAVIGATION: readonly NavigationItem[] = [
     RouterOutlet,
     BreadcrumbComponent,
     IconComponent,
+    LocalClockComponent,
     NotificationCenterComponent,
     ThemeToggleComponent,
   ],
