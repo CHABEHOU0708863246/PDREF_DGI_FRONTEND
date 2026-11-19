@@ -72,7 +72,7 @@ export class AdhesionPublicPageComponent implements OnInit {
         prenom: this.prenom().trim(),
         fonction: this.fonction().trim(),
         email: this.email().trim(),
-        telephone: this.telephone().trim(),
+        telephone: this.toInternationalPhone(this.telephone()),
       })
       .subscribe({
         next: () => {
@@ -133,6 +133,12 @@ export class AdhesionPublicPageComponent implements OnInit {
 
   allPiecesPresent(): boolean {
     return this.pieceTypes.every((type) => Boolean(this.uploaded()[type.code]));
+  }
+
+  private toInternationalPhone(value: string): string {
+    const digits = value.replace(/\D/g, '').replace(/^00/, '');
+    const local = digits.startsWith('225') ? digits.slice(3) : digits;
+    return local.length > 0 ? `+225${local}` : value.trim();
   }
 
   private verify(token: string): void {

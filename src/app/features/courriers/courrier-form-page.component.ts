@@ -65,9 +65,14 @@ import { normalizeProblem } from '../../core/utils/problem';
                   class="pd-input"
                   [(ngModel)]="form.numero"
                   name="numero"
-                  [disabled]="isEdit()"
+                  [disabled]="true"
+                  placeholder="Genere automatiquement"
                   required
                 />
+                <span class="pd-help">
+                  Numero attribue automatiquement a l'enregistrement, au format
+                  COUR-annee-00001-expediteur.
+                </span>
               </label>
               @if (isEdit()) {
                 <div class="pd-field">
@@ -183,12 +188,14 @@ export class CourrierFormPageComponent {
   private readonly permissions = inject(PermissionsService);
   private readonly correlation = inject(CorrelationService);
   private readonly expediteurSearch$ = new Subject<string>();
+  private readonly expediteurPreview$ = new Subject<string>();
   readonly id = this.route.snapshot.paramMap.get('id');
   readonly isEdit = signal(this.id !== null);
   readonly loading = signal(this.id !== null);
   readonly saving = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly item = signal<CourrierDetail | null>(null);
+  readonly numeroPreview = signal<string | null>(null);
   readonly expediteurs = signal<readonly string[]>([]);
   readonly form: CourrierWrite = {
     sens: 'ENTRANT',
@@ -212,6 +219,25 @@ export class CourrierFormPageComponent {
         switchMap((term) => this.gateway.expediteurs(term)),
       )
       .subscribe((items) => this.expediteurs.set(items));
+
+    this.expediteurPreview$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((expediteur) => this.gateway.prochainNumero(expediteur || null)),
+      )
+      .subscribe({
+        next: (preview) => {
+          this.numeroPreview.set(preview.numero);
+          if (!this.isEdit()) {
+            this.form.numero = preview.numero;
+          }
+        },
+        error: () => {
+          this.numeroPreview.set(null);
+        },
+      });
+
     if (this.id) {
       this.load();
     }
@@ -256,7 +282,9 @@ export class CourrierFormPageComponent {
   }
 
   onExpediteurInput(event: Event): void {
-    this.expediteurSearch$.next((event.target as HTMLInputElement).value);
+    const value = (event.target as HTMLInputElement).value;
+    this.expediteurSearch$.next(value);
+    this.expediteurPreview$.next(value.trim());
   }
 
   save(): void {
@@ -286,8 +314,8 @@ export class CourrierFormPageComponent {
   }
 
   private validate(): ApiProblemDetails | null {
-    if (!this.form.numero || !this.form.expediteur || !this.form.objet) {
-      return validation('Numero, expediteur et objet sont obligatoires.');
+    if (!this.form.expediteur || !this.form.objet) {
+      return validation('Expediteur et objet sont obligatoires.');
     }
     if (this.form.sens === 'ENTRANT' && !this.form.dateArrivee) {
       return validation('La date d arrivee est obligatoire.');
@@ -305,6 +333,7 @@ export class CourrierFormPageComponent {
   private createPayload(): CourrierWrite {
     return {
       ...this.form,
+      numero: '',
       dateArrivee: this.form.sens === 'ENTRANT' ? this.form.dateArrivee : null,
       dateEmission: this.form.sens === 'SORTANT' ? this.form.dateEmission : null,
     };

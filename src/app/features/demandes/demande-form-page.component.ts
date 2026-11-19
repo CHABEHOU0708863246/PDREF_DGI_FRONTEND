@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
+import type { CourrierSummary } from '../../core/models/courriers/courrier.model';
 import type {
   DemandeExerciceWrite,
   DemandeFormulaire,
@@ -13,8 +14,8 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { ContribuableSelectComponent } from '../../core/components/contribuable-select/contribuable-select.component';
-import { CourrierSelectComponent } from '../../core/components/courrier-select/courrier-select.component';
 import type { HasUnsavedChanges } from '../../core/guards/unsaved-changes.guard';
+import { CourriersGateway } from '../../core/services/courriers/courriers.gateway';
 import { DemandesGateway } from '../../core/services/demandes/demandes.gateway';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
@@ -60,7 +61,6 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
     SidePanelComponent,
     StatePanelComponent,
     ContribuableSelectComponent,
-    CourrierSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -94,13 +94,30 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
                   label="Contribuable *"
                 />
               </div>
-              <div class="pd-field">
-                <pdref-courrier-select
+              <label class="pd-field">
+                <span class="pd-label">Courrier de dépôt *</span>
+                <select
+                  class="pd-input"
                   [(ngModel)]="form.courrierId"
                   name="courrierId"
-                  label="Courrier de dépôt *"
-                />
-              </div>
+                  (ngModelChange)="onCourrierChange($event)"
+                  [disabled]="courriersLoading()"
+                  required
+                >
+                  <option [ngValue]="null">Sélectionner un courrier</option>
+                  @for (courrier of courriers(); track courrier.id) {
+                    <option [ngValue]="courrier.id">
+                      {{ courrier.numero }} - {{ courrier.expediteur }} - {{ courrier.objet }}
+                    </option>
+                  }
+                </select>
+                @if (courriersLoading()) {
+                  <span class="pd-help">Chargement des courriers...</span>
+                }
+                @if (courriersProblem()) {
+                  <span class="pd-field__error" role="alert">{{ courriersProblem() }}</span>
+                }
+              </label>
               <label class="pd-field">
                 <span class="pd-label">Référence de dépôt</span>
                 <input class="pd-input" [(ngModel)]="form.referenceDepot" name="referenceDepot" />
@@ -314,6 +331,7 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
 })
 export class DemandeFormPageComponent implements HasUnsavedChanges {
   private readonly gateway = inject(DemandesGateway);
+  private readonly courriersGateway = inject(CourriersGateway);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
@@ -329,6 +347,9 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
   readonly auth = inject(AuthService);
   readonly today = new Date();
   readonly champsAcorriger = signal<string[]>([]);
+  readonly courriers = signal<readonly CourrierSummary[]>([]);
+  readonly courriersLoading = signal(false);
+  readonly courriersProblem = signal<string | null>(null);
   readonly exercises: ExerciceForm[] = [];
   readonly form: DemandeWrite = {
     contribuableId: null,
@@ -345,11 +366,58 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       this.markDirty();
       return;
     }
+    this.loadCourriers();
     if (this.id) {
       this.loadForEdit();
     } else {
       this.load();
     }
+  }
+
+  loadCourriers(): void {
+    this.courriersLoading.set(true);
+    this.courriersProblem.set(null);
+    this.courriersGateway
+      .list({
+        typeCourrier: 'COURRIER',
+        sens: 'ENTRANT',
+        sansDemande: true,
+        pageSize: 200,
+        sort: 'date',
+        direction: 'desc',
+      })
+      .subscribe({
+        next: (page) => {
+          this.courriers.set(page.items);
+          this.ensureCourrier(this.form.courrierId ?? null);
+          this.courriersLoading.set(false);
+        },
+        error: () => {
+          this.courriersLoading.set(false);
+          this.courriersProblem.set('Impossible de charger les courriers disponibles.');
+        },
+      });
+  }
+
+  onCourrierChange(courrierId: string | null): void {
+    const courrier = this.courriers().find((item) => item.id === courrierId);
+    if (!courrier) {
+      return;
+    }
+    this.form.referenceDepot = buildReferenceDepot(courrier);
+  }
+
+  private ensureCourrier(courrierId: string | null): void {
+    if (!courrierId || this.courriers().some((item) => item.id === courrierId)) {
+      return;
+    }
+    this.courriersGateway.get(courrierId).subscribe({
+      next: (courrier) => {
+        if (!this.courriers().some((item) => item.id === courrier.id)) {
+          this.courriers.update((items) => [courrier, ...items]);
+        }
+      },
+    });
   }
 
   hasUnsavedChanges(): boolean {
@@ -398,6 +466,7 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
             this.form.contribuableId = demande.contribuable.id;
             this.form.courrierId = demande.courrierId;
             this.form.referenceDepot = demande.referenceDepot;
+            this.ensureCourrier(demande.courrierId);
             this.exercises.splice(0, this.exercises.length);
             for (const exercice of demande.exercices) {
               const target = this.emptyExercise(exercice.annee);
@@ -669,4 +738,25 @@ export class DemandeFormPageComponent implements HasUnsavedChanges {
       variables: [],
     };
   }
+}
+
+function buildReferenceDepot(courrier: CourrierSummary): string {
+  return `REF-${slugify(courrier.expediteur)}-${courrierSequence(courrier.numero)}`;
+}
+
+function slugify(value: string): string {
+  return (
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'EXPEDITEUR'
+  );
+}
+
+function courrierSequence(numero: string): string {
+  const match = /^COUR-\d{4}-(\d{5})-/i.exec(numero);
+  return match?.[1] ?? '00001';
 }

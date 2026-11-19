@@ -40,6 +40,7 @@ function setup(id: string | null = null, internal = true) {
     update: vi.fn(() => of(item)),
     get: vi.fn(() => of(item)),
     expediteurs: vi.fn(() => of(['DGI'])),
+    prochainNumero: vi.fn(() => of({ numero: 'COUR-2026-00001-DGI' })),
   };
   const permissions = {
     hasPermission: vi.fn((permission: string) =>
@@ -155,6 +156,7 @@ describe('CourrierFormPageComponent errors', () => {
       update: vi.fn(() => throwError(() => new Error('boom'))),
       get: vi.fn(() => throwError(() => new Error('boom'))),
       expediteurs: vi.fn(() => of(['DGI'])),
+      prochainNumero: vi.fn(() => of({ numero: 'COUR-2026-00001-DGI' })),
     };
     TestBed.configureTestingModule({
       imports: [CourrierFormPageComponent],

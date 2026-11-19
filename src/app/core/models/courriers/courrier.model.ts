@@ -69,6 +69,7 @@ export interface CourrierQuery {
   dateAu?: string | null;
   expediteur?: string | null;
   lie?: boolean | null;
+  sansDemande?: boolean | null;
   search?: string | null;
   page?: number;
   pageSize?: number;
@@ -97,4 +98,8 @@ export interface CourrierLookup {
   sens: CourrierSens;
   typeCourrier: CourrierType;
   date: string;
+}
+
+export interface CourrierNumeroPreview {
+  numero: string;
 }

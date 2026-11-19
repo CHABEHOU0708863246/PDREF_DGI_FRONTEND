@@ -115,10 +115,21 @@ import { normalizeProblem } from '../../core/utils/problem';
                 ><span class="pd-label">Email</span
                 ><input class="pd-input" type="email" [(ngModel)]="form.email" name="email"
               /></label>
-              <label class="pd-field"
-                ><span class="pd-label">Telephone</span
-                ><input class="pd-input" [(ngModel)]="form.telephone" name="telephone"
-              /></label>
+              <label class="pd-field">
+                <span class="pd-label">Telephone</span>
+                <div class="phone-input">
+                  <span class="phone-input__prefix">+225</span>
+                  <input
+                    class="pd-input"
+                    [(ngModel)]="telephoneLocal"
+                    name="telephone"
+                    type="tel"
+                    inputmode="numeric"
+                    placeholder="01 02 03 04 05"
+                  />
+                </div>
+                <span class="pd-help">Le numero est enregistre avec l'indicatif +225.</span>
+              </label>
             </div>
             <div class="pd-actions">
               <button
@@ -150,6 +161,7 @@ export class ContribuableFormPageComponent {
   readonly centres = signal<CentreOption[]>([]);
   readonly centresLoading = signal(true);
   readonly centresProblem = signal<string | null>(null);
+  telephoneLocal = '';
   readonly form: ContribuableWrite = {
     ncc: '',
     raisonSociale: '',
@@ -198,6 +210,7 @@ export class ContribuableFormPageComponent {
           email: null,
           telephone: null,
         });
+        this.telephoneLocal = localPhone(item.telephone);
         this.loading.set(false);
       },
       error: (error: unknown) => {
@@ -225,6 +238,7 @@ export class ContribuableFormPageComponent {
       return;
     }
     this.saving.set(true);
+    this.form.telephone = toInternationalPhone(this.telephoneLocal);
     const request =
       this.isEdit() && this.id
         ? this.gateway.update(this.id, this.form)
@@ -243,4 +257,17 @@ export class ContribuableFormPageComponent {
   cancel(): void {
     void this.router.navigate(['/dashboard/contribuables']);
   }
+}
+
+function toInternationalPhone(value: string): string | null {
+  const digits = value.replace(/\D/g, '').replace(/^00/, '');
+  const local = digits.startsWith('225') ? digits.slice(3) : digits;
+  return local.length > 0 ? `+225${local}` : null;
+}
+
+function localPhone(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+  return value.replace(/\D/g, '').replace(/^225/, '');
 }

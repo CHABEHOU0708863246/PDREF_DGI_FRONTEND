@@ -9,6 +9,7 @@ import type {
   CourrierASigner,
   CourrierDetail,
   CourrierLookup,
+  CourrierNumeroPreview,
   CourrierPage,
   CourrierQuery,
   CourrierWrite,
@@ -54,6 +55,14 @@ export class CourriersGateway {
   lookup(term: string): Observable<readonly CourrierLookup[]> {
     return this.http
       .get<ApiResponse<CourrierLookup[]>>(`${this.base}/lookup`, { params: { term } })
+      .pipe(map((response) => response.data));
+  }
+
+  prochainNumero(expediteur: string | null): Observable<CourrierNumeroPreview> {
+    return this.http
+      .get<ApiResponse<CourrierNumeroPreview>>(`${this.base}/prochain-numero`, {
+        params: expediteur ? { expediteur } : {},
+      })
       .pipe(map((response) => response.data));
   }
 
@@ -116,6 +125,7 @@ export class CourriersGateway {
       dateAu: query.dateAu,
       expediteur: query.expediteur,
       lie: query.lie,
+      sansDemande: query.sansDemande,
       search: query.search,
       page: query.page ?? 1,
       pageSize: query.pageSize ?? 20,

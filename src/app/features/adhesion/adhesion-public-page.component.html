@@ -79,15 +79,21 @@
           </label>
           <label class="pd-field">
             <span class="pd-label">Telephone</span>
-            <input
-              class="pd-input"
-              name="telephone"
-              type="tel"
-              autocomplete="tel"
-              [value]="telephone()"
-              (input)="telephone.set($any($event.target).value)"
-              required
-            />
+            <div class="phone-input">
+              <span class="phone-input__prefix">+225</span>
+              <input
+                class="pd-input"
+                name="telephone"
+                type="tel"
+                inputmode="numeric"
+                autocomplete="tel"
+                [value]="telephone()"
+                (input)="telephone.set($any($event.target).value)"
+                placeholder="01 02 03 04 05"
+                required
+              />
+            </div>
+            <span class="pd-help">Le numero est enregistre avec l'indicatif +225.</span>
           </label>
         </div>
 

@@ -58,7 +58,14 @@ function providers(gateway: Partial<DemandesGateway>) {
   return [
     provideRouter([]),
     { provide: DemandesGateway, useValue: gateway },
-    { provide: CourriersGateway, useValue: { lookup: vi.fn(() => of([])) } },
+    {
+      provide: CourriersGateway,
+      useValue: {
+        lookup: vi.fn(() => of([])),
+        list: vi.fn(() => of({ items: [], page: 1, pageSize: 20, totalCount: 0 })),
+        get: vi.fn(() => of(detail)),
+      },
+    },
     {
       provide: RejetGateway,
       useValue: {

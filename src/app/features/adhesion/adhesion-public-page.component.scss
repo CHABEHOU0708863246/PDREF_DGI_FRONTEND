@@ -60,6 +60,28 @@
   gap: var(--space-4);
 }
 
+.phone-input {
+  display: flex;
+  align-items: stretch;
+}
+
+.phone-input__prefix {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-inline-end: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.phone-input .pd-input {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
 .adhesion-actions {
   display: flex;
   flex-wrap: wrap;
