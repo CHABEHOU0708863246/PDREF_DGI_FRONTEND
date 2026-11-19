@@ -77,44 +77,53 @@ import { normalizeProblem } from '../../core/utils/problem';
         <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/suivis">Retour a la liste</a>
       </div>
 
-      <section class="pd-card summary">
-        <div>
-          <span class="pd-label">NCC</span><strong>{{ detail.contribuable.ncc }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Raison sociale</span
-          ><strong>{{ detail.contribuable.raisonSociale }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Statut</span><strong>{{ statutLabel(detail.statut) }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Cycle</span><strong>{{ detail.cycle }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Etape</span><strong>{{ detail.etapeCourante || '-' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Agent designe</span
-          ><strong>{{ detail.assigneeUserId || '-' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Instruction</span><strong>{{ detail.instruction || '-' }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Avis</span
-          ><strong>{{ detail.avisRecus }} / {{ detail.avisTotal }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Favorables</span><strong>{{ detail.avisFavorables }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Non favorables</span
-          ><strong>{{ detail.avisNonFavorables }}</strong>
-        </div>
-        <div>
-          <span class="pd-label">Transmissions</span
-          ><strong>{{ detail.transmissionsCount }}</strong>
+      <section class="pd-card">
+        <h2>Synthèse du dossier</h2>
+        <div class="summary">
+          <div>
+            <span class="pd-label">NCC</span>
+            <strong>{{ detail.contribuable.ncc }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Raison sociale</span>
+            <strong>{{ detail.contribuable.raisonSociale }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Statut</span>
+            <strong>{{ statutLabel(detail.statut) }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Cycle</span>
+            <strong>{{ detail.cycle }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Étape</span>
+            <strong>{{ stepLabel(detail.etapeCourante || '') || '-' }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Agent désigné</span>
+            <strong>{{ detail.assigneeName || detail.assigneeUserId || '-' }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Instruction</span>
+            <strong>{{ instructionLabel(detail.instruction) }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Avis reçus</span>
+            <strong>{{ detail.avisRecus }} / {{ detail.avisTotal }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Favorables</span>
+            <strong>{{ detail.avisFavorables }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Non favorables</span>
+            <strong>{{ detail.avisNonFavorables }}</strong>
+          </div>
+          <div>
+            <span class="pd-label">Transmissions</span>
+            <strong>{{ detail.transmissionsCount }}</strong>
+          </div>
         </div>
       </section>
 
@@ -346,19 +355,38 @@ import { normalizeProblem } from '../../core/utils/problem';
   `,
   styles: [
     `
-      .actions,
-      .summary {
+      .actions {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
         align-items: center;
-      }
-      .actions {
         margin-bottom: 1rem;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
       }
       .summary > div {
         display: grid;
-        min-width: 11rem;
+        gap: 0.35rem;
+        min-width: 0;
+        padding: 0.8rem 0.9rem;
+        border: 1px solid var(--pd-border, #d9dee8);
+        border-radius: 0.65rem;
+        background: var(--pd-surface-2, #f6f8fb);
+      }
+      .summary .pd-label {
+        color: var(--pd-muted, #5c6b82);
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .summary strong {
+        font-size: 1rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
       }
       .avis-grid {
         display: grid;
@@ -602,11 +630,13 @@ export class SuiviDetailPageComponent {
   statutLabel(statut: string): string {
     return (
       {
+        EN_ATTENTE_VERIFICATION: 'En attente de vérification',
         AVIS_EN_COURS: 'Avis en cours',
         AVIS_COMPLET: 'Avis complet',
         VALIDATION_EN_ATTENTE: 'Validation en attente',
-        VALIDATION_POSEE: 'Validation posee',
-        CLOTURE: 'Cloture',
+        VALIDATION_POSEE: 'Validation posée',
+        CLOTURE: 'Clôturé',
+        REJETE: 'Rejeté',
       }[statut] ?? statut
     );
   }
@@ -614,11 +644,31 @@ export class SuiviDetailPageComponent {
   stepLabel(step: string): string {
     return (
       {
+        CONFORMITE_AUTO: 'Conformité automatique',
+        VERIF_GUDEF: 'Vérification GUDEF',
         AVIS_DERAR: 'DERAR',
         AVIS_DVFN: 'DVFN',
         AVIS_RATTACHEMENT: 'Rattachement',
+        VALIDATION_GLOBALE_GUDEF: 'Validation globale GUDEF',
+        NON_FAVORABLE: 'Non favorable',
       }[step] ?? step
     );
+  }
+
+  instructionLabel(value: string | null | undefined): string {
+    if (!value) {
+      return '-';
+    }
+    const labels: Record<string, string> = {
+      ACCEPTE_POUR_TRAITEMENT: 'Accepté pour traitement',
+      VERIFICATION_SIMPLE: 'Vérification simple',
+      VERIFICATION_APPROFONDIE: 'Vérification approfondie',
+    };
+    if (labels[value]) {
+      return labels[value];
+    }
+    const readable = value.replaceAll('_', ' ').toLowerCase();
+    return readable.charAt(0).toUpperCase() + readable.slice(1);
   }
 
   motifLabel(code: string): string {

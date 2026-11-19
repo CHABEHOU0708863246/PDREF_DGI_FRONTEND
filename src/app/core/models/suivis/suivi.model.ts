@@ -96,6 +96,7 @@ export interface SuiviDetail extends SuiviDossier {
   directionIds: string[];
   etapes: SuiviEtape[];
   assigneeUserId?: string | null;
+  assigneeName?: string | null;
   assignedAt?: string | null;
   instruction?: string | null;
 }

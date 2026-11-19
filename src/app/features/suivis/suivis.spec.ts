@@ -224,7 +224,9 @@ describe('Pages suivis', () => {
     component.depot();
     component.verify();
     expect(component.stepLabel('AVIS_DVFN')).toBe('DVFN');
-    expect(component.statutLabel('CLOTURE')).toBe('Cloture');
+    expect(component.stepLabel('CONFORMITE_AUTO')).toBe('Conformité automatique');
+    expect(component.instructionLabel('ACCEPTE_POUR_TRAITEMENT')).toBe('Accepté pour traitement');
+    expect(component.statutLabel('CLOTURE')).toBe('Clôturé');
     expect(gateway.decideAvis).toHaveBeenCalled();
     expect(gateway.transmit).toHaveBeenCalled();
     expect(gateway.signature).toHaveBeenCalled();
