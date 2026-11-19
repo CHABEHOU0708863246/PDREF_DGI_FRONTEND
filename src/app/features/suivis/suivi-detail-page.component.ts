@@ -45,7 +45,7 @@ import { normalizeProblem } from '../../core/utils/problem';
       <pdref-state-panel state="loading" title="Chargement du suivi" />
     } @else if (item(); as detail) {
       <div class="actions">
-        @if (canVerify() && detail.etapeCourante === 'VERIF_GUDEF') {
+        @if (canVerify()) {
           <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
             Verifier GUDEF
           </button>
@@ -468,7 +468,10 @@ export class SuiviDetailPageComponent {
   }
 
   canVerify(): boolean {
-    return this.permissions.hasPermission('Etapes_Verifier_Gudef');
+    return (
+      this.permissions.hasPermission('Etapes_Verifier_Gudef') &&
+      ['VERIF_GUDEF', 'CONFORMITE_AUTO'].includes(this.item()?.etapeCourante ?? '')
+    );
   }
 
   canReject(): boolean {

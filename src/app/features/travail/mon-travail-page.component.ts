@@ -15,7 +15,10 @@ import { normalizeProblem } from '../../core/utils/problem';
   imports: [DatePipe, RouterLink, PageHeaderComponent, StatePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pdref-page-header title="Mon travail" subtitle="Dossiers qui attendent une action de votre part." />
+    <pdref-page-header
+      title="Mon travail"
+      subtitle="Dossiers qui attendent une action de votre part."
+    />
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
     } @else if (loading()) {
@@ -35,14 +38,20 @@ import { normalizeProblem } from '../../core/utils/problem';
           <tbody>
             @for (item of items(); track item.demandeId) {
               <tr>
-                <td><a class="pd-link" [routerLink]="['/dashboard/suivis', item.demandeId]">{{ item.numero }}</a></td>
+                <td>
+                  <a class="pd-link" [routerLink]="['/dashboard/suivis', item.demandeId]">{{
+                    item.numero
+                  }}</a>
+                </td>
                 <td>{{ item.contribuable.raisonSociale }}</td>
                 <td>{{ item.etapeCourante || item.statut }}</td>
                 <td>{{ nextAction(item) }}</td>
                 <td>{{ item.dateDepot | date: 'dd/MM/yyyy' }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="5">Aucun dossier en attente.</td></tr>
+              <tr>
+                <td colspan="5">Aucun dossier en attente.</td>
+              </tr>
             }
           </tbody>
         </table>
@@ -77,7 +86,7 @@ export class MonTravailPageComponent implements OnInit {
 
   nextAction(item: SuiviDossier): string {
     const step = item.etapeCourante ?? '';
-    if (step.includes('VERIF_GUDEF')) return 'Verifier la demande';
+    if (step.includes('VERIF_GUDEF') || step === 'CONFORMITE_AUTO') return 'Verifier la demande';
     if (step.startsWith('AVIS_')) return 'Emettre un avis';
     if (step.includes('VALIDATION')) return 'Decider la validation globale';
     if (step.includes('CTF')) return 'Autoriser la rectification';
