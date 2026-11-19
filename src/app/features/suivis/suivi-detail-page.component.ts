@@ -588,7 +588,7 @@ export class SuiviDetailPageComponent {
         article24: value.article24,
       })
       .subscribe({
-        next: (item) => this.item.set(item),
+        next: () => this.load(),
         error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
       });
   }
