@@ -5,6 +5,7 @@ import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type { ApiResponse } from '../../models/common/api-response.model';
 import type {
+  CtfMotifNonConformite,
   DepotRectifie,
   DepotRectifieControlRequest,
   DepotRectifieCreateRequest,
@@ -40,6 +41,12 @@ export class DepotRectifieGateway {
   listCtf(demandeId: string): Observable<DepotRectifie[]> {
     return this.http
       .get<ApiResponse<DepotRectifie[]>>(`${this.ctfRoot}/${demandeId}/depots-rectifies`)
+      .pipe(map((response) => response.data));
+  }
+
+  motifsNonConformite(): Observable<CtfMotifNonConformite[]> {
+    return this.http
+      .get<ApiResponse<CtfMotifNonConformite[]>>(`${this.ctfRoot}/motifs-non-conformite`)
       .pipe(map((response) => response.data));
   }
 

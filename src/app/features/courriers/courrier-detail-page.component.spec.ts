@@ -78,6 +78,7 @@ function setup(canInternal = true, canUpdate = true) {
       if (permission === 'Courriers_Update') return canUpdate;
       return true;
     }),
+    hasRole: vi.fn(() => true),
   };
   TestBed.configureTestingModule({
     imports: [CourrierDetailPageComponent],
@@ -149,7 +150,10 @@ describe('CourrierDetailPageComponent', () => {
           provide: IntegrationGateway,
           useValue: { modes: () => of({ eImpots: 'MANUEL', signature: 'MANUEL' }) },
         },
-        { provide: PermissionsService, useValue: { hasPermission: () => true } },
+        {
+          provide: PermissionsService,
+          useValue: { hasPermission: () => true, hasRole: () => true },
+        },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
       ],
     });
@@ -232,7 +236,10 @@ describe('CourrierDetailPageComponent errors', () => {
           provide: IntegrationGateway,
           useValue: { modes: vi.fn(() => of({ eImpots: 'MANUEL', signature: 'MANUEL' })) },
         },
-        { provide: PermissionsService, useValue: { hasPermission: () => true } },
+        {
+          provide: PermissionsService,
+          useValue: { hasPermission: () => true, hasRole: () => true },
+        },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
       ],
     });
@@ -267,7 +274,10 @@ describe('CourrierDetailPageComponent error branches', () => {
           provide: IntegrationGateway,
           useValue: { modes: vi.fn(() => of({ eImpots: 'MANUEL', signature: 'MANUEL' })) },
         },
-        { provide: PermissionsService, useValue: { hasPermission: () => true } },
+        {
+          provide: PermissionsService,
+          useValue: { hasPermission: () => true, hasRole: () => true },
+        },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'cr1' } } } },
       ],
     });

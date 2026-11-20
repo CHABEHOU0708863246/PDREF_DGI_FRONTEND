@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfDetail } from '../../core/models/ctf/ctf.model';
 import type { DepotRectifie } from '../../core/models/ctf/depot-rectifie.model';
+import type { CtfMotifNonConformite } from '../../core/models/ctf/depot-rectifie.model';
 import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { UploadFieldComponent } from '../../core/components/upload-field/upload-field.component';
@@ -57,15 +58,73 @@ import { ctfStatutLabel } from './ctf-status';
                   Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | abidjanDate }} -
                   <strong>{{ depot.statut }}</strong>
                   @if (depot.motifCode) {
-                    <span> - motif : {{ depot.motifCode }}</span>
+                    <span> - motif : {{ motifLabel(depot.motifCode) }}</span>
+                  }
+                  @if (depot.observation) {
+                    <div class="pd-muted">Observation : {{ depot.observation }}</div>
                   }
                   @if (depot.statut === 'SOUMIS' && canActiver()) {
-                    <button type="button" class="pd-btn pd-btn--primary" [disabled]="busy()" (click)="controler(depot, true)">
-                      Conforme
-                    </button>
-                    <button type="button" class="pd-btn pd-btn--danger" [disabled]="busy()" (click)="controler(depot, false)">
-                      Non conforme
-                    </button>
+                    <div class="actions">
+                      <button
+                        type="button"
+                        class="pd-btn pd-btn--primary"
+                        [disabled]="busy()"
+                        (click)="controler(depot, true)"
+                      >
+                        Conforme
+                      </button>
+                      <button
+                        type="button"
+                        class="pd-btn pd-btn--danger"
+                        [disabled]="busy()"
+                        (click)="demanderNonConforme(depot)"
+                      >
+                        Non conforme
+                      </button>
+                    </div>
+                    @if (nonConformeDepotId() === depot.id) {
+                      <div class="pd-card">
+                        <label class="pd-field">
+                          <span class="pd-label">Motif du refus</span>
+                          <select
+                            class="pd-input"
+                            [value]="nonConformeMotif()"
+                            (change)="onNonConformeMotif($event)"
+                          >
+                            <option value="">Choisir un motif</option>
+                            @for (motif of motifs(); track motif.code) {
+                              <option [value]="motif.code">{{ motif.libelle }}</option>
+                            }
+                          </select>
+                        </label>
+                        <label class="pd-field">
+                          <span class="pd-label">Observation</span>
+                          <textarea
+                            class="pd-input"
+                            rows="3"
+                            [value]="nonConformeObservation()"
+                            (input)="onNonConformeObservation($event)"
+                          ></textarea>
+                        </label>
+                        <div class="actions">
+                          <button
+                            type="button"
+                            class="pd-btn pd-btn--danger"
+                            [disabled]="busy() || !nonConformeMotif()"
+                            (click)="confirmerNonConforme(depot)"
+                          >
+                            Confirmer le refus
+                          </button>
+                          <button
+                            type="button"
+                            class="pd-btn pd-btn--ghost"
+                            (click)="annulerNonConforme()"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </div>
+                    }
                   }
                 </li>
               }
@@ -267,6 +326,7 @@ export class CtfDetailPageComponent {
 
   readonly item = signal<CtfDetail | null>(null);
   readonly depots = signal<DepotRectifie[]>([]);
+  readonly motifs = signal<CtfMotifNonConformite[]>([]);
   readonly loading = signal(true);
   readonly busy = signal(false);
   readonly problem = signal<ApiProblemDetails | null>(null);
@@ -279,11 +339,22 @@ export class CtfDetailPageComponent {
   readonly proofVersionId = signal<string | null>(null);
   readonly proofName = signal<string | null>(null);
   readonly uploadingProof = signal(false);
+  readonly nonConformeDepotId = signal<string | null>(null);
+  readonly nonConformeMotif = signal('');
+  readonly nonConformeObservation = signal('');
 
   constructor() {
     this.load();
     this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
     this.loadDepots();
+    this.loadMotifs();
+  }
+
+  loadMotifs(): void {
+    this.depotsGateway.motifsNonConformite().subscribe({
+      next: (items) => this.motifs.set(items),
+      error: () => this.motifs.set([]),
+    });
   }
 
   loadDepots(): void {
@@ -293,28 +364,69 @@ export class CtfDetailPageComponent {
     });
   }
 
+  motifLabel(code: string): string {
+    return this.motifs().find((motif) => motif.code === code)?.libelle ?? code;
+  }
+
+  demanderNonConforme(depot: DepotRectifie): void {
+    this.nonConformeDepotId.set(depot.id);
+    this.nonConformeMotif.set('');
+    this.nonConformeObservation.set('');
+  }
+
+  annulerNonConforme(): void {
+    this.nonConformeDepotId.set(null);
+    this.nonConformeMotif.set('');
+    this.nonConformeObservation.set('');
+  }
+
+  onNonConformeMotif(event: Event): void {
+    this.nonConformeMotif.set((event.target as HTMLSelectElement).value);
+  }
+
+  onNonConformeObservation(event: Event): void {
+    this.nonConformeObservation.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  confirmerNonConforme(depot: DepotRectifie): void {
+    if (!this.nonConformeMotif()) {
+      return;
+    }
+    this.envoyerControle(depot, false, this.nonConformeMotif(), this.nonConformeObservation());
+  }
+
   controler(depot: DepotRectifie, conforme: boolean): void {
+    if (!conforme) {
+      this.demanderNonConforme(depot);
+      return;
+    }
+    this.envoyerControle(depot, true, null, null);
+  }
+
+  private envoyerControle(
+    depot: DepotRectifie,
+    conforme: boolean,
+    motifCode: string | null,
+    observation: string | null,
+  ): void {
     if (this.busy() || depot.statut !== 'SOUMIS') {
       return;
     }
-    const motif = conforme
-      ? null
-      : window.prompt('Code du motif non conforme (PIECES_MANQUANTES, PIECE_ILLISIBLE, FORMAT_INCORRECT, MONTANT_INCOHERENT, AUTRE)');
-    if (!conforme && !motif) {
-      return;
-    }
     this.busy.set(true);
-    this.depotsGateway.control(this.demandeId, depot.id, { conforme, motifCode: motif }).subscribe({
-      next: () => {
-        this.busy.set(false);
-        this.loadDepots();
-        this.load();
-      },
-      error: (error: unknown) => {
-        this.busy.set(false);
-        this.problem.set(normalizeProblem(error, null));
-      },
-    });
+    this.depotsGateway
+      .control(this.demandeId, depot.id, { conforme, motifCode, observation })
+      .subscribe({
+        next: () => {
+          this.busy.set(false);
+          this.annulerNonConforme();
+          this.loadDepots();
+          this.load();
+        },
+        error: (error: unknown) => {
+          this.busy.set(false);
+          this.problem.set(normalizeProblem(error, null));
+        },
+      });
   }
 
   manualEImpots(): boolean {

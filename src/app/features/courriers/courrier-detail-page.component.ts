@@ -146,7 +146,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             </label>
           </section>
         }
-        @if (canUpdate()) {
+        @if (canDeclarerRemise()) {
           <section class="pd-card">
             <h2>Declarer la remise</h2>
             <label class="pd-field">
@@ -334,6 +334,12 @@ export class CourrierDetailPageComponent {
 
   canUpdate(): boolean {
     return this.permissions.hasPermission('Courriers_Update');
+  }
+
+  canDeclarerRemise(): boolean {
+    return (
+      this.permissions.hasPermission('Courriers_Update') && this.permissions.hasRole('SD_GUDEF')
+    );
   }
 
   close(): void {

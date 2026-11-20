@@ -25,3 +25,8 @@ export interface DepotRectifieControlRequest {
   motifCode?: string | null;
   observation?: string | null;
 }
+
+export interface CtfMotifNonConformite {
+  code: string;
+  libelle: string;
+}

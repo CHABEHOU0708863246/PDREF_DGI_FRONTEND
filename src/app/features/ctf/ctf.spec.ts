@@ -7,6 +7,7 @@ import { PermissionsService } from '../../core/services/permissions/permissions.
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { FilesGateway } from '../../core/services/files/files.gateway';
+import { DepotRectifieGateway } from '../../core/services/ctf/depot-rectifie.gateway';
 import { CtfAActiverPageComponent } from './ctf-a-activer-page.component';
 import { CtfDetailPageComponent } from './ctf-detail-page.component';
 import { CtfSuiviPageComponent } from './ctf-suivi-page.component';
@@ -75,6 +76,16 @@ function providers(permissions: string[]) {
             ownerId: null,
           }),
         ),
+      },
+    },
+    {
+      provide: DepotRectifieGateway,
+      useValue: {
+        listCtf: vi.fn(() => of([])),
+        motifsNonConformite: vi.fn(() =>
+          of([{ code: 'PIECES_MANQUANTES', libelle: 'Pieces manquantes' }]),
+        ),
+        control: vi.fn(() => of({})),
       },
     },
     {
@@ -221,5 +232,54 @@ describe('Pages CTF', () => {
     expect(gateway.depotRectifieManuel).toHaveBeenCalled();
     expect(component.statutLabel('A_ACTIVER')).toBe('A activer');
     expect(gateway.get).toHaveBeenCalled();
+  });
+
+  it('controle un depot non conforme avec motif et observation', () => {
+    const depot = {
+      id: 'dep1',
+      demandeId: 'd1',
+      cycle: 1,
+      autorisationId: 'a1',
+      numeroEnvoi: 1,
+      fileGroupIds: [],
+      origine: 'CONTRIBUABLE',
+      deposePar: 'u1',
+      dateDepot: '2026-11-05T00:00:00Z',
+      statut: 'SOUMIS',
+      controlePar: null,
+      dateControle: null,
+      motifCode: null,
+      observation: null,
+    };
+    const depotsGateway = {
+      listCtf: vi.fn(() => of([depot])),
+      motifsNonConformite: vi.fn(() =>
+        of([{ code: 'PIECES_MANQUANTES', libelle: 'Pieces manquantes' }]),
+      ),
+      control: vi.fn(() => of(depot)),
+    };
+    TestBed.configureTestingModule({
+      imports: [CtfDetailPageComponent],
+      providers: [
+        ...providers(['Ctf_Read', 'Ctf_Activer', 'Ctf_Retour']),
+        { provide: CtfGateway, useValue: gateway },
+        { provide: DepotRectifieGateway, useValue: depotsGateway },
+      ],
+    });
+    const component = TestBed.createComponent(CtfDetailPageComponent).componentInstance;
+    component.demanderNonConforme(depot);
+    component.onNonConformeMotif({
+      target: { value: 'PIECES_MANQUANTES' },
+    } as unknown as Event);
+    component.onNonConformeObservation({
+      target: { value: 'Bilan signe absent' },
+    } as unknown as Event);
+    component.confirmerNonConforme(depot);
+
+    expect(depotsGateway.control).toHaveBeenCalledWith('d1', 'dep1', {
+      conforme: false,
+      motifCode: 'PIECES_MANQUANTES',
+      observation: 'Bilan signe absent',
+    });
   });
 });
