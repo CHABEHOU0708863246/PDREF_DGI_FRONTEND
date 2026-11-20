@@ -147,6 +147,11 @@ export class LoginComponent {
           return;
         }
 
+        if (session.user.roles.includes('CONTRIBUABLE')) {
+          void this.router.navigateByUrl('/espace');
+          return;
+        }
+
         const returnUrl = sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
         void this.router.navigateByUrl(returnUrl);
       },

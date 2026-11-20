@@ -73,6 +73,33 @@ describe('Auth screens', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
   });
 
+  it('login redirige un contribuable vers son espace', () => {
+    const auth = authMock();
+    auth.login.mockReturnValue(
+      of({
+        accessToken: 'a',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        user: { ...user, roles: ['CONTRIBUABLE'] },
+      }),
+    );
+    TestBed.configureTestingModule({
+      imports: [LoginComponent],
+      providers: commonProviders(auth),
+    });
+    const fixture = TestBed.createComponent(LoginComponent);
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    fixture.componentInstance.form.setValue({
+      login: 'entreprise@test.local',
+      password: 'Correct-Horse-2026!',
+    });
+
+    fixture.componentInstance.submit();
+
+    expect(auth.login).toHaveBeenCalledOnce();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/espace');
+  });
+
   it('login redirige vers l ecran MFA quand un challenge est requis', () => {
     const auth = authMock();
     auth.login.mockReturnValue(
