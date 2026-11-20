@@ -154,6 +154,9 @@ import { normalizeProblem } from '../../core/utils/problem';
                 @if (avis.motifCode) {
                   <p><strong>Motif :</strong> {{ motifLabel(avis.motifCode) }}</p>
                 }
+                @if (avis.commentaire) {
+                  <p class="pd-muted">Precision : {{ avis.commentaire }}</p>
+                }
                 <div class="article24-read">
                   <span
                     >3 ans : {{ article24Value(avis.article24?.insuffisanceMemeNature3Ans) }}</span
@@ -214,6 +217,15 @@ import { normalizeProblem } from '../../core/utils/problem';
                       }
                     </select>
                   </label>
+                  @if (motifRequirement(draft[avis.etapeCode].motifCode); as requirement) {
+                    <p class="pd-help">
+                      Ce motif exige le controle article 24 « {{ requirement }} » = Oui.
+                    </p>
+                  } @else if (draft[avis.etapeCode].motifCode === 'AUTRE') {
+                    <p class="pd-help">
+                      Le motif Autre exige une precision dans le champ ci-dessous.
+                    </p>
+                  }
                   <label class="pd-field">
                     <span class="pd-label">Precision</span>
                     <textarea
@@ -677,6 +689,17 @@ export class SuiviDetailPageComponent {
 
   motifLabel(code: string): string {
     return this.motifs().find((motif) => motif.code === code)?.libelle ?? code;
+  }
+
+  motifRequirement(code: string): string | null {
+    return (
+      {
+        INSUFFISANCE_MEME_NATURE_3ANS: 'Insuffisance de meme nature dans les 3 ans',
+        ENGAGEMENT_REDRESSEMENT_EN_COURS: 'Engagement de redressement en cours',
+        AVIS_VERIFICATION_COMPTABILITE: 'Avis de verification de comptabilite',
+        VERIFICATION_APPROFONDIE_EN_COURS: 'Verification approfondie en cours',
+      }[code] ?? null
+    );
   }
 
   article24Value(value: boolean | null | undefined): string {
