@@ -5,6 +5,7 @@ import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type { ApiResponse } from '../../models/common/api-response.model';
 import type {
+  DashboardAnalytique,
   DashboardKpis,
   DashboardNominatifPage,
   DashboardNominatifQuery,
@@ -20,6 +21,14 @@ export class DashboardGateway {
   kpis(query: DashboardQuery = {}): Observable<DashboardKpis> {
     return this.http
       .get<ApiResponse<DashboardKpis>>(`${this.base}/kpis`, { params: this.params(query) })
+      .pipe(map((response) => response.data));
+  }
+
+  analytique(query: DashboardQuery = {}): Observable<DashboardAnalytique> {
+    return this.http
+      .get<ApiResponse<DashboardAnalytique>>(`${this.base}/analytique`, {
+        params: this.params(query),
+      })
       .pipe(map((response) => response.data));
   }
 

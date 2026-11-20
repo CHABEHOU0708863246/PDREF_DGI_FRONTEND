@@ -6,17 +6,21 @@
   signal,
   type OnDestroy,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../../core/models/common/api-problem.model';
 import type {
+  DashboardAnalytique,
   DashboardKpis,
   DashboardNominatifPage,
   DashboardQualite,
 } from '../../../core/models/dashboard/dashboard.model';
-import {
-  BarChartComponent,
-  type BarChartDatum,
-} from '../../../core/components/bar-chart/bar-chart.component';
+import type { BarChartDatum } from '../../../core/components/bar-chart/bar-chart.component';
+import type { ComparisonDatum } from '../../../core/components/comparison-bar-chart/comparison-bar-chart.component';
+import { ComparisonBarChartComponent } from '../../../core/components/comparison-bar-chart/comparison-bar-chart.component';
+import type { DonutDatum } from '../../../core/components/donut-chart/donut-chart.component';
+import { DonutChartComponent } from '../../../core/components/donut-chart/donut-chart.component';
+import type { LineDatum } from '../../../core/components/line-chart/line-chart.component';
+import { LineChartComponent } from '../../../core/components/line-chart/line-chart.component';
 import { KpiCardComponent } from '../../../core/components/kpi-card/kpi-card.component';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { LiveClockComponent } from '../../../core/components/live-clock/live-clock.component';
@@ -34,6 +38,43 @@ const LIGHTHOUSE_KPIS: DashboardKpis = {
   favorables: 6,
   nonFavorables: 3,
   enRetard: 2,
+  dateCalcul: '2026-11-09T10:00:00Z',
+};
+
+const LIGHTHOUSE_ANALYTIQUE: DashboardAnalytique = {
+  tauxTraitement: 50,
+  dureeMoyenneJours: 42,
+  total: 18,
+  enCours: 9,
+  enRetard: 2,
+  repartition: [
+    { code: 'EN_COURS', libelle: 'En cours', valeur: 9 },
+    { code: 'FAVORABLE', libelle: 'Favorables', valeur: 6 },
+    { code: 'NON_FAVORABLE', libelle: 'Non favorables', valeur: 3 },
+    { code: 'REJETE', libelle: 'Rejetes', valeur: 0 },
+  ],
+  evolution: [
+    { periode: '2026-06', libelle: 'Juin', total: 2, favorables: 1, nonFavorables: 0 },
+    { periode: '2026-07', libelle: 'Juil.', total: 4, favorables: 2, nonFavorables: 1 },
+    { periode: '2026-08', libelle: 'Aout', total: 3, favorables: 1, nonFavorables: 0 },
+    { periode: '2026-09', libelle: 'Sept.', total: 5, favorables: 3, nonFavorables: 1 },
+    { periode: '2026-10', libelle: 'Oct.', total: 2, favorables: 1, nonFavorables: 0 },
+    { periode: '2026-11', libelle: 'Nov.', total: 2, favorables: 0, nonFavorables: 1 },
+  ],
+  directions: [
+    { directionCode: 'DERAR', libelle: 'DERAR', total: 12, enCours: 3, tauxTraitement: 75 },
+    { directionCode: 'DVFN', libelle: 'DVFN', total: 12, enCours: 4, tauxTraitement: 66.7 },
+    { directionCode: 'DME', libelle: 'DME', total: 12, enCours: 2, tauxTraitement: 83.3 },
+  ],
+  demandesRecentes: [
+    {
+      demandeId: 'lh-demande-1',
+      numero: '2026-0024',
+      contribuable: 'Client demonstration',
+      statut: 'EN_COURS',
+      dateDepot: '2026-11-08T00:00:00Z',
+    },
+  ],
   dateCalcul: '2026-11-09T10:00:00Z',
 };
 
@@ -76,7 +117,9 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
     PageHeaderComponent,
     LiveClockComponent,
     KpiCardComponent,
-    BarChartComponent,
+    DonutChartComponent,
+    LineChartComponent,
+    ComparisonBarChartComponent,
     StatePanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -155,6 +198,19 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
           icon="alert-triangle"
           [state]="kpiState()"
         />
+        <pdref-kpi-card
+          label="Taux de traitement"
+          [value]="formatRate(analytique()?.tauxTraitement ?? null)"
+          icon="layout"
+          [state]="analytiqueState()"
+        />
+        <pdref-kpi-card
+          label="Duree moyenne"
+          [value]="analytique()?.dureeMoyenneJours ?? null"
+          unit="j"
+          icon="clock"
+          [state]="analytiqueState()"
+        />
         <a
           class="kpi-link"
           [routerLink]="['/dashboard/pilotage/dossiers']"
@@ -174,15 +230,88 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
         </a>
       </section>
 
-      <section class="pd-card">
-        <h2>Demandes par statut</h2>
-        <pdref-bar-chart
-          title="Demandes par statut"
-          unit="demandes"
-          [series]="chartData()"
-          (barClick)="openMetric($event)"
-        />
-      </section>
+      <div class="analytics" aria-label="Graphiques du tableau de bord">
+        <section class="pd-card">
+          <h2>Repartition des demandes</h2>
+          <pdref-donut-chart
+            [series]="repartitionData()"
+            title="Repartition des demandes"
+            unit="demandes"
+          />
+          <p class="pd-muted">Toutes les demandes de la periode, y compris les rejets.</p>
+        </section>
+
+        <section class="pd-card gauge-card">
+          <h2>Taux de traitement global</h2>
+          <div class="gauge" [style.background]="gaugeBackground()">
+            <span>{{ formatRate(analytique()?.tauxTraitement ?? null) }}</span>
+          </div>
+          <p class="pd-muted">Objectif : 100%</p>
+        </section>
+
+        <section class="pd-card wide">
+          <div class="head">
+            <h2>Evolution des demandes</h2>
+            <span class="pd-muted">6 derniers mois</span>
+          </div>
+          <pdref-line-chart [series]="evolutionData()" title="Evolution des demandes" />
+        </section>
+
+        <section class="pd-card wide">
+          <div class="head">
+            <h2>Demandes par direction</h2>
+            <span class="pd-muted">Avis : total vs en attente</span>
+          </div>
+          <pdref-comparison-bar-chart
+            [series]="directionBars()"
+            title="Demandes par direction"
+            currentLabel="Total"
+            previousLabel="En attente"
+          />
+        </section>
+
+        <section class="pd-card">
+          <h2>Taux de traitement par direction</h2>
+          <div class="rates">
+            @for (item of directions(); track item.directionCode) {
+              <div class="rate">
+                <span class="rate__label">{{ item.libelle }}</span>
+                <div class="rate__bar">
+                  <span [style.inline-size.%]="clamp(item.tauxTraitement)"></span>
+                </div>
+                <strong>{{ formatRate(item.tauxTraitement) }}</strong>
+              </div>
+            } @empty {
+              <p class="pd-muted">Aucun avis enregistre.</p>
+            }
+          </div>
+          <p class="pd-muted">Objectif : 100%</p>
+        </section>
+
+        <section class="pd-card">
+          <div class="head">
+            <h2>Demandes recentes</h2>
+            <a class="pd-link" routerLink="/dashboard/demandes">Voir tous</a>
+          </div>
+          @if (recentes().length === 0) {
+            <p class="pd-muted">Aucune demande recente.</p>
+          } @else {
+            <ul class="recent">
+              @for (item of recentes(); track item.demandeId) {
+                <li>
+                  <a class="recent__main" [routerLink]="['/dashboard/demandes', item.demandeId]">
+                    <strong>{{ item.numero }}</strong>
+                    <span>{{ item.contribuable }}</span>
+                  </a>
+                  <span class="status" [class]="'status status--' + item.statut.toLowerCase()">
+                    {{ statutLabel(item.statut) }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
 
       <section class="pd-card">
         <h2>Qualite des donnees</h2>
@@ -312,13 +441,142 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
       .table-wrap {
         overflow-x: auto;
       }
+      .analytics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin-block-end: 1rem;
+      }
+      .analytics > .pd-card {
+        display: grid;
+        gap: 0.75rem;
+        align-content: start;
+      }
+      .analytics h2 {
+        margin: 0;
+      }
+      .analytics .head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .wide {
+        grid-column: span 2;
+      }
+      .gauge-card {
+        justify-items: center;
+        text-align: center;
+      }
+      .gauge {
+        inline-size: 150px;
+        block-size: 150px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        position: relative;
+      }
+      .gauge::before {
+        content: '';
+        position: absolute;
+        inset: 18px;
+        border-radius: 50%;
+        background: var(--color-surface, #fff);
+      }
+      .gauge span {
+        position: relative;
+        font-size: 1.35rem;
+        font-weight: 700;
+      }
+      .rates {
+        display: grid;
+        gap: 0.6rem;
+      }
+      .rate {
+        display: grid;
+        grid-template-columns: minmax(5rem, 8rem) minmax(0, 1fr) auto;
+        gap: 0.5rem;
+        align-items: center;
+        font-size: var(--text-sm);
+      }
+      .rate__label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .rate__bar {
+        block-size: 0.6rem;
+        border-radius: 999px;
+        background: var(--color-border);
+        overflow: hidden;
+      }
+      .rate__bar span {
+        display: block;
+        block-size: 100%;
+        border-radius: inherit;
+        background: var(--color-primary);
+      }
+      .recent {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.5rem;
+      }
+      .recent li {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: space-between;
+        border-block-end: 1px solid var(--color-border);
+        padding-block-end: 0.45rem;
+      }
+      .recent__main {
+        display: grid;
+        min-inline-size: 0;
+      }
+      .recent__main span {
+        color: var(--color-text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .status {
+        flex: none;
+        font-size: var(--text-xs, 0.7rem);
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background: var(--color-border);
+      }
+      .status--favorable {
+        background: #d9f2e3;
+        color: #1b6b3f;
+      }
+      .status--non_favorable,
+      .status--rejete {
+        background: #f7dcd9;
+        color: #8c2f28;
+      }
+      .status--en_cours {
+        background: #dde9f7;
+        color: #1d4f7c;
+      }
+      @media (max-width: 63.99rem) {
+        .analytics {
+          grid-template-columns: 1fr;
+        }
+        .wide {
+          grid-column: auto;
+        }
+      }
     `,
   ],
 })
 export class DashboardHomeComponent implements OnDestroy {
   private readonly gateway = inject(DashboardGateway);
   private readonly permissions = inject(PermissionsService);
-  private readonly router = inject(Router);
   private readonly timer: ReturnType<typeof setInterval> | null;
 
   readonly periods = [
@@ -331,6 +589,7 @@ export class DashboardHomeComponent implements OnDestroy {
   ];
   readonly filters = { periode: '30j', statut: '' };
   readonly kpis = signal<DashboardKpis | null>(null);
+  readonly analytique = signal<DashboardAnalytique | null>(null);
   readonly qualite = signal<DashboardQualite | null>(null);
   readonly nominatif = signal<DashboardNominatifPage>({
     items: [],
@@ -356,9 +615,42 @@ export class DashboardHomeComponent implements OnDestroy {
   readonly canImputation = () => this.permissions.hasPermission('Etapes_Imputer');
   readonly lastRefreshAt = signal(Date.now());
 
+  readonly analytiqueState = computed(() =>
+    this.analytique() ? ('success' as const) : ('empty' as const),
+  );
+
+  readonly repartitionData = computed<DonutDatum[]>(() =>
+    (this.analytique()?.repartition ?? [])
+      .filter((item) => item.valeur > 0)
+      .map((item) => ({ label: item.libelle, value: item.valeur })),
+  );
+
+  readonly evolutionData = computed<LineDatum[]>(() =>
+    (this.analytique()?.evolution ?? []).map((item) => ({
+      label: item.libelle,
+      value: item.total,
+    })),
+  );
+
+  readonly directionBars = computed<ComparisonDatum[]>(() =>
+    (this.analytique()?.directions ?? []).map((item) => ({
+      label: item.libelle,
+      courant: item.total,
+      precedent: item.enCours,
+    })),
+  );
+
+  readonly directions = computed(() => this.analytique()?.directions ?? []);
+  readonly recentes = computed(() => this.analytique()?.demandesRecentes ?? []);
+  readonly gaugeBackground = computed(() => {
+    const value = this.clamp(this.analytique()?.tauxTraitement ?? 0);
+    return `conic-gradient(var(--color-primary) 0 ${value}%, var(--color-border) ${value}% 100%)`;
+  });
+
   constructor() {
     if (isLighthouseEnabled()) {
       this.kpis.set(LIGHTHOUSE_KPIS);
+      this.analytique.set(LIGHTHOUSE_ANALYTIQUE);
       this.qualite.set(LIGHTHOUSE_QUALITE);
       this.nominatif.set(LIGHTHOUSE_NOMINATIF);
       this.timer = null;
@@ -387,6 +679,10 @@ export class DashboardHomeComponent implements OnDestroy {
       next: (quality) => this.qualite.set(quality),
       error: () => this.qualite.set(null),
     });
+    this.gateway.analytique(this.filters).subscribe({
+      next: (analytique) => this.analytique.set(analytique),
+      error: () => this.analytique.set(null),
+    });
   }
 
   loadNominatif(): void {
@@ -396,21 +692,25 @@ export class DashboardHomeComponent implements OnDestroy {
     });
   }
 
-  openMetric(label: string): void {
-    const map: Record<string, string> = {
-      'En cours': 'EN_COURS',
-      Favorables: 'FAVORABLES',
-      'Non favorables': 'NON_FAVORABLES',
-      Rejetes: 'REJETES',
-    };
-    void this.router.navigate(['/dashboard/pilotage/dossiers'], {
-      queryParams: {
-        source: 'DASHBOARD',
-        metric: map[label] ?? 'TOTAL',
-        periode: this.filters.periode,
-        statut: this.filters.statut || null,
-      },
-    });
+  formatRate(value: number | null): string {
+    return value === null ? '—' : `${value.toFixed(1).replace('.', ',')} %`;
+  }
+
+  clamp(value: number): number {
+    return Math.min(100, Math.max(0, value));
+  }
+
+  statutLabel(statut: string): string {
+    return (
+      {
+        EN_COURS: 'En cours',
+        FAVORABLE: 'Avis favorable',
+        NON_FAVORABLE: 'Avis non favorable',
+        REJETE: 'Rejete',
+        CLOTURE: 'Cloture',
+        ABANDONNE: 'Abandonne',
+      }[statut] ?? statut
+    );
   }
 
   onPeriode(event: Event): void {
