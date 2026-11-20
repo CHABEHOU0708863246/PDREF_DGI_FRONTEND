@@ -50,12 +50,21 @@ export class AdhesionPublicPageComponent implements OnInit {
   readonly uploaded = signal<Record<string, string>>({});
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly pieceTypes = ADHESION_PIECE_TYPES;
+  private readonly uploadTokenKey = 'pdref.adhesion.uploadToken';
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
-    if (token) {
-      this.verify(token);
+    if (!token) {
+      return;
     }
+
+    const stored = this.readStoredToken();
+    if (stored) {
+      this.resume(stored, token);
+      return;
+    }
+
+    this.verify(token);
   }
 
   submitDemand(): void {
@@ -118,6 +127,7 @@ export class AdhesionPublicPageComponent implements OnInit {
     this.gateway.submit(this.uploadToken()).subscribe({
       next: () => {
         this.busy.set(false);
+        this.clearStoredToken();
         this.step.set('done');
       },
       error: (error: unknown) => {
@@ -147,6 +157,7 @@ export class AdhesionPublicPageComponent implements OnInit {
       next: (result: AdhesionVerify) => {
         this.busy.set(false);
         this.uploadToken.set(result.jeton);
+        this.storeToken(result.jeton);
         this.emailMasque.set(result.emailMasque);
         this.pieces.set(result.pieces);
         this.uploaded.set(
@@ -159,5 +170,68 @@ export class AdhesionPublicPageComponent implements OnInit {
         this.problem.set(normalizeProblem(error, this.correlation.last));
       },
     });
+  }
+
+  private resume(uploadToken: string, emailToken: string): void {
+    this.busy.set(true);
+    this.gateway.suivi(uploadToken).subscribe({
+      next: (result) => {
+        this.busy.set(false);
+        this.uploadToken.set(uploadToken);
+        this.pieces.set(result.pieces);
+        this.uploaded.set(
+          Object.fromEntries(result.pieces.map((piece) => [piece.type, piece.fileName])),
+        );
+        if (result.statut === 'EN_ATTENTE_VALIDATION' || result.statut === 'ACCEPTEE') {
+          this.clearStoredToken();
+          this.step.set('done');
+          return;
+        }
+
+        if (result.statut === 'REFUSEE') {
+          this.clearStoredToken();
+          this.problem.set({
+            type: 'urn:pdref:error:ADHESION_REFUSEE',
+            title: 'Adhesion refusee',
+            status: 409,
+            detail: 'Cette demande a ete refusee. Contactez la DGI pour reprendre la procedure.',
+            instance: '',
+            code: 'ADHESION_REFUSEE',
+            traceId: '',
+            reference: null,
+            errors: null,
+          });
+          return;
+        }
+
+        this.step.set('pieces');
+      },
+      error: () => {
+        this.busy.set(false);
+        this.clearStoredToken();
+        this.verify(emailToken);
+      },
+    });
+  }
+
+  private readStoredToken(): string | null {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+
+    const value = localStorage.getItem(this.uploadTokenKey);
+    return value && value.trim().length > 0 ? value.trim() : null;
+  }
+
+  private storeToken(token: string): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(this.uploadTokenKey, token);
+    }
+  }
+
+  private clearStoredToken(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(this.uploadTokenKey);
+    }
   }
 }
