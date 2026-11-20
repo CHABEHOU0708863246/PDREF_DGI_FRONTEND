@@ -469,9 +469,11 @@ export class SuiviDetailPageComponent {
 
   constructor() {
     this.load();
-    this.gateway
-      .motifs()
-      .subscribe({ next: (items) => this.motifs.set(items), error: () => this.motifs.set([]) });
+    if (this.permissions.hasPermission('Avis_Emettre')) {
+      this.gateway
+        .motifs()
+        .subscribe({ next: (items) => this.motifs.set(items), error: () => this.motifs.set([]) });
+    }
   }
 
   load(): void {
