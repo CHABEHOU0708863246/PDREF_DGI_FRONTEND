@@ -197,4 +197,12 @@ export class CourriersGateway {
       )
       .pipe(map(() => undefined));
   }
+
+  remiseReference(id: string): Observable<string> {
+    return this.http
+      .get<ApiResponse<{ reference: string }>>(
+        `${environment.apiUrl}/api/v1/courriers-manuels/${encodeURIComponent(id)}/remise-reference`,
+      )
+      .pipe(map((response) => response.data.reference));
+  }
 }

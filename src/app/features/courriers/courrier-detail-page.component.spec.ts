@@ -70,6 +70,7 @@ function setup(canInternal = true, canUpdate = true) {
     uploadAttachment: vi.fn(() => of(100)),
     signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
     declarerRemise: vi.fn(() => of(undefined)),
+    remiseReference: vi.fn(() => of('REM-TEST')),
   };
   const permissions = {
     hasPermission: vi.fn((permission: string) => {
@@ -138,6 +139,7 @@ describe('CourrierDetailPageComponent', () => {
       uploadAttachment: vi.fn(),
       signerManuel: vi.fn(() => throwError(() => new Error('sign'))),
       declarerRemise: vi.fn(() => throwError(() => new Error('remise'))),
+      remiseReference: vi.fn(() => of('REM-TEST')),
     };
     TestBed.configureTestingModule({
       imports: [CourrierDetailPageComponent],
@@ -216,6 +218,7 @@ describe('CourrierDetailPageComponent errors', () => {
       uploadAttachment: vi.fn(() => of(100)),
       signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
       declarerRemise: vi.fn(() => of(undefined)),
+      remiseReference: vi.fn(() => of('REM-TEST')),
     };
     TestBed.configureTestingModule({
       imports: [CourrierDetailPageComponent],
@@ -250,6 +253,7 @@ describe('CourrierDetailPageComponent error branches', () => {
       uploadAttachment: vi.fn(() => of(100)),
       signerManuel: vi.fn(() => of({ statut: 'SIGNE', sha256: 'abc' })),
       declarerRemise: vi.fn(() => of(undefined)),
+      remiseReference: vi.fn(() => of('REM-TEST')),
     };
     TestBed.configureTestingModule({
       imports: [CourrierDetailPageComponent],

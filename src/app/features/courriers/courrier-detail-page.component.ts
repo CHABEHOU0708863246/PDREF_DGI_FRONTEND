@@ -172,6 +172,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 [value]="referenceRemise()"
                 (input)="onReferenceRemise($event)"
               />
+              <span class="pd-help">Reference proposee automatiquement, modifiable.</span>
             </label>
             <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
               Declarer la remise
@@ -346,6 +347,7 @@ export class CourrierDetailPageComponent {
         this.item.set(item);
         this.loading.set(false);
         this.loadAttachments();
+        this.loadRemiseReference();
       },
       error: (error: unknown) => {
         this.loading.set(false);
@@ -362,6 +364,22 @@ export class CourrierDetailPageComponent {
         this.attachmentsLoading.set(false);
       },
       error: () => this.attachmentsLoading.set(false),
+    });
+  }
+
+  loadRemiseReference(): void {
+    if (this.item()?.remiseStatut === 'REMIS' || this.referenceRemise()) {
+      return;
+    }
+    this.gateway.remiseReference(this.id).subscribe({
+      next: (reference) => {
+        if (!this.referenceRemise()) {
+          this.referenceRemise.set(reference);
+        }
+      },
+      error: () => {
+        // La reference reste vide : le backend la generera a la declaration.
+      },
     });
   }
 
