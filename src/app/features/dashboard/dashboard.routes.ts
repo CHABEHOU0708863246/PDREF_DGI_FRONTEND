@@ -237,7 +237,11 @@ export const DASHBOARD_ROUTES: Routes = [
             (module) => module.CtfDetailPageComponent,
           ),
         canActivate: [accessGuard],
-        data: { permissions: ['Ctf_Read'], breadcrumb: 'Detail autorisation', renderMode: 'client' },
+        data: {
+          permissions: ['Ctf_Read'],
+          breadcrumb: 'Detail autorisation',
+          renderMode: 'client',
+        },
         title: 'Detail autorisation - PDREF',
       },
       {
@@ -349,7 +353,7 @@ export const DASHBOARD_ROUTES: Routes = [
             (module) => module.ImputationPageComponent,
           ),
         canActivate: [accessGuard],
-        data: { permissions: ['Suivis_Read'], breadcrumb: 'Imputation GUDEF' },
+        data: { permissions: ['Etapes_Imputer'], breadcrumb: 'Imputation GUDEF' },
         title: 'Imputation GUDEF - PDREF',
       },
       {

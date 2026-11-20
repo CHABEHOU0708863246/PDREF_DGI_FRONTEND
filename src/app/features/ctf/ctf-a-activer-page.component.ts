@@ -43,7 +43,13 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
     />
 
     @if (modes()?.eImpots === 'MANUEL') {
-      <p><span class="pd-chip">Autorisation dans PDREF</span></p>
+      <p>
+        <span class="pd-chip">Autorisation dans PDREF</span>
+      </p>
+      <p class="pd-muted">
+        En mode manuel, ouvrez le dossier pour enregistrer la reference, la date d'activation et la
+        preuve. Le bouton d activation automatique n'est pas utilise.
+      </p>
     }
     @if (problem(); as issue) {
       <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
@@ -73,7 +79,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
           <pdref-state-panel
             state="empty"
             title="Aucune autorisation a activer"
-            message="Aucun dossier ne correspond aux filtres."
+            [message]="emptyMessage()"
           />
         } @else {
           <div
@@ -113,7 +119,14 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                       <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
                     </td>
                     <td>
-                      @if (canActiver()) {
+                      @if (manualEImpots()) {
+                        <a
+                          class="pd-btn pd-btn--ghost pd-btn--sm"
+                          [routerLink]="['/dashboard/ctf', item.demandeId]"
+                        >
+                          Enregistrer
+                        </a>
+                      } @else if (canActiver()) {
                         <button
                           type="button"
                           class="pd-btn pd-btn--primary pd-btn--sm"
@@ -197,6 +210,19 @@ export class CtfAActiverPageComponent {
 
   canActiver(): boolean {
     return this.permissions.hasPermission('Ctf_Activer');
+  }
+
+  manualEImpots(): boolean {
+    return this.modes()?.eImpots === 'MANUEL';
+  }
+
+  emptyMessage(): string {
+    if (this.filters.search.trim()) {
+      return 'Aucun dossier ne correspond aux filtres.';
+    }
+    return this.manualEImpots()
+      ? "Aucune autorisation en attente. La validation globale d'un dossier doit d'abord etre prononcee favorablement par le Sous-Directeur."
+      : 'Aucune autorisation en attente.';
   }
 
   isActivating(id: string): boolean {

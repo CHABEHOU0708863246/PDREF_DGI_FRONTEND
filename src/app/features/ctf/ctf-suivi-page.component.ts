@@ -8,11 +8,13 @@ import {
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
 import type { CtfListItem } from '../../core/models/ctf/ctf.model';
+import type { IntegrationModes } from '../../core/models/integrations/integration.model';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { CtfGateway } from '../../core/services/ctf/ctf.gateway';
+import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 import { CTF_STATUTS, ctfStatutLabel } from './ctf-status';
@@ -133,14 +135,23 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                     <td>{{ item.motifCloture || '-' }}</td>
                     <td class="actions">
                       @if (canActiver() && item.statut === 'A_ACTIVER') {
-                        <button
-                          type="button"
-                          class="pd-btn pd-btn--primary pd-btn--sm"
-                          [disabled]="isActivating(item.id)"
-                          (click)="activer(item)"
-                        >
-                          {{ isActivating(item.id) ? 'Activation...' : 'Activer' }}
-                        </button>
+                        @if (manualEImpots()) {
+                          <a
+                            class="pd-btn pd-btn--ghost pd-btn--sm"
+                            [routerLink]="['/dashboard/ctf', item.demandeId]"
+                          >
+                            Enregistrer
+                          </a>
+                        } @else {
+                          <button
+                            type="button"
+                            class="pd-btn pd-btn--primary pd-btn--sm"
+                            [disabled]="isActivating(item.id)"
+                            (click)="activer(item)"
+                          >
+                            {{ isActivating(item.id) ? 'Activation...' : 'Activer' }}
+                          </button>
+                        }
                       }
                       @if (
                         canRetour() &&
@@ -192,6 +203,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
 })
 export class CtfSuiviPageComponent {
   private readonly gateway = inject(CtfGateway);
+  private readonly integrations = inject(IntegrationGateway);
   private readonly permissions = inject(PermissionsService);
 
   readonly statuts = CTF_STATUTS;
@@ -200,6 +212,7 @@ export class CtfSuiviPageComponent {
   readonly problem = signal<ApiProblemDetails | null>(null);
   readonly activating = signal<ReadonlySet<string>>(new Set());
   readonly returning = signal<ReadonlySet<string>>(new Set());
+  readonly modes = signal<IntegrationModes | null>(null);
   readonly filters = { search: '', statut: '' };
 
   constructor() {
@@ -208,6 +221,7 @@ export class CtfSuiviPageComponent {
       this.loading.set(false);
       return;
     }
+    this.integrations.modes().subscribe({ next: (modes) => this.modes.set(modes) });
     this.load();
   }
 
@@ -236,6 +250,10 @@ export class CtfSuiviPageComponent {
 
   canActiver(): boolean {
     return this.permissions.hasPermission('Ctf_Activer');
+  }
+
+  manualEImpots(): boolean {
+    return this.modes()?.eImpots === 'MANUEL';
   }
 
   canRetour(): boolean {

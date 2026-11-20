@@ -130,7 +130,7 @@ const NAVIGATION: readonly NavigationItem[] = [
     permission: 'Suivis_Read',
   },
   {
-    label: 'Autorisations',
+    label: 'Autorisations à activer',
     route: '/dashboard/ctf/a-activer',
     icon: 'file',
     exact: false,
