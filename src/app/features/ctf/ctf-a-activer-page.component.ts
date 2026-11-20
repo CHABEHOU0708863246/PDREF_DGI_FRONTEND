@@ -57,7 +57,12 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
       <section class="pd-card">
         <div class="head">
           <h2>Dossiers a autoriser</h2>
-          <span class="pd-muted">{{ items().length }} dossier(s)</span>
+          <div class="head-actions">
+            <span class="pd-muted">{{ items().length }} dossier(s)</span>
+            <a class="pd-btn pd-btn--ghost pd-btn--sm" routerLink="/dashboard/ctf/suivi">
+              Tous les dossiers CTF
+            </a>
+          </div>
         </div>
         <form class="filters" (submit)="$event.preventDefault(); load()">
           <label class="pd-field">
@@ -155,6 +160,12 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
         gap: 1rem;
         align-items: end;
         justify-content: space-between;
+      }
+      .head-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
       }
       .filters {
         justify-content: start;

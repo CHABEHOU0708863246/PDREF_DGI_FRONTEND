@@ -138,6 +138,14 @@ const NAVIGATION: readonly NavigationItem[] = [
     roles: ['CHEF_CTF', 'COLLABORATEUR_CTF'],
   },
   {
+    label: 'Suivi des autorisations',
+    route: '/dashboard/ctf/suivi',
+    icon: 'clipboard',
+    exact: false,
+    permission: 'Ctf_Read',
+    roles: ['CHEF_CTF', 'COLLABORATEUR_CTF'],
+  },
+  {
     label: 'Rapports',
     route: '/dashboard/rapports',
     icon: 'clipboard',
