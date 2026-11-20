@@ -264,7 +264,9 @@ import { normalizeProblem } from '../../core/utils/problem';
             </div>
             <div>
               <span class="pd-label">Courrier</span
-              ><strong>{{ validation.courrierReponseId || '-' }}</strong>
+              ><strong>{{
+                validation.courrierNumero || validation.courrierReponseId || '-'
+              }}</strong>
             </div>
           </div>
         </section>

@@ -41,6 +41,11 @@
   overflow-x: auto;
   max-inline-size: 100%;
 }
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
 .pd-table {
   width: 100%;
   min-inline-size: 0;

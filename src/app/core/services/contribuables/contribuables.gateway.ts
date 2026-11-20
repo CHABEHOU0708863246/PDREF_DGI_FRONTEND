@@ -18,6 +18,17 @@ export interface ExportResult {
   fileName: string;
 }
 
+export interface ContribuableImportError {
+  ligne: number;
+  message: string;
+}
+
+export interface ContribuableImportResult {
+  total: number;
+  crees: number;
+  erreurs: ContribuableImportError[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContribuablesGateway {
   private readonly http = inject(HttpClient);
@@ -68,6 +79,42 @@ export class ContribuablesGateway {
     return this.http.post(`${this.base}/${encodeURIComponent(id)}/sync-eimpots`, null);
   }
 
+  fichePdf(id: string): Observable<ExportResult> {
+    return this.http
+      .get(`${this.base}/${encodeURIComponent(id)}/fiche-pdf`, {
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob(),
+          fileName: this.fileName(response.headers.get('content-disposition'), 'pdf'),
+        })),
+      );
+  }
+
+  importTemplate(): Observable<ExportResult> {
+    return this.http
+      .get(`${this.base}/modele-import`, {
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob(),
+          fileName: this.fileName(response.headers.get('content-disposition'), 'xlsx'),
+        })),
+      );
+  }
+
+  import(file: File): Observable<ContribuableImportResult> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http
+      .post<ApiResponse<ContribuableImportResult>>(`${this.base}/import`, form)
+      .pipe(map((response) => response.data));
+  }
+
   export(query: ContribuableQuery, format: 'xlsx' = 'xlsx'): Observable<ExportResult> {
     return this.http
       .get(`${this.base}/export`, {
@@ -107,8 +154,17 @@ export class ContribuablesGateway {
     return params;
   }
 
-  private fileName(header: string | null, format: 'xlsx'): string {
-    const match = header ? /filename="?([^";]+)"?/i.exec(header) : null;
-    return match?.[1] ?? `contribuables.${format}`;
+  private fileName(header: string | null, format: string): string {
+    if (header) {
+      const star = /filename\*=UTF-8''([^;]+)/i.exec(header);
+      if (star?.[1]) {
+        return decodeURIComponent(star[1]);
+      }
+      const plain = /filename="?([^";]+)"?/i.exec(header);
+      if (plain?.[1]) {
+        return plain[1];
+      }
+    }
+    return `contribuables.${format}`;
   }
 }

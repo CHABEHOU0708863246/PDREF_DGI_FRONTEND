@@ -72,6 +72,20 @@ export class CourriersGateway {
       .pipe(map((response) => response.data));
   }
 
+  fichePdf(id: string): Observable<{ blob: Blob; fileName: string | null }> {
+    return this.http
+      .get(`${this.base}/${encodeURIComponent(id)}/fiche-pdf`, {
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob(),
+          fileName: this.fileName(response.headers.get('content-disposition')),
+        })),
+      );
+  }
+
   attachments(id: string): Observable<FileGroup[]> {
     return this.http
       .get<ApiResponse<FileGroup[]>>(`${this.base}/${encodeURIComponent(id)}/pieces-jointes`)

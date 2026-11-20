@@ -66,6 +66,21 @@ export class DemandesGateway {
       );
   }
 
+  exportList(query: DemandeQuery): Observable<DemandePdf> {
+    return this.http
+      .get(`${this.base}/export-liste`, {
+        params: this.params({ ...query, page: 1, pageSize: 100 }),
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob(),
+          fileName: this.fileName(response.headers.get('content-disposition')),
+        })),
+      );
+  }
+
   attachments(id: string): Observable<FileGroup[]> {
     return this.http
       .get<ApiResponse<FileGroup[]>>(`${this.base}/${encodeURIComponent(id)}/pieces-jointes`)

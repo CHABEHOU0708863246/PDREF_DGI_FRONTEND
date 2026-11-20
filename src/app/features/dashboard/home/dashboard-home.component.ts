@@ -353,7 +353,7 @@ export class DashboardHomeComponent implements OnDestroy {
       : [];
   });
   readonly canNominatif = () => this.permissions.hasPermission('Dashboard_ReadDg');
-  readonly canImputation = () => this.permissions.hasPermission('Suivis_Read');
+  readonly canImputation = () => this.permissions.hasPermission('Etapes_Imputer');
   readonly lastRefreshAt = signal(Date.now());
 
   constructor() {

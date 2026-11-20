@@ -222,6 +222,9 @@ import { normalizeProblem } from '../../core/utils/problem';
 
         <section class="pd-card">
           <div class="pd-actions">
+            <button type="button" class="pd-btn pd-btn--ghost" (click)="exportFiche()">
+              Fiche PDF
+            </button>
             @if (canUpdate()) {
               <a
                 class="pd-btn pd-btn--ghost"
@@ -378,6 +381,20 @@ export class CourrierDetailPageComponent {
       error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
     });
     input.value = '';
+  }
+
+  exportFiche(): void {
+    this.gateway.fichePdf(this.id).subscribe({
+      next: ({ blob, fileName }) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName ?? `courrier-${this.id}.pdf`;
+        anchor.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
   }
 
   download(versionId: string): void {

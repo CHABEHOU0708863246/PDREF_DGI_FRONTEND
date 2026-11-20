@@ -112,6 +112,20 @@ export class SuivisGateway {
       .pipe(map((response) => response.data));
   }
 
+  exportPdf(demandeId: string): Observable<SuiviExport> {
+    return this.http
+      .get(`${this.suivis}/${encodeURIComponent(demandeId)}/pdf`, {
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob(),
+          fileName: this.fileName(response.headers.get('content-disposition')),
+        })),
+      );
+  }
+
   exportBase(query: SuiviQuery): Observable<SuiviExport> {
     return this.http
       .get(`${this.suivis}/base-demandes`, {

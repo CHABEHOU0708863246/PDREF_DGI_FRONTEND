@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { ContribuablesGateway } from '../../core/services/contribuables/contribuables.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
+import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 
@@ -31,10 +32,22 @@ import { normalizeProblem } from '../../core/utils/problem';
       <section class="contribuables-card pd-card">
         <div class="contribuables-head">
           <h2>Liste</h2>
-          <a class="pd-btn pd-btn--primary" routerLink="/dashboard/contribuables/nouveau"
-            >Nouveau contribuable</a
-          >
+          <div class="pd-actions">
+            <button type="button" class="pd-btn pd-btn--ghost" (click)="downloadTemplate()">
+              Modèle Excel
+            </button>
+            <label class="pd-btn pd-btn--ghost">
+              Importer Excel
+              <input type="file" accept=".xlsx" hidden (change)="importFile($event)" />
+            </label>
+            <a class="pd-btn pd-btn--primary" routerLink="/dashboard/contribuables/nouveau"
+              >Nouveau contribuable</a
+            >
+          </div>
         </div>
+        @if (importMessage()) {
+          <p class="pd-card" role="status">{{ importMessage() }}</p>
+        }
 
         <div class="quality-grid">
           <article class="pd-card">
@@ -138,7 +151,16 @@ import { normalizeProblem } from '../../core/utils/problem';
                         <span class="pd-chip">Sans telephone</span>
                       }
                     </td>
-                    <td>
+                    <td class="actions-cell">
+                      @if (canFiche()) {
+                        <button
+                          type="button"
+                          class="pd-btn pd-btn--ghost pd-btn--sm"
+                          (click)="exportFiche(item)"
+                        >
+                          Fiche PDF
+                        </button>
+                      }
                       <a
                         class="pd-btn pd-btn--ghost pd-btn--sm"
                         [routerLink]="['/dashboard/contribuables', item.id]"
@@ -178,6 +200,8 @@ import { normalizeProblem } from '../../core/utils/problem';
 export class ContribuablesPageComponent {
   private readonly gateway = inject(ContribuablesGateway);
   private readonly correlation = inject(CorrelationService);
+  private readonly permissions = inject(PermissionsService);
+  readonly importMessage = signal<string | null>(null);
   readonly items = signal<Contribuable[]>([]);
   readonly quality = signal<ContribuableQuality | null>(null);
   readonly loading = signal(true);
@@ -226,6 +250,55 @@ export class ContribuablesPageComponent {
         this.problem.set(normalizeProblem(error, this.correlation.last));
       },
     });
+  }
+
+  canFiche(): boolean {
+    return this.permissions.hasPermission('Contribuables_ReadPii');
+  }
+
+  exportFiche(item: Contribuable): void {
+    this.gateway.fichePdf(item.id).subscribe({
+      next: ({ blob, fileName }) => this.download(blob, fileName),
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
+  }
+
+  downloadTemplate(): void {
+    this.gateway.importTemplate().subscribe({
+      next: ({ blob, fileName }) => this.download(blob, fileName),
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
+  }
+
+  importFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    this.importMessage.set('Import en cours...');
+    this.gateway.import(file).subscribe({
+      next: (result) => {
+        this.importMessage.set(
+          `${result.crees} contribuable(s) importé(s), ${result.erreurs.length} erreur(s).`,
+        );
+        this.load(1);
+      },
+      error: (error: unknown) => {
+        this.importMessage.set(null);
+        this.problem.set(normalizeProblem(error, this.correlation.last));
+      },
+    });
+    input.value = '';
+  }
+
+  private download(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   export(): void {

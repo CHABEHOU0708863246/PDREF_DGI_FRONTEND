@@ -58,11 +58,18 @@ const LIGHTHOUSE_DEMANDES: DemandeSummary[] = [
             <h2>Registre des demandes</h2>
             <p class="pd-muted">{{ page().totalCount }} demande(s)</p>
           </div>
-          @if (canCreate()) {
-            <a class="pd-btn pd-btn--primary" routerLink="/dashboard/demandes/nouvelle">
-              Nouvelle demande
-            </a>
-          }
+          <div class="pd-actions">
+            @if (canExport()) {
+              <button type="button" class="pd-btn pd-btn--ghost" (click)="exportList()">
+                Exporter Excel
+              </button>
+            }
+            @if (canCreate()) {
+              <a class="pd-btn pd-btn--primary" routerLink="/dashboard/demandes/nouvelle">
+                Nouvelle demande
+              </a>
+            }
+          </div>
         </div>
 
         <form class="filters" (ngSubmit)="load(1)">
@@ -207,6 +214,24 @@ export class DemandesPageComponent {
 
   canCreate(): boolean {
     return this.permissions.hasPermission('Demandes_Create');
+  }
+
+  canExport(): boolean {
+    return this.permissions.hasPermission('Demandes_Export');
+  }
+
+  exportList(): void {
+    this.gateway.exportList(this.filters).subscribe({
+      next: ({ blob, fileName }) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName ?? 'demandes.xlsx';
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, this.correlation.last)),
+    });
   }
 
   load(page = this.page().page): void {

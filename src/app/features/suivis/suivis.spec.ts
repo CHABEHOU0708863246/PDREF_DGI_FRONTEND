@@ -69,6 +69,7 @@ const detail: SuiviDetail = {
     decidePar: null,
     decideLe: null,
     courrierReponseId: null,
+    courrierNumero: null,
     signatureStatut: 'EN_ATTENTE',
     depotEImpotsStatut: 'EN_ATTENTE',
     referenceDepotEImpots: null,

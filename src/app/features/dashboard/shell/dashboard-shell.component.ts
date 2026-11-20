@@ -23,11 +23,18 @@ interface NavigationItem {
   icon: IconName;
   exact: boolean;
   permission?: string;
+  roles?: readonly string[];
 }
 
 const NAVIGATION: readonly NavigationItem[] = [
   { label: 'Accueil', route: '/dashboard', icon: 'home', exact: true },
-  { label: 'Mon travail', route: '/dashboard/mon-travail', icon: 'layout', exact: false, permission: 'Suivis_Read' },
+  {
+    label: 'Mon travail',
+    route: '/dashboard/mon-travail',
+    icon: 'layout',
+    exact: false,
+    permission: 'Suivis_Read',
+  },
   { label: 'Circuit du dossier', route: '/dashboard/aide/circuit', icon: 'layout', exact: false },
   { label: 'Design system', route: '/design-system-demo', icon: 'layout', exact: false },
   { label: 'Portail public', route: '/portail-public/suivi', icon: 'external-link', exact: false },
@@ -128,6 +135,7 @@ const NAVIGATION: readonly NavigationItem[] = [
     icon: 'file',
     exact: false,
     permission: 'Ctf_Read',
+    roles: ['CHEF_CTF', 'COLLABORATEUR_CTF'],
   },
   {
     label: 'Rapports',
@@ -225,9 +233,10 @@ export class DashboardShellComponent {
       ].filter((item) => !item.permission || this.permissions.hasPermission(item.permission));
     }
 
-    return NAVIGATION.filter(
-      (item) => !item.permission || this.permissions.hasPermission(item.permission),
-    );
+    return NAVIGATION.filter((item) => {
+      const byRole = item.roles?.some((role) => this.permissions.hasRole(role)) ?? false;
+      return byRole || !item.permission || this.permissions.hasPermission(item.permission);
+    });
   });
 
   readonly collapsed = signal(false);

@@ -133,7 +133,14 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
                     </td>
                     <td>{{ item.etapeCourante || '-' }}</td>
                     <td>{{ item.dateOuverture | abidjanDate }}</td>
-                    <td>
+                    <td class="actions-cell">
+                      <button
+                        type="button"
+                        class="pd-btn pd-btn--ghost pd-btn--sm"
+                        (click)="exportPdf(item.demandeId)"
+                      >
+                        PDF
+                      </button>
                       <a
                         class="pd-btn pd-btn--ghost pd-btn--sm"
                         [routerLink]="['/dashboard/suivis', item.demandeId]"
@@ -168,6 +175,11 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
       }
       .table-wrap {
         overflow-x: auto;
+      }
+      .actions-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
       }
     `,
   ],
@@ -214,6 +226,20 @@ export class SuivisPageComponent {
 
   canExport(): boolean {
     return this.permissions.hasPermission('Suivis_Read');
+  }
+
+  exportPdf(demandeId: string): void {
+    this.gateway.exportPdf(demandeId).subscribe({
+      next: (result) => {
+        const url = URL.createObjectURL(result.blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = result.fileName ?? 'suivi.pdf';
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      },
+      error: (error: unknown) => this.problem.set(normalizeProblem(error, null)),
+    });
   }
 
   exportBase(): void {

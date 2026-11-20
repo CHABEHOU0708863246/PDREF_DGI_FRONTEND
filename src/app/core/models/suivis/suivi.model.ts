@@ -34,6 +34,7 @@ export interface ValidationGlobale {
   decidePar: string | null;
   decideLe: string | null;
   courrierReponseId: string | null;
+  courrierNumero: string | null;
   signatureStatut: string | null;
   depotEImpotsStatut: string | null;
   referenceDepotEImpots: string | null;
