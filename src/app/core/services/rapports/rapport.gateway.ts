@@ -9,6 +9,7 @@ import type {
   RapportExportRequest,
   RapportQuery,
   RapportResponse,
+  RapportStatistiques,
 } from '../../models/rapports/rapport.model';
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,14 @@ export class RapportGateway {
   get(query: RapportQuery = {}): Observable<RapportResponse> {
     return this.http
       .get<ApiResponse<RapportResponse>>(this.base, { params: this.params(query) })
+      .pipe(map((response) => response.data));
+  }
+
+  statistiques(query: RapportQuery = {}): Observable<RapportStatistiques> {
+    return this.http
+      .get<ApiResponse<RapportStatistiques>>(`${this.base}/statistiques`, {
+        params: this.params(query),
+      })
       .pipe(map((response) => response.data));
   }
 

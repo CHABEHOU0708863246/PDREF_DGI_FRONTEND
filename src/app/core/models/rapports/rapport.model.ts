@@ -22,6 +22,66 @@ export interface RapportResponse {
   legende: string[];
 }
 
+export interface RapportStatistiquesKpis {
+  formulees: number;
+  traitees: number;
+  tauxTraitement: number | null;
+  favorables: number;
+  tauxReponseFavorable: number | null;
+  stockGlobal: number;
+  formuleesPrecedent: number;
+  traiteesPrecedent: number;
+  favorablesPrecedent: number;
+  stockGlobalPrecedent: number;
+}
+
+export interface RapportStatistiquesLigne {
+  code: string;
+  libelle: string;
+  courant: number;
+  precedent: number;
+  ecart: number;
+  estTotal?: boolean;
+}
+
+export interface RapportStatistiquesSection {
+  code: string;
+  titre: string;
+  lignes: RapportStatistiquesLigne[];
+}
+
+export interface RapportEvolutionPoint {
+  label: string;
+  courant: number;
+  precedent: number;
+}
+
+export interface RapportAvisDirectionLigne {
+  code: string;
+  libelle: string;
+  favorables: number;
+  nonFavorables: number;
+  total: number;
+  precedent: number;
+  ecart: number;
+  estTotal?: boolean;
+}
+
+export interface RapportStatistiques {
+  type: RapportType;
+  libelle: string;
+  dateDu: string;
+  dateAu: string;
+  dateDuPrecedent: string;
+  dateAuPrecedent: string;
+  kpis: RapportStatistiquesKpis;
+  evolution: RapportEvolutionPoint[];
+  sections: RapportStatistiquesSection[];
+  avis: RapportAvisDirectionLigne[];
+  directions: RapportLigne[];
+  legende: string[];
+}
+
 export interface RapportQuery {
   type?: RapportType;
   dateReference?: string | null;

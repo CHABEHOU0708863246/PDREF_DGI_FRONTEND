@@ -2,37 +2,76 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import type { RapportExport, RapportResponse } from '../../../core/models/rapports/rapport.model';
+import type {
+  RapportExport,
+  RapportStatistiques,
+} from '../../../core/models/rapports/rapport.model';
 import { PermissionsService } from '../../../core/services/permissions/permissions.service';
 import { RapportGateway } from '../../../core/services/rapports/rapport.gateway';
 import { RapportsPageComponent } from './rapports-page.component';
 
-const report: RapportResponse = {
-  type: 'MENSUEL',
-  libelle: 'Mois de 11/2026',
-  dateDu: '2026-11-01',
-  dateAu: '2026-11-30',
-  lignes: [
+const stats: RapportStatistiques = {
+  type: 'ANNUEL',
+  libelle: 'Annee 2026',
+  dateDu: '2026-01-01',
+  dateAu: '2026-12-31',
+  dateDuPrecedent: '2025-01-01',
+  dateAuPrecedent: '2025-12-31',
+  kpis: {
+    formulees: 16,
+    traitees: 6,
+    tauxTraitement: 37.5,
+    favorables: 3,
+    tauxReponseFavorable: 50,
+    stockGlobal: 10,
+    formuleesPrecedent: 8,
+    traiteesPrecedent: 4,
+    favorablesPrecedent: 2,
+    stockGlobalPrecedent: 4,
+  },
+  evolution: [{ label: 'Janv.', courant: 2, precedent: 1 }],
+  sections: [
     {
-      directionId: 'GUDEF',
-      directionLibelle: 'GUDEF',
-      formulees: 4,
-      traitees: 3,
-      tauxTraitement: 75,
-      favorables: 2,
-      tauxReponseFavorable: 66.666,
+      code: 'SYSTEME_COMPTABLE',
+      titre: 'Repartition par systeme comptable',
+      lignes: [
+        { code: 'NORMAL', libelle: 'Normal/OHADA', courant: 8, precedent: 3, ecart: 5 },
+        { code: 'TOTAL', libelle: 'Total', courant: 8, precedent: 3, ecart: 5, estTotal: true },
+      ],
+    },
+  ],
+  avis: [
+    {
+      code: 'DERAR',
+      libelle: 'DERAR',
+      favorables: 7,
+      nonFavorables: 2,
+      total: 9,
+      precedent: 5,
+      ecart: 4,
+    },
+  ],
+  directions: [
+    {
+      directionId: 'DME',
+      directionLibelle: 'DME',
+      formulees: 1,
+      traitees: 0,
+      tauxTraitement: 0,
+      favorables: 0,
+      tauxReponseFavorable: null,
       stockGlobal: 1,
     },
   ],
-  legende: ['Taux de traitement = traitees / formulees.'],
+  legende: ['Formulee = demande deposee pendant la periode.'],
 };
 
 const exportItem: RapportExport = {
   id: 'e1',
   format: 'PDF',
-  type: 'MENSUEL',
-  dateDu: '2026-11-01',
-  dateAu: '2026-11-30',
+  type: 'ANNUEL',
+  dateDu: '2026-01-01',
+  dateAu: '2026-12-31',
   directionId: null,
   statut: 'PRET',
   fileName: 'rapport.pdf',
@@ -42,37 +81,46 @@ const exportItem: RapportExport = {
   errorMessage: null,
 };
 
+function permissions(): PermissionsService {
+  const service = new PermissionsService();
+  service.load({
+    id: 'u1',
+    login: 'u',
+    displayName: 'User',
+    roles: ['DG'],
+    permissions: ['Rapports_Read', 'Rapports_Generate', 'Rapports_Export'],
+    mustChangePassword: false,
+  });
+  return service;
+}
+
 describe('RapportsPageComponent', () => {
-  it('affiche les taux, la legende et les exports', () => {
+  it('affiche les statistiques, les taux, la legende et les exports', () => {
     const gateway = {
-      get: vi.fn(() => of(report)),
+      statistiques: vi.fn(() => of(stats)),
       exports: vi.fn(() => of([exportItem])),
       createExport: vi.fn(() => of(exportItem)),
       download: vi.fn(() => of(new Blob(['pdf']))),
     };
-    const permissions = new PermissionsService();
-    permissions.load({
-      id: 'u1',
-      login: 'u',
-      displayName: 'User',
-      roles: ['DG'],
-      permissions: ['Rapports_Read', 'Rapports_Generate', 'Rapports_Export'],
-      mustChangePassword: false,
-    });
     TestBed.configureTestingModule({
       imports: [RapportsPageComponent],
       providers: [
         provideRouter([]),
         { provide: RapportGateway, useValue: gateway },
-        { provide: PermissionsService, useValue: permissions },
+        { provide: PermissionsService, useValue: permissions() },
       ],
     });
     const fixture = TestBed.createComponent(RapportsPageComponent);
     fixture.detectChanges();
     const component = fixture.componentInstance;
-    expect(component.report()?.lignes[0].tauxTraitement).toBe(75);
+    expect(component.stats()?.kpis.formulees).toBe(16);
+    expect(component.kpiCards()).toHaveLength(6);
+    expect(component.evolutionSeries()).toHaveLength(1);
+    expect(component.donutFor(stats.sections[0])).toHaveLength(1);
     expect(component.formatRate(75)).toBe('75,0 %');
     expect(component.formatRate(null)).toBe('—');
+    expect(component.formatEcart(5)).toBe('+5');
+    expect(component.formatEcart(-2)).toBe('-2');
     expect(component.exports()).toHaveLength(1);
     expect(component.canExport()).toBe(true);
     component.createExport();
@@ -84,7 +132,7 @@ describe('RapportsPageComponent', () => {
     component.onDateReference({ target: { value: '2026-11-10' } } as unknown as Event);
     component.onDateDu({ target: { value: '2026-11-01' } } as unknown as Event);
     component.onDateAu({ target: { value: '2026-11-30' } } as unknown as Event);
-    component.onDirection({ target: { value: 'GUDEF' } } as unknown as Event);
+    component.onDirection({ target: { value: 'DME' } } as unknown as Event);
     component.loadExports();
     expect(component.statutLabel('PRET')).toBe('Pret');
     expect(component.formatDate('2026-11-09')).toContain('2026');
@@ -93,26 +141,17 @@ describe('RapportsPageComponent', () => {
 
   it('gere les erreurs et le telechargement', () => {
     const gateway = {
-      get: vi.fn(() => throwError(() => new Error('load'))),
+      statistiques: vi.fn(() => throwError(() => new Error('load'))),
       exports: vi.fn(() => throwError(() => new Error('exports'))),
       createExport: vi.fn(() => throwError(() => new Error('export'))),
       download: vi.fn(() => of(new Blob(['pdf']))),
     };
-    const permissions = new PermissionsService();
-    permissions.load({
-      id: 'u1',
-      login: 'u',
-      displayName: 'User',
-      roles: ['DG'],
-      permissions: ['Rapports_Read', 'Rapports_Generate', 'Rapports_Export'],
-      mustChangePassword: false,
-    });
     TestBed.configureTestingModule({
       imports: [RapportsPageComponent],
       providers: [
         provideRouter([]),
         { provide: RapportGateway, useValue: gateway },
-        { provide: PermissionsService, useValue: permissions },
+        { provide: PermissionsService, useValue: permissions() },
       ],
     });
     const fixture = TestBed.createComponent(RapportsPageComponent);
