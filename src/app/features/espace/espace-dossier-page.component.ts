@@ -13,7 +13,6 @@ import { AdhesionGateway } from '../../core/services/adhesions/adhesion.gateway'
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { RejetPiecesGateway } from '../../core/services/rejets/rejet-pieces.gateway';
 import { DepotRectifieGateway } from '../../core/services/ctf/depot-rectifie.gateway';
-import { FilesGateway } from '../../core/services/files/files.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 
@@ -29,7 +28,6 @@ export class EspaceDossierPageComponent implements OnInit {
   private readonly gateway = inject(AdhesionGateway);
   private readonly rejetPieces = inject(RejetPiecesGateway);
   private readonly depotsRectifies = inject(DepotRectifieGateway);
-  private readonly files = inject(FilesGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly correlation = inject(CorrelationService);
 
@@ -129,7 +127,7 @@ export class EspaceDossierPageComponent implements OnInit {
     this.rectifiedBusy.set(true);
     this.rectifiedError.set(null);
     const uploads = this.rectifiedFiles().map((file) =>
-      this.files.uploadGroup(file, 'DEPOT_RECTIFIE', this.id(), 'CONTRIBUABLE'),
+      this.depotsRectifies.uploadEspacePiece(this.id(), file),
     );
     forkJoin(uploads).subscribe({
       next: (groups) => {

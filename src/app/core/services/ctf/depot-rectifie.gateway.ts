@@ -9,6 +9,7 @@ import type {
   DepotRectifieControlRequest,
   DepotRectifieCreateRequest,
 } from '../../models/ctf/depot-rectifie.model';
+import type { FileGroup } from '../../models/files/file.model';
 
 @Injectable({ providedIn: 'root' })
 export class DepotRectifieGateway {
@@ -28,13 +29,25 @@ export class DepotRectifieGateway {
       .pipe(map((response) => response.data));
   }
 
+  uploadEspacePiece(demandeId: string, file: File): Observable<FileGroup> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http
+      .post<ApiResponse<FileGroup>>(`${this.espaceRoot}/${demandeId}/depots-rectifies/pieces`, form)
+      .pipe(map((response) => response.data));
+  }
+
   listCtf(demandeId: string): Observable<DepotRectifie[]> {
     return this.http
       .get<ApiResponse<DepotRectifie[]>>(`${this.ctfRoot}/${demandeId}/depots-rectifies`)
       .pipe(map((response) => response.data));
   }
 
-  control(demandeId: string, depotId: string, request: DepotRectifieControlRequest): Observable<DepotRectifie> {
+  control(
+    demandeId: string,
+    depotId: string,
+    request: DepotRectifieControlRequest,
+  ): Observable<DepotRectifie> {
     return this.http
       .post<ApiResponse<DepotRectifie>>(
         `${this.ctfRoot}/${demandeId}/depots-rectifies/${depotId}/controle`,
