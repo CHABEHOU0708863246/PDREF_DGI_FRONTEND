@@ -89,7 +89,7 @@ export class EspaceDossierPageComponent implements OnInit {
 
   loadPieces(): void {
     this.rejetPieces.get(this.id()).subscribe({
-      next: (pieces) => this.pieces.set(pieces),
+      next: (pieces) => this.pieces.set(pieces.rejetId ? pieces : null),
       error: () => this.pieces.set(null),
     });
   }
