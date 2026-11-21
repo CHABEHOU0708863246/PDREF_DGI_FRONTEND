@@ -82,7 +82,7 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
         <pdref-state-panel
           state="error"
           [problem]="issue"
-          actionLabel="Reessayer"
+          actionLabel="Réessayer"
           (retry)="load()"
         />
       } @else if (loading()) {
@@ -122,7 +122,7 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
             <span class="pd-label">Motif</span><strong>{{ detail.motifLibelle }}</strong>
           </div>
           <div>
-            <span class="pd-label">Piece complementaire</span
+            <span class="pd-label">Pièce complementaire</span
             ><strong>{{ detail.pieceComplementaireRequise ? 'Requise' : 'Non requise' }}</strong>
           </div>
           <div>

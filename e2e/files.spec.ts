@@ -132,8 +132,13 @@ test.describe('fichiers', () => {
   test('expose telechargement et suppression logique', async ({ page }) => {
     await mockFilesApi(page);
     await page.goto('/dashboard/files');
-    await expect(page.getByRole('button', { name: 'Telecharger' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Supprimer' })).toBeVisible();
+    // Les actions d'une ligne sont regroupees dans le menu « ⋮ ».
+    await page
+      .getByRole('button', { name: /^Actions pour / })
+      .first()
+      .click();
+    await expect(page.getByRole('menuitem', { name: 'Télécharger' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Supprimer' })).toBeVisible();
     await expect(page.getByRole('button', { name: /modifier/i })).toHaveCount(0);
   });
 });

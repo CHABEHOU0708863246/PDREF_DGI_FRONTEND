@@ -1,8 +1,8 @@
 ﻿<pdref-page-header
   title="Mes dossiers"
-  subtitle="Consultez l'avancement et les courriers de reponse de vos dossiers."
+  subtitle="Consultez l'avancement et les courriers de réponse de vos dossiers."
 >
-  <a class="pd-btn pd-btn--primary" routerLink="/espace/depots/nouveau">Nouveau depot</a>
+  <a class="pd-btn pd-btn--primary" routerLink="/espace/depots/nouveau">Nouveau dépôt</a>
 </pdref-page-header>
 
 @if (problem(); as issue) {
@@ -10,15 +10,15 @@
     state="error"
     [title]="issue.title"
     [message]="issue.detail ?? 'Impossible de charger vos dossiers.'"
-    actionLabel="Reessayer"
+    actionLabel="Réessayer"
     (retry)="load()"
   />
 } @else if (loading()) {
   <pdref-state-panel state="loading" title="Chargement de vos dossiers" />
 } @else {
   @if (drafts().length > 0) {
-    <section class="espace-card pd-card" aria-label="Brouillons de depot">
-      <h2>Brouillons de depot</h2>
+    <section class="espace-card pd-card" aria-label="Brouillons de dépôt">
+      <h2>Brouillons de dépôt</h2>
       <ul class="espace-drafts">
         @for (draft of drafts(); track draft.id) {
           <li>
@@ -51,8 +51,8 @@
           <tr>
             <th>Dossier</th>
             <th>Statut</th>
-            <th>Depot</th>
-            <th>Decision</th>
+            <th>Dépôt</th>
+            <th>Décision</th>
             <th>Courrier</th>
           </tr>
         </thead>
@@ -62,9 +62,9 @@
               <td>
                 <a [routerLink]="['/espace/dossiers', dossier.id]">{{ dossier.numero }}</a>
               </td>
-              <td>{{ dossier.statut }}</td>
+              <td>{{ demandeStatutLabel(dossier.statut) }}</td>
               <td>{{ dossier.dateDepot ? (dossier.dateDepot | date: 'dd/MM/yyyy') : '-' }}</td>
-              <td>{{ dossier.decision ?? '-' }}</td>
+              <td>{{ decisionLabel(dossier.decision) }}</td>
               <td>{{ dossier.courrierDisponible ? 'Disponible' : '-' }}</td>
             </tr>
           }

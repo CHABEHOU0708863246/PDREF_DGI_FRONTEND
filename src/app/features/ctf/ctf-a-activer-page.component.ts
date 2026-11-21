@@ -47,12 +47,12 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
         <span class="pd-chip">Autorisation dans PDREF</span>
       </p>
       <p class="pd-muted">
-        En mode manuel, ouvrez le dossier pour enregistrer la reference, la date d'activation et la
+        En mode manuel, ouvrez le dossier pour enregistrer la référence, la date d'activation et la
         preuve. Le bouton d activation automatique n'est pas utilise.
       </p>
     }
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card">
         <div class="head">
@@ -72,7 +72,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
               name="search"
               [value]="filters.search"
               (input)="onSearch($event)"
-              placeholder="Numero, NCC ou raison sociale"
+              placeholder="Numéro, NCC ou raison sociale"
             />
           </label>
           <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
@@ -99,10 +99,10 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                   <th>Demande</th>
                   <th>Contribuable</th>
                   <th>Cycle</th>
-                  <th>Delai activation</th>
-                  <th>Delai depot</th>
+                  <th>Délai activation</th>
+                  <th>Délai dépôt</th>
                   <th>Statut</th>
-                  <th></th>
+                  <th class="pd-col-actions"><span class="pd-visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -123,10 +123,10 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                     <td>
                       <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
                     </td>
-                    <td>
+                    <td class="pd-col-actions pd-col-actions--wide">
                       @if (manualEImpots()) {
                         <a
-                          class="pd-btn pd-btn--ghost pd-btn--sm"
+                          class="pd-btn pd-btn--primary pd-btn--sm"
                           [routerLink]="['/dashboard/ctf', item.demandeId]"
                         >
                           Enregistrer

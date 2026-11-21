@@ -4,7 +4,7 @@
 />
 
 @if (problem(); as issue) {
-  <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+  <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
 } @else if (loading()) {
   <pdref-state-panel state="loading" title="Chargement des fichiers" />
 } @else {
@@ -17,7 +17,7 @@
         {{ formatSize(currentPolicy.maximumTotalSizeBytes) }} au total.
       </p>
       <pdref-upload-field
-        label="Pieces jointes"
+        label="Pièces jointes"
         hint="PDF, JPEG ou PNG. Le serveur verifie le vrai type et la taille ; l antivirus est applique lorsqu il est active."
         [accept]="currentPolicy.allowedContentTypes.join(',')"
         [multiple]="true"
@@ -73,7 +73,9 @@
               <th scope="col">Type</th>
               <th scope="col">Taille</th>
               <th scope="col">Statut</th>
-              <th scope="col">Actions</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -87,33 +89,38 @@
                   <td>
                     <span class="pd-chip">{{ file.status }}</span>
                   </td>
-                  <td class="files-actions">
+                  <td class="pd-col-actions">
                     @if (file.status !== 'SUPPRIMEE') {
-                      <button
-                        type="button"
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        [pdrefSecureDownload]="file.id"
-                      >
-                        Telecharger
-                      </button>
-                      <label class="pd-btn pd-btn--ghost pd-btn--sm">
-                        Remplacer
-                        <input
-                          class="pd-visually-hidden"
-                          type="file"
-                          [attr.accept]="policy()?.allowedContentTypes?.join(',')"
-                          (change)="replace(group, $event)"
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        (click)="remove(group)"
-                      >
-                        Supprimer
-                      </button>
+                      <pdref-row-actions [label]="'Actions pour ' + file.originalName">
+                        <button
+                          type="button"
+                          class="pd-menu-item"
+                          role="menuitem"
+                          [pdrefSecureDownload]="file.id"
+                        >
+                          <pdref-icon name="download" size="sm" />Télécharger
+                        </button>
+                        <label class="pd-menu-item" role="menuitem">
+                          <pdref-icon name="upload" size="sm" />Remplacer par une nouvelle version
+                          <input
+                            class="pd-visually-hidden"
+                            type="file"
+                            [attr.accept]="policy()?.allowedContentTypes?.join(',')"
+                            (change)="replace(group, $event)"
+                          />
+                        </label>
+                        <div class="pd-menu-separator" role="separator"></div>
+                        <button
+                          type="button"
+                          class="pd-menu-item pd-menu-item--danger"
+                          role="menuitem"
+                          (click)="remove(group)"
+                        >
+                          <pdref-icon name="trash" size="sm" />Supprimer
+                        </button>
+                      </pdref-row-actions>
                     } @else {
-                      <span class="pd-muted">Aucune action</span>
+                      <span class="pd-muted">Supprimé</span>
                     }
                   </td>
                 </tr>

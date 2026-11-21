@@ -12,6 +12,7 @@ import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { AlerteGateway } from '../../core/services/alertes/alerte.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import { etapeLabel } from '../../core/utils/labels';
 
 const LIGHTHOUSE_PAGE: AlertePage = {
   items: [
@@ -74,7 +75,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
     <pdref-page-header title="Alertes" subtitle="Echeances, retards et plafonds de traitement." />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="stats" aria-label="Compteurs des alertes">
         <div class="pd-card stat">
@@ -107,7 +108,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
           <pdref-state-panel state="loading" title="Chargement des alertes" />
         } @else {
           <pdref-bar-chart
-            title="Alertes ouvertes par periode"
+            title="Alertes ouvertes par période"
             unit="alertes"
             [series]="chartData()"
             (barClick)="openPeriod($event)"
@@ -158,7 +159,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
             </select>
           </label>
           <label class="pd-field"
-            ><span class="pd-label">Etape</span>
+            ><span class="pd-label">Étape</span>
             <input
               class="pd-input"
               [value]="filters.etape"
@@ -182,9 +183,9 @@ const LIGHTHOUSE_STATS: AlerteStats = {
                 <tr>
                   <th>Demande</th>
                   <th>Direction</th>
-                  <th>Etape</th>
+                  <th>Étape</th>
                   <th>Type</th>
-                  <th>Echeance</th>
+                  <th>Échéance</th>
                   <th>Retard</th>
                   <th>Statut</th>
                 </tr>
@@ -198,7 +199,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
                       }}</a>
                     </td>
                     <td>{{ item.directionId }}</td>
-                    <td>{{ item.etape }}</td>
+                    <td>{{ etapeLabel(item.etape) }}</td>
                     <td>
                       <span
                         class="pd-chip"
@@ -258,6 +259,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
   ],
 })
 export class AlertesPageComponent {
+  readonly etapeLabel = etapeLabel;
   private readonly gateway = inject(AlerteGateway);
   private readonly router = inject(Router);
   readonly page = signal<AlertePage>({

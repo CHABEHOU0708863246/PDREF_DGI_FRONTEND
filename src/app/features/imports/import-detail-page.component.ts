@@ -55,7 +55,7 @@ const LIGHTHOUSE_ERRORS: ImportError[] = [
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de l'import" />
     } @else if (item(); as detail) {

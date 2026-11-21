@@ -8,6 +8,7 @@ import { StatePanelComponent } from '../../core/components/state-panel/state-pan
 import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
+import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-suivi-validation-page',
@@ -17,11 +18,11 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header
       [title]="'Validation globale - ' + (item()?.numero || '')"
-      subtitle="Decision du SD GUDEF apres jointure des trois avis."
+      subtitle="Décision du SD GUDEF après jointure des trois avis."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de la validation" />
     } @else if (item(); as detail) {
@@ -33,7 +34,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <tr>
                 <th>Direction</th>
                 <th>Statut</th>
-                <th>Decision</th>
+                <th>Décision</th>
                 <th>Emis le</th>
               </tr>
             </thead>
@@ -41,13 +42,13 @@ import { normalizeProblem } from '../../core/utils/problem';
               @for (avis of detail.avis; track avis.id) {
                 <tr>
                   <td>{{ avis.directionCode }}</td>
-                  <td>{{ avis.statut }}</td>
+                  <td>{{ avisStatutLabel(avis.statut) }}</td>
                   <td>
                     <span
                       class="pd-chip"
                       [class.pd-chip--danger]="avis.decision === 'NON_FAVORABLE'"
                     >
-                      {{ avis.decision || '-' }}
+                      {{ decisionLabel(avis.decision) }}
                     </span>
                   </td>
                   <td>{{ avis.emisLe | abidjanDate }}</td>
@@ -59,10 +60,10 @@ import { normalizeProblem } from '../../core/utils/problem';
       </section>
 
       <section class="pd-card">
-        <h2>Decision globale</h2>
+        <h2>Décision globale</h2>
         <form class="form" (ngSubmit)="submit()">
           <label class="pd-field">
-            <span class="pd-label">Decision</span>
+            <span class="pd-label">Décision</span>
             <select class="pd-input" [(ngModel)]="decision" name="decision">
               <option value="FAVORABLE">Favorable</option>
               <option value="NON_FAVORABLE">Non favorable</option>
@@ -114,6 +115,8 @@ import { normalizeProblem } from '../../core/utils/problem';
   ],
 })
 export class SuiviValidationPageComponent {
+  readonly avisStatutLabel = avisStatutLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(SuivisGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

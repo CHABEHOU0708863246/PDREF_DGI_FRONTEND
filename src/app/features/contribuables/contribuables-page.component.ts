@@ -7,6 +7,8 @@ import type {
   ContribuableQuality,
   ContribuableQuery,
 } from '../../core/models/contribuables/contribuable.model';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { ContribuablesGateway } from '../../core/services/contribuables/contribuables.gateway';
@@ -18,16 +20,23 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-contribuables-page',
   standalone: true,
-  imports: [FormsModule, RouterLink, PageHeaderComponent, StatePanelComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    IconComponent,
+    PageHeaderComponent,
+    RowActionsComponent,
+    StatePanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
       title="Contribuables"
-      subtitle="Consultez et gerez les fiches contribuables. Les contacts sont masques par defaut."
+      subtitle="Consultez et gérez les fiches contribuables. Les contacts sont masqués par defaut."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="contribuables-card pd-card">
         <div class="contribuables-head">
@@ -55,7 +64,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           </article>
           <article class="pd-card">
             <strong>{{ quality()?.pourcentageSansTelephone ?? 0 }} %</strong
-            ><span>Sans telephone</span>
+            ><span>Sans téléphone</span>
           </article>
           <article class="pd-card">
             <strong>{{ quality()?.pourcentageSansCentre ?? 0 }} %</strong><span>Sans centre</span>
@@ -77,7 +86,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             />
           </label>
           <label class="pd-field">
-            <span class="pd-label">Systeme comptable</span>
+            <span class="pd-label">Système comptable</span>
             <input
               class="pd-input"
               [(ngModel)]="filters.systemeComptable"
@@ -94,7 +103,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           >
           <label class="check"
             ><input type="checkbox" [(ngModel)]="filters.sansTelephone" name="sansTelephone" /> Sans
-            telephone</label
+            téléphone</label
           >
           <label class="check"
             ><input type="checkbox" [(ngModel)]="filters.nccHorsFormat" name="nccHorsFormat" /> NCC
@@ -123,18 +132,22 @@ import { normalizeProblem } from '../../core/utils/problem';
                 <tr>
                   <th>NCC</th>
                   <th>Raison sociale</th>
-                  <th>Systeme</th>
+                  <th>Système</th>
                   <th>Centre</th>
                   <th>Email</th>
-                  <th>Telephone</th>
-                  <th>Qualite</th>
-                  <th></th>
+                  <th>Téléphone</th>
+                  <th>Qualité</th>
+                  <th class="pd-col-actions"><span class="pd-visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
                 @for (item of items(); track item.id) {
                   <tr>
-                    <td>{{ item.ncc }}</td>
+                    <td>
+                      <a class="pd-row-link" [routerLink]="['/dashboard/contribuables', item.id]">{{
+                        item.ncc
+                      }}</a>
+                    </td>
                     <td>{{ item.raisonSociale }}</td>
                     <td>{{ item.systemeComptable }}</td>
                     <td>{{ item.centreImpotLibelle || '-' }}</td>
@@ -148,24 +161,29 @@ import { normalizeProblem } from '../../core/utils/problem';
                         <span class="pd-chip">Sans email</span>
                       }
                       @if (item.telephoneManquant) {
-                        <span class="pd-chip">Sans telephone</span>
+                        <span class="pd-chip">Sans téléphone</span>
                       }
                     </td>
-                    <td class="actions-cell">
-                      @if (canFiche()) {
-                        <button
-                          type="button"
-                          class="pd-btn pd-btn--ghost pd-btn--sm"
-                          (click)="exportFiche(item)"
+                    <td class="pd-col-actions">
+                      <pdref-row-actions [label]="'Actions pour ' + item.raisonSociale">
+                        <a
+                          class="pd-menu-item"
+                          role="menuitem"
+                          [routerLink]="['/dashboard/contribuables', item.id]"
                         >
-                          Fiche PDF
-                        </button>
-                      }
-                      <a
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        [routerLink]="['/dashboard/contribuables', item.id]"
-                        >Detail</a
-                      >
+                          <pdref-icon name="eye" size="sm" />Voir la fiche
+                        </a>
+                        @if (canFiche()) {
+                          <button
+                            type="button"
+                            class="pd-menu-item"
+                            role="menuitem"
+                            (click)="exportFiche(item)"
+                          >
+                            <pdref-icon name="download" size="sm" />Télécharger la fiche PDF
+                          </button>
+                        }
+                      </pdref-row-actions>
                     </td>
                   </tr>
                 }
@@ -179,7 +197,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               [disabled]="page() === 1"
               (click)="load(page() - 1)"
             >
-              Precedente
+              Précédente
             </button>
             <span>Page {{ page() }} / {{ pageCount() }}</span>
             <button

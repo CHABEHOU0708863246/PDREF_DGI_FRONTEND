@@ -50,7 +50,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card courriers-card">
         <div class="courriers-head">
@@ -69,7 +69,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
               class="pd-input"
               [(ngModel)]="filters.search"
               name="search"
-              placeholder="Numero ou objet"
+              placeholder="Numéro ou objet"
             />
           </label>
           <label class="pd-field">
@@ -79,7 +79,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
               <option value="COURRIER">Courrier</option>
               <option value="SIGICI">SIGICI</option>
               <option value="PORTAIL">Portail</option>
-              <option value="REPONSE_DGI">Reponse DGI</option>
+              <option value="REPONSE_DGI">Réponse DGI</option>
             </select>
           </label>
           <label class="pd-field">
@@ -91,7 +91,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
             </select>
           </label>
           <label class="pd-field">
-            <span class="pd-label">Expediteur</span>
+            <span class="pd-label">Expéditeur</span>
             <input class="pd-input" [(ngModel)]="filters.expediteur" name="expediteur" />
           </label>
           <label class="pd-field">
@@ -113,7 +113,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
           <div class="pd-actions">
             <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">
-              Reinitialiser
+              Réinitialiser
             </button>
           </div>
         </form>
@@ -131,11 +131,11 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
             <table class="pd-table">
               <thead>
                 <tr>
-                  <th>Numero</th>
+                  <th>Numéro</th>
                   <th>Type</th>
                   <th>Sens</th>
                   <th>Date</th>
-                  <th>Expediteur</th>
+                  <th>Expéditeur</th>
                   <th>Objet</th>
                   <th>Contribuable</th>
                   <th>Lien</th>
@@ -169,7 +169,7 @@ const LIGHTHOUSE_COURRIERS: CourrierSummary[] = [
               [disabled]="page() <= 1"
               (click)="load(page() - 1)"
             >
-              Precedent
+              Précédent
             </button>
             <span>Page {{ page() }} / {{ pages() }}</span>
             <button

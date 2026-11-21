@@ -12,6 +12,7 @@ import { DepotGateway } from '../../core/services/depots/depot.gateway';
 import { CorrelationService } from '../../core/services/correlation/correlation.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import { demandeStatutLabel, decisionLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-espace-dossiers-page',
@@ -22,6 +23,8 @@ import { normalizeProblem } from '../../core/utils/problem';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EspaceDossiersPageComponent implements OnInit {
+  readonly demandeStatutLabel = demandeStatutLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(AdhesionGateway);
   private readonly depotGateway = inject(DepotGateway);
   private readonly correlation = inject(CorrelationService);

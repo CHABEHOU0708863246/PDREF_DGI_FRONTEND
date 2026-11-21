@@ -7,6 +7,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { PilotageGateway } from '../../core/services/pilotage/pilotage.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
+import { demandeStatutLabel, etapeLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-pilotage-list-page',
@@ -25,7 +26,7 @@ import { normalizeProblem } from '../../core/utils/problem';
       <span class="pd-muted">{{ page().totalCount }} dossier(s)</span>
     </div>
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement des dossiers" />
     } @else if (page().items.length === 0) {
@@ -42,8 +43,8 @@ import { normalizeProblem } from '../../core/utils/problem';
               <th>Demande</th>
               <th>Contribuable</th>
               <th>Statut</th>
-              <th>Etape</th>
-              <th>Depot</th>
+              <th>Étape</th>
+              <th>Dépôt</th>
             </tr>
           </thead>
           <tbody>
@@ -58,9 +59,9 @@ import { normalizeProblem } from '../../core/utils/problem';
                   {{ item.contribuable }}
                   <div class="pd-muted">{{ item.ncc }}</div>
                 </td>
-                <td>{{ item.statut }}</td>
+                <td>{{ demandeStatutLabel(item.statut) }}</td>
                 <td>
-                  {{ item.etapeCourante || '-' }}
+                  {{ etapeLabel(item.etapeCourante) }}
                   @if (item.enRetard) {
                     <span class="pd-chip pd-chip--danger">En retard</span>
                   }
@@ -88,6 +89,8 @@ import { normalizeProblem } from '../../core/utils/problem';
   ],
 })
 export class PilotageListPageComponent {
+  readonly demandeStatutLabel = demandeStatutLabel;
+  readonly etapeLabel = etapeLabel;
   private readonly gateway = inject(PilotageGateway);
   private readonly route = inject(ActivatedRoute);
   readonly page = signal<PilotagePage>({ items: [], page: 1, pageSize: 50, totalCount: 0 });

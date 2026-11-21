@@ -1,6 +1,6 @@
 ﻿<pdref-page-header
   title="Utilisateurs"
-  subtitle="Creation, invitation, roles et directions des comptes agents."
+  subtitle="Création, invitation, roles et directions des comptes agents."
 >
   <button class="pd-btn pd-btn--primary" type="button" (click)="openCreate()">
     Nouvel utilisateur
@@ -39,7 +39,7 @@
       </select>
     </label>
     <label class="pd-field">
-      <span class="pd-label">Etat</span>
+      <span class="pd-label">État</span>
       <select class="pd-input" formControlName="active">
         <option value="">Tous</option>
         <option value="true">Actifs</option>
@@ -48,7 +48,7 @@
     </label>
     <div class="users-filters__actions">
       <button class="pd-btn pd-btn--primary" type="submit">Filtrer</button>
-      <button class="pd-btn pd-btn--ghost" type="button" (click)="reset()">Reinitialiser</button>
+      <button class="pd-btn pd-btn--ghost" type="button" (click)="reset()">Réinitialiser</button>
     </div>
   </form>
 </section>
@@ -142,8 +142,10 @@
             <th scope="col">Direction</th>
             <th scope="col">Roles</th>
             <th scope="col">MFA</th>
-            <th scope="col">Etat</th>
-            <th scope="col">Actions</th>
+            <th scope="col">État</th>
+            <th scope="col" class="pd-col-actions">
+              <span class="pd-visually-hidden">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -164,53 +166,38 @@
                   <span class="pd-muted"> ({{ user.assignedDossiersCount }} dossier(s))</span>
                 }
               </td>
-              <td class="users-list__actions">
-                <details class="row-actions">
-                  <summary
-                    class="pd-btn pd-btn--ghost pd-btn--icon"
-                    aria-label="Actions de l utilisateur"
-                    title="Actions"
+              <td class="pd-col-actions">
+                <pdref-row-actions [label]="'Actions pour ' + user.displayName">
+                  <button class="pd-menu-item" role="menuitem" type="button" (click)="edit(user)">
+                    <pdref-icon name="edit" size="sm" />Modifier
+                  </button>
+                  <button class="pd-menu-item" role="menuitem" type="button" (click)="resend(user)">
+                    <pdref-icon name="mail" size="sm" />Renvoyer l'invitation
+                  </button>
+                  <button class="pd-menu-item" role="menuitem" type="button" (click)="unlock(user)">
+                    <pdref-icon name="key" size="sm" />Déverrouiller le compte
+                  </button>
+                  <button
+                    class="pd-menu-item"
+                    role="menuitem"
+                    type="button"
+                    (click)="resetMfa(user)"
                   >
-                    <pdref-icon name="menu" />
-                  </summary>
-                  <div class="row-actions__menu">
-                    <button
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      type="button"
-                      (click)="edit(user)"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      type="button"
-                      (click)="resend(user)"
-                    >
-                      Renvoyer l invitation
-                    </button>
-                    <button
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      type="button"
-                      (click)="resetMfa(user)"
-                    >
-                      Reinitialiser la double authentification
-                    </button>
-                    <button
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      type="button"
-                      (click)="unlock(user)"
-                    >
-                      Deverrouiller
-                    </button>
-                    <button
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      type="button"
-                      (click)="toggleActive(user)"
-                    >
-                      {{ user.isActive ? 'Desactiver' : 'Reactiver' }}
-                    </button>
-                  </div>
-                </details>
+                    <pdref-icon name="shield" size="sm" />Réinitialiser la double authentification
+                  </button>
+                  <div class="pd-menu-separator" role="separator"></div>
+                  <button
+                    class="pd-menu-item"
+                    role="menuitem"
+                    type="button"
+                    [class.pd-menu-item--danger]="user.isActive"
+                    (click)="toggleActive(user)"
+                  >
+                    <pdref-icon name="power" size="sm" />{{
+                      user.isActive ? 'Désactiver le compte' : 'Réactiver le compte'
+                    }}
+                  </button>
+                </pdref-row-actions>
               </td>
             </tr>
           }
@@ -219,7 +206,7 @@
     </div>
 
     <nav class="users-pagination" aria-label="Pagination utilisateurs">
-      <button class="pd-btn pd-btn--ghost" type="button" (click)="previousPage()">Precedent</button>
+      <button class="pd-btn pd-btn--ghost" type="button" (click)="previousPage()">Précédent</button>
       <span>Page {{ page() }} - {{ total() }} utilisateur(s)</span>
       <button class="pd-btn pd-btn--ghost" type="button" (click)="nextPage()">Suivant</button>
     </nav>
@@ -228,7 +215,7 @@
 
 <pdref-confirm-dialog-with-input
   [open]="resetMfaOpen()"
-  title="Reinitialiser la double authentification"
+  title="Réinitialiser la double authentification"
   [message]="
     'Le secret et les codes de secours de ' +
     (resetMfaTarget()?.displayName ?? 'cet utilisateur') +
@@ -244,7 +231,7 @@
 
 <pdref-confirm-dialog-with-input
   [open]="unlockOpen()"
-  title="Deverrouiller le compte"
+  title="Déverrouiller le compte"
   [message]="
     'Le verrouillage de ' +
     (unlockTarget()?.displayName ?? 'cet utilisateur') +

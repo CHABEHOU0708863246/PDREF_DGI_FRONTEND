@@ -29,7 +29,7 @@ import { normalizeProblem } from '../../core/utils/problem';
         <pdref-state-panel
           state="error"
           [problem]="issue"
-          actionLabel="Reessayer"
+          actionLabel="Réessayer"
           (retry)="load()"
         />
       } @else if (loading()) {
@@ -39,7 +39,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           <article class="pd-card">
             <h2>Identification</h2>
             <dl>
-              <dt>Numero</dt>
+              <dt>Numéro</dt>
               <dd>{{ courrier.numero }}</dd>
               <dt>Type</dt>
               <dd>{{ typeLabel(courrier.typeCourrier) }}</dd>
@@ -49,7 +49,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dd>{{ courrier.dateArrivee || courrier.dateEmission || '-' }}</dd>
               <dt>Imputation</dt>
               <dd>{{ courrier.imputation }}</dd>
-              <dt>Expediteur</dt>
+              <dt>Expéditeur</dt>
               <dd>{{ courrier.expediteur }}</dd>
             </dl>
           </article>
@@ -59,9 +59,9 @@ import { normalizeProblem } from '../../core/utils/problem';
             <dl>
               <dt>Objet</dt>
               <dd>{{ courrier.objet }}</dd>
-              <dt>References</dt>
+              <dt>Références</dt>
               <dd>{{ courrier.references || '-' }}</dd>
-              <dt>Reference depot</dt>
+              <dt>Référence dépôt</dt>
               <dd>{{ courrier.referenceDepot || '-' }}</dd>
             </dl>
           </article>
@@ -106,7 +106,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 
           @if (canInternal() && (courrier.instructionsDirecteur || courrier.annotationsSdGudef)) {
             <article class="pd-card detail-full">
-              <h2>Donnees internes C3</h2>
+              <h2>Données internes C3</h2>
               <dl>
                 @if (courrier.instructionsDirecteur) {
                   <dt>Instructions du Directeur</dt>
@@ -126,7 +126,7 @@ import { normalizeProblem } from '../../core/utils/problem';
         }
         @if (canSigner() && manualSignature()) {
           <section class="pd-card">
-            <h2>Deposer le courrier signe</h2>
+            <h2>Déposer le courrier signe</h2>
             <label class="pd-field">
               <span class="pd-label">Signataire declare</span>
               <input class="pd-input" [value]="signataire()" (input)="onSignataire($event)" />
@@ -152,7 +152,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <label class="pd-field">
               <span class="pd-label">Canal</span>
               <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
-                <option value="DEPOT_EIMPOTS_MANUEL">Depot au guichet</option>
+                <option value="DEPOT_EIMPOTS_MANUEL">Dépôt au guichet</option>
                 <option value="REMISE_PAPIER">Remise papier</option>
               </select>
             </label>
@@ -166,13 +166,13 @@ import { normalizeProblem } from '../../core/utils/problem';
               />
             </label>
             <label class="pd-field">
-              <span class="pd-label">Reference</span>
+              <span class="pd-label">Référence</span>
               <input
                 class="pd-input"
                 [value]="referenceRemise()"
                 (input)="onReferenceRemise($event)"
               />
-              <span class="pd-help">Reference proposee automatiquement, modifiable.</span>
+              <span class="pd-help">Référence proposee automatiquement, modifiable.</span>
             </label>
             <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
               Declarer la remise
@@ -182,7 +182,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 
         <section class="pd-card detail-full">
           <div class="courriers-head">
-            <h2>Pieces jointes</h2>
+            <h2>Pièces jointes</h2>
             @if (canUpload()) {
               <label class="pd-btn pd-btn--ghost">
                 Ajouter un fichier
@@ -191,11 +191,11 @@ import { normalizeProblem } from '../../core/utils/problem';
             }
           </div>
           @if (attachmentsLoading()) {
-            <pdref-state-panel state="loading" title="Chargement des pieces jointes" />
+            <pdref-state-panel state="loading" title="Chargement des pièces jointes" />
           } @else if (attachments().length === 0) {
             <pdref-state-panel
               state="empty"
-              title="Aucune piece jointe"
+              title="Aucune pièce jointe"
               message="Aucun fichier rattache."
             />
           } @else {
@@ -209,7 +209,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                       class="pd-btn pd-btn--ghost pd-btn--sm"
                       (click)="download(current.id)"
                     >
-                      Telecharger
+                      Télécharger
                     </button>
                   </li>
                 }

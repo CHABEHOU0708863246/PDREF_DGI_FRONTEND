@@ -1,22 +1,22 @@
-﻿<pdref-side-panel [open]="true" title="Nouveau depot en ligne" size="xl" (closeRequested)="close()">
+﻿<pdref-side-panel [open]="true" title="Nouveau dépôt en ligne" size="xl" (closeRequested)="close()">
   @if (loading()) {
-    <pdref-state-panel state="loading" title="Chargement du depot" />
+    <pdref-state-panel state="loading" title="Chargement du dépôt" />
   } @else if (problem(); as issue) {
     <pdref-state-panel
       state="error"
-      title="Depot indisponible"
+      title="Dépôt indisponible"
       [problem]="issue"
-      actionLabel="Reessayer"
+      actionLabel="Réessayer"
       (retry)="load()"
     />
   } @else if (deposited(); as done) {
     <section class="depot-confirmation pd-card" aria-live="polite">
       <h2>Demande deposee</h2>
       <p class="depot-confirmation__numero">Numero {{ done.demande.numero ?? done.demande.id }}</p>
-      <p>Votre demande a ete enregistree et transmise au service GUDEF.</p>
+      <p>Votre demande a ete enregistrée et transmise au service GUDEF.</p>
       <div class="depot-actions">
         <button class="pd-btn pd-btn--primary" type="button" (click)="downloadAccuse()">
-          Telecharger l'accuse de reception
+          Télécharger l'accuse de reception
         </button>
         <a class="pd-btn pd-btn--ghost" [routerLink]="['/espace/dossiers', done.demande.id]">
           Voir le dossier
@@ -26,7 +26,7 @@
     </section>
   } @else if (formulaire(); as form) {
     <div class="depot-layout">
-      <aside class="depot-stepper pd-card" aria-label="Etapes du depot">
+      <aside class="depot-stepper pd-card" aria-label="Étapes du dépôt">
         <ol>
           @for (label of etapes; track label; let index = $index) {
             <li
@@ -158,7 +158,7 @@
                     />
                   </label>
                   <label class="pd-field">
-                    <span class="pd-label">Libelle</span>
+                    <span class="pd-label">Libellé</span>
                     <input
                       class="pd-input"
                       type="text"
@@ -214,10 +214,10 @@
 
         @if (step() === 5) {
           <section class="depot-fieldset">
-            <h3>Pieces jointes</h3>
+            <h3>Pièces jointes</h3>
             <p class="pd-muted">Formats et antivirus appliques par la plateforme.</p>
             @if (pieces().length === 0) {
-              <p>Aucune piece jointe pour le moment.</p>
+              <p>Aucune pièce jointe pour le moment.</p>
             } @else {
               <ul class="depot-pieces">
                 @for (piece of pieces(); track piece.id) {
@@ -253,7 +253,7 @@
                 {{ exercice.variables.length }} variable(s).
               </p>
             }
-            <p class="pd-muted">Le numero de demande sera attribue au depot, pas avant.</p>
+            <p class="pd-muted">Le numéro de demande sera attribue au dépôt, pas avant.</p>
           </section>
         }
 
@@ -265,7 +265,7 @@
               (click)="previous()"
               [disabled]="busy()"
             >
-              Precedent
+              Précédent
             </button>
           }
           @if (step() < 5) {
@@ -275,7 +275,7 @@
               (click)="next()"
               [disabled]="busy() || saving()"
             >
-              Etape suivante
+              Étape suivante
             </button>
           } @else {
             <button
@@ -284,7 +284,7 @@
               (click)="deposit()"
               [disabled]="busy() || saving()"
             >
-              Deposer la demande
+              Déposer la demande
             </button>
           }
         </div>

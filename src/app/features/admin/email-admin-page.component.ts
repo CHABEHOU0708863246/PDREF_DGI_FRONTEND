@@ -17,7 +17,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header
       title="E-mails transactionnels"
-      subtitle="Suivi de l outbox, erreurs SMTP et renvoi des messages en echec."
+      subtitle="Suivi de l outbox, erreurs SMTP et renvoi des messages en échec."
     />
 
     @if (notice(); as message) {
@@ -61,14 +61,14 @@ import { normalizeProblem } from '../../core/utils/problem';
             <option value="EN_ATTENTE">En attente</option>
             <option value="EN_COURS">En cours</option>
             <option value="ENVOYEE">Envoyee</option>
-            <option value="ECHEC">Echec</option>
-            <option value="ECHEC_FINAL">Echec final</option>
+            <option value="ECHEC">Échec</option>
+            <option value="ECHEC_FINAL">Échec final</option>
           </select>
         </label>
         <div class="emails-filters__actions">
           <button class="pd-btn pd-btn--primary" type="submit">Filtrer</button>
           <button class="pd-btn pd-btn--ghost" type="button" (click)="reset()">
-            Reinitialiser
+            Réinitialiser
           </button>
         </div>
       </form>
@@ -144,7 +144,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           [disabled]="page() <= 1"
           (click)="load(page() - 1)"
         >
-          Precedent
+          Précédent
         </button>
         <span class="pd-muted">Page {{ page() }} - {{ total() }} e-mail(s)</span>
         <button

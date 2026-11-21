@@ -42,7 +42,7 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
         <div class="mfa-card__actions">
           <button type="button" class="pd-btn pd-btn--ghost" (click)="copyAll()">Copier</button>
           <button type="button" class="pd-btn pd-btn--ghost" (click)="download()">
-            Telecharger
+            Télécharger
           </button>
           <button type="button" class="pd-btn pd-btn--ghost" (click)="regenerate()">
             Regenerer

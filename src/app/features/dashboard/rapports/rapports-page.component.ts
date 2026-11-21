@@ -165,17 +165,17 @@ interface KpiView {
   template: `
     <pdref-page-header
       title="Rapports et statistiques"
-      subtitle="Demandes, avis et traitements par systeme comptable, secteur, direction et type d'erreur."
+      subtitle="Demandes, avis et traitements par système comptable, secteur, direction et type d'erreur."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement des rapports" />
     } @else if (stats(); as data) {
       <section class="filters pd-card" aria-label="Filtres des rapports">
         <label class="pd-field">
-          <span class="pd-label">Periode</span>
+          <span class="pd-label">Période</span>
           <select class="pd-input" [value]="type()" (change)="onType($event)">
             @for (item of types; track item.value) {
               <option [value]="item.value">{{ item.label }}</option>
@@ -183,7 +183,7 @@ interface KpiView {
           </select>
         </label>
         <label class="pd-field">
-          <span class="pd-label">Date de reference</span>
+          <span class="pd-label">Date de référence</span>
           <input
             class="pd-input"
             type="date"
@@ -213,7 +213,7 @@ interface KpiView {
         <button type="button" class="pd-btn pd-btn--primary" (click)="load()">Afficher</button>
       </section>
 
-      <section class="period pd-card" aria-label="Periode du rapport">
+      <section class="period pd-card" aria-label="Période du rapport">
         <div>
           <h2>{{ data.libelle }}</h2>
           <p class="pd-muted">
@@ -226,7 +226,7 @@ interface KpiView {
         >
       </section>
 
-      <section class="kpis" aria-label="Indicateurs de la periode">
+      <section class="kpis" aria-label="Indicateurs de la période">
         @for (kpi of kpiCards(); track kpi.label) {
           <pdref-kpi-card
             [label]="kpi.label"
@@ -237,14 +237,14 @@ interface KpiView {
         }
       </section>
 
-      <section class="pd-card" aria-label="Evolution des demandes">
+      <section class="pd-card" aria-label="Évolution des demandes">
         <div class="head">
-          <h2>Evolution des demandes</h2>
-          <span class="pd-muted">Periode courante et meme periode de l'annee precedente</span>
+          <h2>Évolution des demandes</h2>
+          <span class="pd-muted">Période courante et meme période de l'année precedente</span>
         </div>
         <pdref-comparison-bar-chart
           [series]="evolutionSeries()"
-          title="Evolution des demandes"
+          title="Évolution des demandes"
           [currentLabel]="data.libelle"
           previousLabel="Annee precedente"
         />
@@ -268,9 +268,9 @@ interface KpiView {
                 </caption>
                 <thead>
                   <tr>
-                    <th scope="col">Libelle</th>
+                    <th scope="col">Libellé</th>
                     <th scope="col" class="num">{{ data.libelle }}</th>
-                    <th scope="col" class="num">Precedent</th>
+                    <th scope="col" class="num">Précédent</th>
                     <th scope="col" class="num">Ecart</th>
                   </tr>
                 </thead>
@@ -302,7 +302,7 @@ interface KpiView {
           <span class="pd-muted">{{ data.libelle }}</span>
         </div>
         @if (data.avis.length === 0) {
-          <p class="pd-muted">Aucun avis emis sur la periode.</p>
+          <p class="pd-muted">Aucun avis emis sur la période.</p>
         } @else {
           <div class="table-wrap">
             <table class="pd-table">
@@ -312,7 +312,7 @@ interface KpiView {
                   <th scope="col" class="num">Favorables</th>
                   <th scope="col" class="num">Non favorables</th>
                   <th scope="col" class="num">Total</th>
-                  <th scope="col" class="num">Precedent</th>
+                  <th scope="col" class="num">Précédent</th>
                   <th scope="col" class="num">Ecart</th>
                 </tr>
               </thead>
@@ -342,7 +342,7 @@ interface KpiView {
       <section class="pd-card" aria-label="Situation par direction de rattachement">
         <div class="head">
           <h2>Situation par direction de rattachement</h2>
-          <span class="pd-muted">Taux de traitement acheve et taux de reponse favorable</span>
+          <span class="pd-muted">Taux de traitement acheve et taux de réponse favorable</span>
         </div>
         <div class="table-wrap">
           <table class="pd-table">
@@ -397,7 +397,7 @@ interface KpiView {
         <div>
           <h2>Export du rapport par direction</h2>
           <p class="pd-muted">
-            PDF, Excel ou Word prepare en arriere-plan, selon la periode filtree.
+            PDF, Excel ou Word prepare en arriere-plan, selon la période filtree.
           </p>
         </div>
         <label class="pd-field">
@@ -440,7 +440,7 @@ interface KpiView {
                 <span class="pd-muted">{{ statutLabel(item.statut) }}</span>
                 @if (item.statut === 'PRET' && canExport()) {
                   <button type="button" class="pd-btn pd-btn--ghost" (click)="download(item)">
-                    Telecharger
+                    Télécharger
                   </button>
                 }
               </li>

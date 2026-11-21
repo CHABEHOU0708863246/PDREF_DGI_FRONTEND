@@ -16,8 +16,8 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
   template: `
     <pdref-auth-layout
       eyebrow="Double authentification"
-      title="Code de verification"
-      subtitle="Saisissez le code genere par votre application d'authentification ou un code de secours."
+      title="Code de vérification"
+      subtitle="Saisissez le code généré par votre application d'authentification ou un code de secours."
     >
       <form class="pd-card auth-card mfa-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         @if (error(); as problem) {

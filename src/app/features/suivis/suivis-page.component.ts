@@ -10,6 +10,9 @@ import { PermissionsService } from '../../core/services/permissions/permissions.
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
+import { etapeLabel } from '../../core/utils/labels';
 
 const LIGHTHOUSE_PAGE: SuiviPage = {
   items: [
@@ -40,7 +43,15 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
 @Component({
   selector: 'pdref-suivis-page',
   standalone: true,
-  imports: [FormsModule, RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe],
+  imports: [
+    FormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatePanelComponent,
+    AbidjanDatePipe,
+    IconComponent,
+    RowActionsComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -49,7 +60,7 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card">
         <div class="head">
@@ -71,7 +82,7 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
               class="pd-input"
               [(ngModel)]="filters.search"
               name="search"
-              placeholder="Numero, NCC ou raison sociale"
+              placeholder="Numéro, NCC ou raison sociale"
             />
           </label>
           <label class="pd-field">
@@ -82,13 +93,13 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
               <option value="AVIS_COMPLET">Avis complet</option>
               <option value="VALIDATION_EN_ATTENTE">Validation en attente</option>
               <option value="VALIDATION_POSEE">Validation posee</option>
-              <option value="CLOTURE">Cloture</option>
+              <option value="CLOTURE">Clôture</option>
             </select>
           </label>
           <div class="pd-actions">
             <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">
-              Reinitialiser
+              Réinitialiser
             </button>
           </div>
         </form>
@@ -106,13 +117,13 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
             <table class="pd-table">
               <thead>
                 <tr>
-                  <th>Numero</th>
+                  <th>Numéro</th>
                   <th>Contribuable</th>
                   <th>Avis</th>
                   <th>Statut</th>
-                  <th>Etape</th>
+                  <th>Étape</th>
                   <th>Ouverture</th>
-                  <th></th>
+                  <th class="pd-col-actions"><span class="pd-visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -131,21 +142,26 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
                     <td>
                       <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
                     </td>
-                    <td>{{ item.etapeCourante || '-' }}</td>
+                    <td>{{ etapeLabel(item.etapeCourante) }}</td>
                     <td>{{ item.dateOuverture | abidjanDate }}</td>
-                    <td class="actions-cell">
-                      <button
-                        type="button"
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        (click)="exportPdf(item.demandeId)"
-                      >
-                        PDF
-                      </button>
-                      <a
-                        class="pd-btn pd-btn--ghost pd-btn--sm"
-                        [routerLink]="['/dashboard/suivis', item.demandeId]"
-                        >Detail</a
-                      >
+                    <td class="pd-col-actions">
+                      <pdref-row-actions [label]="'Actions pour le dossier ' + item.numero">
+                        <a
+                          class="pd-menu-item"
+                          role="menuitem"
+                          [routerLink]="['/dashboard/suivis', item.demandeId]"
+                        >
+                          <pdref-icon name="eye" size="sm" />Ouvrir le dossier
+                        </a>
+                        <button
+                          type="button"
+                          class="pd-menu-item"
+                          role="menuitem"
+                          (click)="exportPdf(item.demandeId)"
+                        >
+                          <pdref-icon name="download" size="sm" />Télécharger la fiche PDF
+                        </button>
+                      </pdref-row-actions>
                     </td>
                   </tr>
                 }
@@ -185,6 +201,7 @@ const LIGHTHOUSE_PAGE: SuiviPage = {
   ],
 })
 export class SuivisPageComponent {
+  readonly etapeLabel = etapeLabel;
   private readonly gateway = inject(SuivisGateway);
   private readonly permissions = inject(PermissionsService);
 

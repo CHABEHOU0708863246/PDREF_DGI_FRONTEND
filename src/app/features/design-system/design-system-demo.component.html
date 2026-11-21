@@ -4,7 +4,7 @@
 
     <pdref-page-header
       title="Design system PDREF"
-      subtitle="Demonstration uniquement : donnees fictives, aucun appel metier, aucun NCC reel."
+      subtitle="Demonstration uniquement : données fictives, aucun appel metier, aucun NCC reel."
     >
       <pdref-theme-toggle />
       <button type="button" class="pd-btn pd-btn--ghost" (click)="showErrorToast()">
@@ -32,7 +32,7 @@
             Theme sombre
           </button>
           <button type="button" class="pd-btn pd-btn--ghost" (click)="theme.setMode('system')">
-            Systeme
+            Système
           </button>
           <button
             type="button"
@@ -107,7 +107,7 @@
     <section class="demo-section" aria-labelledby="status-title">
       <h2 id="status-title">Statuts</h2>
       <p class="pd-muted">
-        Couleur + icone + libelle : l'information ne depend jamais de la couleur seule.
+        Couleur + icone + libellé : l'information ne depend jamais de la couleur seule.
       </p>
       <div class="pd-cluster">
         @for (code of statusCodes; track code) {
@@ -124,7 +124,7 @@
         <button type="button" class="pd-btn pd-btn--secondary">Action secondaire</button>
         <button type="button" class="pd-btn pd-btn--ghost">Action discrete</button>
         <button type="button" class="pd-btn pd-btn--danger">Action sensible</button>
-        <button type="button" class="pd-btn pd-btn--primary" disabled>Desactive</button>
+        <button type="button" class="pd-btn pd-btn--primary" disabled>Désactivé</button>
       </div>
     </section>
 
@@ -149,7 +149,7 @@
             <h3>Succes</h3>
             <pdref-state-panel
               state="success"
-              title="Operation reussie"
+              title="Opération reussie"
               message="Transition douce."
             />
           </article>
@@ -158,9 +158,9 @@
             <pdref-state-panel
               state="error"
               title="Exemple d erreur"
-              message="Code, trace et reference sont affiches pour le support."
+              message="Code, trace et référence sont affiches pour le support."
               [problem]="problem"
-              actionLabel="Reessayer"
+              actionLabel="Réessayer"
             />
             <pdref-error-footer [problem]="problem" />
           </article>
@@ -181,10 +181,10 @@
               <input id="demo-name" class="pd-input" formControlName="name" />
             </div>
             <div class="pd-field">
-              <label class="pd-label" for="demo-reference">Reference</label>
+              <label class="pd-label" for="demo-reference">Référence</label>
               <input id="demo-reference" class="pd-input" formControlName="reference" />
             </div>
-            <pdref-phone-input formControlName="phone" label="Telephone" />
+            <pdref-phone-input formControlName="phone" label="Téléphone" />
             <pdref-contribuable-select formControlName="contribuable" label="Contribuable (demo)" />
             <pdref-form-guide
               [form]="demoForm"
@@ -194,7 +194,7 @@
           </form>
 
           <div class="pd-card upload-demo">
-            <h3>Pieces jointes</h3>
+            <h3>Pièces jointes</h3>
             <p class="pd-muted">
               Exemple de demonstration : limites passees en proprietes, pas en dur dans le
               composant.
@@ -223,7 +223,7 @@
 
     @defer (on viewport) {
       <section class="demo-section" aria-labelledby="table-title">
-        <h2 id="table-title">Tableau de donnees</h2>
+        <h2 id="table-title">Tableau de données</h2>
         <div class="table-toolbar">
           <div class="pd-field table-toolbar__search">
             <label class="pd-label" for="demo-search">Recherche (non PII)</label>
@@ -231,7 +231,7 @@
               id="demo-search"
               class="pd-input"
               type="search"
-              placeholder="Reference ou libelle de demonstration"
+              placeholder="Référence ou libellé de demonstration"
               (input)="onSearch($event)"
             />
           </div>

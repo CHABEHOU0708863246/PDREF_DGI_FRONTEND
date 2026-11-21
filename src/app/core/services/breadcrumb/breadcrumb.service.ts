@@ -35,7 +35,10 @@ export class BreadcrumbService {
       }
 
       const label = current.snapshot.data['breadcrumb'];
-      if (typeof label === 'string' && label.length > 0) {
+      // Une route enfant sans libelle propre herite des donnees de son parent :
+      // on n'affiche pas deux fois le meme niveau (« Tableau de bord / Tableau de bord »).
+      const duplicate = items.length > 0 && items[items.length - 1]?.label === label;
+      if (typeof label === 'string' && label.length > 0 && !duplicate) {
         items.push({
           label,
           url: segments.length > 0 ? `/${segments.join('/')}` : undefined,

@@ -17,11 +17,11 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header
       title="Courriers a signer"
-      subtitle="Courriers de refus en attente de signature et de depot du PDF signe."
+      subtitle="Courriers de refus en attente de signature et de dépôt du PDF signe."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card">
         <form class="filters" (ngSubmit)="load()">
@@ -31,7 +31,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               class="pd-input"
               [(ngModel)]="search"
               name="search"
-              placeholder="Numero, objet ou contribuable"
+              placeholder="Numéro, objet ou contribuable"
             />
           </label>
           <button type="submit" class="pd-btn pd-btn--primary">Filtrer</button>
@@ -53,11 +53,11 @@ import { normalizeProblem } from '../../core/utils/problem';
               </caption>
               <thead>
                 <tr>
-                  <th>Numero</th>
+                  <th>Numéro</th>
                   <th>Demande</th>
                   <th>Contribuable</th>
-                  <th>Decision</th>
-                  <th>Delai</th>
+                  <th>Décision</th>
+                  <th>Délai</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -77,7 +77,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                       <a
                         class="pd-btn pd-btn--primary pd-btn--sm"
                         [routerLink]="['/dashboard/courriers', item.courrierId]"
-                        >Deposer le PDF signe</a
+                        >Déposer le PDF signe</a
                       >
                     </td>
                   </tr>

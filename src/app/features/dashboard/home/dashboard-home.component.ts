@@ -51,7 +51,7 @@ const LIGHTHOUSE_ANALYTIQUE: DashboardAnalytique = {
     { code: 'EN_COURS', libelle: 'En cours', valeur: 9 },
     { code: 'FAVORABLE', libelle: 'Favorables', valeur: 6 },
     { code: 'NON_FAVORABLE', libelle: 'Non favorables', valeur: 3 },
-    { code: 'REJETE', libelle: 'Rejetes', valeur: 0 },
+    { code: 'REJETE', libelle: 'Rejetés', valeur: 0 },
   ],
   evolution: [
     { periode: '2026-06', libelle: 'Juin', total: 2, favorables: 1, nonFavorables: 0 },
@@ -126,17 +126,17 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
   template: `
     <pdref-page-header
       title="Tableau de bord"
-      subtitle="Pilotage des courriers, demandes, circuits et qualite des donnees."
+      subtitle="Pilotage des courriers, demandes, circuits et qualité des données."
     >
       <pdref-live-clock [lastRefreshAt]="lastRefreshAt()" />
     </pdref-page-header>
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="toolbar pd-card" aria-label="Filtres du tableau de bord">
         <label class="pd-field"
-          ><span class="pd-label">Periode</span>
+          ><span class="pd-label">Période</span>
           <select class="pd-input" [value]="filters.periode" (change)="onPeriode($event)">
             @for (period of periods; track period.value) {
               <option [value]="period.value">{{ period.label }}</option>
@@ -161,51 +161,51 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
         >
       </section>
 
-      <section class="kpis" aria-label="Indicateurs cles">
+      <section class="kpis" aria-label="Indicateurs clés">
         <pdref-kpi-card
-          label="Courriers recus"
+          label="Courriers reçus"
           [value]="kpis()?.courriersRecus ?? null"
-          icon="file"
+          icon="inbox"
           [state]="kpiState()"
         />
         <pdref-kpi-card
-          label="Rejetes"
+          label="Rejetés"
           [value]="kpis()?.rejetes ?? null"
-          icon="alert-triangle"
+          icon="x-circle"
           [state]="kpiState()"
         />
         <pdref-kpi-card
           label="Total demandes"
           [value]="kpis()?.totalDemandes ?? null"
-          icon="clipboard"
+          icon="file-text"
           [state]="kpiState()"
         />
         <pdref-kpi-card
           label="En cours"
           [value]="kpis()?.enCours ?? null"
-          icon="layout"
+          icon="activity"
           [state]="kpiState()"
         />
         <pdref-kpi-card
           label="Favorables"
           [value]="kpis()?.favorables ?? null"
-          icon="check"
+          icon="check-circle"
           [state]="kpiState()"
         />
         <pdref-kpi-card
           label="Non favorables"
           [value]="kpis()?.nonFavorables ?? null"
-          icon="alert-triangle"
+          icon="alert-circle"
           [state]="kpiState()"
         />
         <pdref-kpi-card
           label="Taux de traitement"
           [value]="formatRate(analytique()?.tauxTraitement ?? null)"
-          icon="layout"
+          icon="bar-chart"
           [state]="analytiqueState()"
         />
         <pdref-kpi-card
-          label="Duree moyenne"
+          label="Durée moyenne"
           [value]="analytique()?.dureeMoyenneJours ?? null"
           unit="j"
           icon="clock"
@@ -224,7 +224,7 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
           <pdref-kpi-card
             label="En retard"
             [value]="kpis()?.enRetard ?? null"
-            icon="clock"
+            icon="alert-triangle"
             [state]="kpiState()"
           />
         </a>
@@ -232,13 +232,13 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
 
       <div class="analytics" aria-label="Graphiques du tableau de bord">
         <section class="pd-card">
-          <h2>Repartition des demandes</h2>
+          <h2>Répartition des demandes</h2>
           <pdref-donut-chart
             [series]="repartitionData()"
-            title="Repartition des demandes"
+            title="Répartition des demandes"
             unit="demandes"
           />
-          <p class="pd-muted">Toutes les demandes de la periode, y compris les rejets.</p>
+          <p class="pd-muted">Toutes les demandes de la période, y compris les rejets.</p>
         </section>
 
         <section class="pd-card gauge-card">
@@ -251,10 +251,10 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
 
         <section class="pd-card wide">
           <div class="head">
-            <h2>Evolution des demandes</h2>
+            <h2>Évolution des demandes</h2>
             <span class="pd-muted">6 derniers mois</span>
           </div>
-          <pdref-line-chart [series]="evolutionData()" title="Evolution des demandes" />
+          <pdref-line-chart [series]="evolutionData()" title="Évolution des demandes" />
         </section>
 
         <section class="pd-card wide">
@@ -314,14 +314,14 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
       </div>
 
       <section class="pd-card">
-        <h2>Qualite des donnees</h2>
+        <h2>Qualité des données</h2>
         @if (qualite(); as quality) {
           <div class="quality">
             <span
               >Sans e-mail <strong>{{ quality.pourcentageSansEmail }} %</strong></span
             >
             <span
-              >Sans telephone <strong>{{ quality.pourcentageSansTelephone }} %</strong></span
+              >Sans téléphone <strong>{{ quality.pourcentageSansTelephone }} %</strong></span
             >
             <span
               >Sans centre <strong>{{ quality.pourcentageSansCentre }} %</strong></span
@@ -331,7 +331,7 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
             >
           </div>
         } @else {
-          <p class="pd-muted">Qualite indisponible.</p>
+          <p class="pd-muted">Qualité indisponible.</p>
         }
       </section>
 
@@ -370,11 +370,11 @@ const LIGHTHOUSE_NOMINATIF: DashboardNominatifPage = {
                       <th>Demande</th>
                       <th>Contribuable</th>
                       <th>NCC</th>
-                      <th>Etat</th>
+                      <th>État</th>
                       <th>Niveau</th>
-                      <th>Delai GUDEF</th>
-                      <th>Delai directions</th>
-                      <th>Delai autorisation</th>
+                      <th>Délai GUDEF</th>
+                      <th>Délai directions</th>
+                      <th>Délai autorisation</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -584,7 +584,7 @@ export class DashboardHomeComponent implements OnDestroy {
     { value: '30j', label: '30 jours' },
     { value: '3m', label: '3 mois' },
     { value: '6m', label: '6 mois' },
-    { value: 'annee', label: 'Annee' },
+    { value: 'annee', label: 'Année' },
     { value: 'tout', label: 'Tout' },
   ];
   readonly filters = { periode: '30j', statut: '' };
@@ -607,7 +607,7 @@ export class DashboardHomeComponent implements OnDestroy {
           { label: 'En cours', value: kpis.enCours },
           { label: 'Favorables', value: kpis.favorables },
           { label: 'Non favorables', value: kpis.nonFavorables },
-          { label: 'Rejetes', value: kpis.rejetes },
+          { label: 'Rejetés', value: kpis.rejetes },
         ]
       : [];
   });

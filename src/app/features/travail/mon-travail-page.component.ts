@@ -8,6 +8,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
+import { etapeLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-mon-travail-page',
@@ -20,7 +21,7 @@ import { normalizeProblem } from '../../core/utils/problem';
       subtitle="Dossiers qui attendent une action de votre part."
     />
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de votre travail" />
     } @else {
@@ -28,11 +29,11 @@ import { normalizeProblem } from '../../core/utils/problem';
         <table class="pd-table">
           <thead>
             <tr>
-              <th>Numero</th>
+              <th>Numéro</th>
               <th>Contribuable</th>
-              <th>Etape</th>
+              <th>Étape</th>
               <th>Prochaine action</th>
-              <th>Date depot</th>
+              <th>Date dépôt</th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +45,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                   }}</a>
                 </td>
                 <td>{{ item.contribuable.raisonSociale }}</td>
-                <td>{{ item.etapeCourante || item.statut }}</td>
+                <td>{{ etapeLabel(item.etapeCourante, item.statut) }}</td>
                 <td>{{ nextAction(item) }}</td>
                 <td>{{ item.dateDepot | date: 'dd/MM/yyyy' }}</td>
               </tr>
@@ -60,6 +61,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   `,
 })
 export class MonTravailPageComponent implements OnInit {
+  readonly etapeLabel = etapeLabel;
   private readonly gateway = inject(SuivisGateway);
   readonly items = signal<SuiviDossier[]>([]);
   readonly loading = signal(true);

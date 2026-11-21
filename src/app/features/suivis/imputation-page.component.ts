@@ -21,11 +21,11 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header
       title="Imputation GUDEF"
-      subtitle="Distribution et suivi des dossiers de verification."
+      subtitle="Distribution et suivi des dossiers de vérification."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       @if (notice()) {
         <p class="pd-card notice" role="status">{{ notice() }}</p>
@@ -74,7 +74,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               [disabled]="!agentId() || busy()"
               (click)="assign()"
             >
-              Attribuer / Reattribuer
+              Attribuer / Réattribuer
             </button>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="selected.set(null)">
               Annuler
@@ -107,7 +107,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 <tr>
                   <th>Demande</th>
                   <th>Contribuable</th>
-                  <th>Echeance</th>
+                  <th>Échéance</th>
                   <th>Agent</th>
                   <th>Instruction</th>
                   <th></th>

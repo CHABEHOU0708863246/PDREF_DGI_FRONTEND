@@ -120,3 +120,141 @@
     }
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Menu d'actions de ligne (pdref-row-actions)                          */
+/* Un seul bouton par ligne ; les actions s'affichent en liste verticale. */
+/* ------------------------------------------------------------------ */
+pdref-row-actions {
+  display: inline-block;
+}
+
+.pd-row-actions__trigger {
+  display: inline-grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+/* Le clic doit toujours viser le bouton lui-meme, jamais le SVG de l'icone. */
+.pd-row-actions__trigger pdref-icon,
+.pd-row-actions__trigger svg {
+  pointer-events: none;
+}
+
+.pd-row-actions__trigger:hover,
+.pd-row-actions__trigger[aria-expanded='true'] {
+  border-color: var(--color-border);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.pd-row-actions__trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.pd-row-actions__menu {
+  position: fixed;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  min-width: 13rem;
+  max-width: 20rem;
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  box-shadow: var(--elevation-3);
+  text-align: left;
+  white-space: normal;
+}
+
+.pd-row-actions__menu[hidden] {
+  display: none;
+}
+
+.pd-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  text-decoration: none;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.pd-menu-item:hover,
+.pd-menu-item:focus-visible {
+  outline: none;
+  background: var(--color-surface-muted);
+}
+
+.pd-menu-item:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.pd-menu-item pdref-icon {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+.pd-menu-item--danger,
+.pd-menu-item--danger pdref-icon {
+  color: var(--color-error-text);
+}
+
+.pd-menu-separator {
+  height: var(--border-width);
+  margin: var(--space-1) 0;
+  background: var(--color-border);
+}
+
+/* Colonne d'actions : etroite, alignee a droite, toujours visible.
+   Largeur explicite (et non 1 %) pour rester correcte avec table-layout: fixed. */
+.content td.pd-col-actions,
+.content th.pd-col-actions {
+  width: calc(var(--control-height) + var(--space-3) * 2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Un numero de dossier ou de courrier ne se coupe jamais en deux lignes. */
+.content td > a.pd-link,
+.content td > a.pd-row-link {
+  white-space: nowrap;
+}
+
+/* Lien principal d'une ligne (numero, raison sociale) : ouvre la fiche. */
+.pd-row-link {
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.pd-row-link:hover {
+  text-decoration: underline;
+}
+
+/* Colonne contenant une seule action principale (bouton texte) plutot qu'un menu. */
+.content td.pd-col-actions--wide,
+.content th.pd-col-actions--wide {
+  width: auto;
+}

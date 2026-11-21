@@ -86,6 +86,49 @@
   padding-right: var(--space-1);
 }
 
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nav__group + .nav__group {
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.nav__group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.nav__group-title:hover {
+  color: var(--color-text);
+}
+
+.nav__group-title pdref-icon {
+  transition: transform var(--motion-base) var(--ease-out);
+}
+
+.nav__group--closed .nav__group-title pdref-icon {
+  transform: rotate(-90deg);
+}
+
 .nav ul {
   display: flex;
   flex-direction: column;
@@ -96,20 +139,40 @@
 }
 
 .nav a {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
   text-decoration: none;
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
 }
 
-.nav a:hover,
+.nav a pdref-icon {
+  flex: 0 0 auto;
+}
+
+.nav a:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
 .nav a.is-active {
   background: var(--color-surface-muted);
   color: var(--color-primary);
+}
+
+.nav a.is-active::before {
+  position: absolute;
+  inset: var(--space-2) auto var(--space-2) 0;
+  width: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  content: '';
 }
 
 .shell__foot {
@@ -215,6 +278,16 @@
 
 .shell--collapsed .nav a {
   justify-content: center;
+}
+
+/* Barre repliee : seules les icones restent, les titres de groupe deviennent de simples separateurs. */
+.shell--collapsed .nav__group-title {
+  display: none;
+}
+
+.shell--collapsed .nav {
+  padding-right: 0;
+  scrollbar-width: none;
 }
 
 @include bp.down(sm) {

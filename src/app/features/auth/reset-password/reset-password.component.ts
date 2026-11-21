@@ -30,7 +30,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   template: `
     <pdref-auth-layout
       eyebrow="Nouveau mot de passe"
-      title="Reinitialiser l'acces"
+      title="Réinitialiser l'accès"
       subtitle="Le lien est a usage unique et expire rapidement. Choisissez un mot de passe d'au moins 12 caracteres."
     >
       <form class="pd-card auth-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>

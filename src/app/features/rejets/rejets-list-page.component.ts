@@ -12,6 +12,8 @@ import { RejetGateway } from '../../core/services/rejets/rejet.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 import { REJET_FAMILLES, REJET_STATUTS, rejetFamilleLabel, rejetStatutLabel } from './rejet-status';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
 
 const LIGHTHOUSE_MOTIFS: RejetMotif[] = [
   {
@@ -98,16 +100,18 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
     AbidjanDatePipe,
     ConfirmDialogComponent,
     ConfirmDialogWithInputComponent,
+    IconComponent,
+    RowActionsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
       title="Rejets"
-      subtitle="Rejets agent, reprises de cycle et abandons definitifs."
+      subtitle="Rejets agent, reprises de cycle et abandons définitifs."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="stats" aria-label="Compteurs des rejets">
         <div class="pd-card stat">
@@ -115,18 +119,18 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
           <strong>{{ page().enAttenteCorrectionCount }}</strong>
         </div>
         <div class="pd-card stat">
-          <span class="pd-label">Corriges</span>
+          <span class="pd-label">Corrigés</span>
           <strong>{{ page().corrigeCount }}</strong>
         </div>
         <div class="pd-card stat">
-          <span class="pd-label">Abandonnes</span>
+          <span class="pd-label">Abandonnés</span>
           <strong>{{ page().abandonneCount }}</strong>
         </div>
       </section>
 
       <section class="pd-card">
         <div class="head">
-          <h2>Dossiers rejetes</h2>
+          <h2>Dossiers rejetés</h2>
           <span class="pd-muted">{{ page().totalCount }} dossier(s)</span>
         </div>
         <form class="filters" (submit)="$event.preventDefault(); load()">
@@ -137,7 +141,7 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
               name="search"
               [value]="filters.search"
               (input)="onSearch($event)"
-              placeholder="Numero de demande, motif"
+              placeholder="Numéro de demande, motif"
             />
           </label>
           <label class="pd-field">
@@ -204,7 +208,7 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
                   <th>Motif</th>
                   <th>Statut</th>
                   <th>Date</th>
-                  <th></th>
+                  <th class="pd-col-actions"><span class="pd-visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -225,25 +229,37 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
                       }
                     </td>
                     <td>{{ item.dateCreation | abidjanDate }}</td>
-                    <td class="actions">
-                      @if (canReprendre() && isActionable(item)) {
-                        <button
-                          type="button"
-                          class="pd-btn pd-btn--primary pd-btn--sm"
-                          (click)="askReprendre(item)"
+                    <td class="pd-col-actions">
+                      <pdref-row-actions [label]="'Actions pour le rejet ' + item.numeroDemande">
+                        <a
+                          class="pd-menu-item"
+                          role="menuitem"
+                          [routerLink]="['/dashboard/rejets', item.id]"
                         >
-                          Reprendre
-                        </button>
-                      }
-                      @if (canAbandonner() && isActionable(item)) {
-                        <button
-                          type="button"
-                          class="pd-btn pd-btn--danger pd-btn--sm"
-                          (click)="askAbandon(item)"
-                        >
-                          Abandonner
-                        </button>
-                      }
+                          <pdref-icon name="eye" size="sm" />Ouvrir le rejet
+                        </a>
+                        @if (canReprendre() && isActionable(item)) {
+                          <button
+                            type="button"
+                            class="pd-menu-item"
+                            role="menuitem"
+                            (click)="askReprendre(item)"
+                          >
+                            <pdref-icon name="rotate-ccw" size="sm" />Reprendre le dossier
+                          </button>
+                        }
+                        @if (canAbandonner() && isActionable(item)) {
+                          <div class="pd-menu-separator" role="separator"></div>
+                          <button
+                            type="button"
+                            class="pd-menu-item pd-menu-item--danger"
+                            role="menuitem"
+                            (click)="askAbandon(item)"
+                          >
+                            <pdref-icon name="x-circle" size="sm" />Abandonner le dossier
+                          </button>
+                        }
+                      </pdref-row-actions>
                     </td>
                   </tr>
                 }

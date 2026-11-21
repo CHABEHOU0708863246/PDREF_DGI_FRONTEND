@@ -11,7 +11,7 @@
     state="error"
     [title]="issue.title"
     [message]="issue.detail ?? 'Impossible de charger le dossier.'"
-    actionLabel="Reessayer"
+    actionLabel="Réessayer"
     (retry)="load()"
   />
 } @else if (dossier(); as item) {
@@ -22,14 +22,14 @@
   }
 
   <section class="espace-card pd-card" aria-labelledby="dossier-synthese">
-    <h2 id="dossier-synthese">Synthese</h2>
+    <h2 id="dossier-synthese">Synthèse</h2>
     <dl class="espace-facts">
       <dt>Statut</dt>
-      <dd>{{ item.statut }}</dd>
-      <dt>Date de depot</dt>
+      <dd>{{ demandeStatutLabel(item.statut) }}</dd>
+      <dt>Date de dépôt</dt>
       <dd>{{ item.dateDepot ? (item.dateDepot | date: 'dd/MM/yyyy HH:mm') : '-' }}</dd>
-      <dt>Decision</dt>
-      <dd>{{ item.decision ?? '-' }}</dd>
+      <dt>Décision</dt>
+      <dd>{{ decisionLabel(item.decision) }}</dd>
       @if (item.motifRejet) {
         <dt>Motif de rejet</dt>
         <dd>{{ item.motifRejet }}</dd>
@@ -38,22 +38,21 @@
 
     @if (item.courrierDisponible) {
       <button class="pd-btn pd-btn--primary" type="button" [disabled]="busy()" (click)="download()">
-        Telecharger le courrier de reponse
+        Télécharger le courrier de réponse
       </button>
     }
   </section>
 
-
   <section class="espace-card pd-card" aria-labelledby="dossier-depots-rectifies">
-    <h2 id="dossier-depots-rectifies">Depots rectifies</h2>
+    <h2 id="dossier-depots-rectifies">Dépôts rectifiés</h2>
     @if (depots().length === 0) {
-      <p class="pd-help">Aucun depot rectifie pour ce dossier.</p>
+      <p class="pd-help">Aucun dépôt rectifié pour ce dossier.</p>
     } @else {
       <ul>
         @for (depot of depots(); track depot.id) {
           <li>
             Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | date: 'dd/MM/yyyy HH:mm' }} -
-            <strong>{{ depot.statut }}</strong>
+            <strong>{{ depotRectifieStatutLabel(depot.statut) }}</strong>
             @if (depot.motifCode) {
               <span> - motif : {{ depot.motifCode }}</span>
             }
@@ -66,7 +65,7 @@
       <p class="pd-error" role="alert">{{ rectifiedError() }}</p>
     }
     <label class="pd-field">
-      <span class="pd-label">Nouveau depot rectifie (PDF, JPEG ou PNG)</span>
+      <span class="pd-label">Nouveau dépôt rectifie (PDF, JPEG ou PNG)</span>
       <input
         class="pd-input"
         type="file"
@@ -76,8 +75,8 @@
       />
     </label>
     <p class="pd-help">
-      {{ rectifiedFiles().length }} fichier(s) selectionne(s), maximum 2 Mo par fichier et 5 Mo
-      au total. Le delai de 15 jours ouvrables part de l autorisation et n est pas prolonge.
+      {{ rectifiedFiles().length }} fichier(s) selectionne(s), maximum 2 Mo par fichier et 5 Mo au
+      total. Le delai de 15 jours ouvrables part de l autorisation et n est pas prolonge.
     </p>
     <button
       class="pd-btn pd-btn--primary"
@@ -85,13 +84,13 @@
       [disabled]="rectifiedBusy() || rectifiedFiles().length === 0"
       (click)="sendRectified()"
     >
-      Transmettre le depot rectifie
+      Transmettre le dépôt rectifie
     </button>
   </section>
 
   @if (pieces(); as depot) {
     <section class="espace-card pd-card pieces" aria-labelledby="dossier-pieces">
-      <h2 id="dossier-pieces">Pieces demandees</h2>
+      <h2 id="dossier-pieces">Pièces demandees</h2>
       <p class="pd-help">Motif : {{ depot.motifLibelle }}</p>
 
       @for (envoi of depot.envois; track envoi.id) {
@@ -115,7 +114,7 @@
           <p class="pd-error" role="alert">{{ piecesError() }}</p>
         }
         <label class="pd-field">
-          <span class="pd-label">Pieces (PDF, JPEG ou PNG)</span>
+          <span class="pd-label">Pièces (PDF, JPEG ou PNG)</span>
           <input
             class="pd-input"
             type="file"
@@ -144,7 +143,7 @@
           [disabled]="busy() || selectedFiles().length === 0"
           (click)="sendPieces()"
         >
-          Envoyer les pieces
+          Envoyer les pièces
         </button>
       }
     </section>

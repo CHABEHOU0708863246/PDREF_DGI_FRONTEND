@@ -159,8 +159,8 @@ test.describe('courriers', () => {
   test('cree un courrier depuis le formulaire', async ({ page }) => {
     await mockApi(page);
     await page.goto('/dashboard/courriers/nouveau');
-    await page.getByLabel('Numero *').fill('C-002');
-    await page.getByLabel('Expediteur *').fill('DGI');
+    await page.getByLabel('Numéro *').fill('C-002');
+    await page.getByLabel('Expéditeur *').fill('DGI');
     await page.getByLabel('Objet *').fill('Nouveau courrier');
     await page.getByRole('button', { name: 'Enregistrer' }).click();
     await expect(page.getByRole('heading', { name: 'Fiche courrier' })).toBeVisible();

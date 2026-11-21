@@ -20,7 +20,7 @@ import { ProblemStore } from '../../core/services/errors/problem.store';
         title="Traitement interrompu"
         message="Reessayez ou revenez au tableau de bord."
         [problem]="problem()"
-        actionLabel="Reessayer"
+        actionLabel="Réessayer"
         (retry)="retry()"
       />
     </main>

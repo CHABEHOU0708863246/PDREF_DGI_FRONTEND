@@ -18,6 +18,8 @@ import { IntegrationGateway } from '../../core/services/integrations/integration
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
 import { CTF_STATUTS, ctfStatutLabel } from './ctf-status';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
 
 const LIGHTHOUSE_ITEMS: CtfListItem[] = [
   {
@@ -41,7 +43,14 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
 @Component({
   selector: 'pdref-ctf-suivi-page',
   standalone: true,
-  imports: [RouterLink, PageHeaderComponent, StatePanelComponent, AbidjanDatePipe],
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    StatePanelComponent,
+    AbidjanDatePipe,
+    IconComponent,
+    RowActionsComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
@@ -50,7 +59,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card">
         <div class="head">
@@ -65,7 +74,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
               name="search"
               [value]="filters.search"
               (input)="onSearch($event)"
-              placeholder="Numero, NCC ou raison sociale"
+              placeholder="Numéro, NCC ou raison sociale"
             />
           </label>
           <label class="pd-field">
@@ -106,10 +115,10 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                   <th>Demande</th>
                   <th>Contribuable</th>
                   <th>Cycle</th>
-                  <th>Echeance depot</th>
+                  <th>Échéance dépôt</th>
                   <th>Statut</th>
                   <th>Motif</th>
-                  <th></th>
+                  <th class="pd-col-actions"><span class="pd-visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -133,39 +142,55 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
                       <span class="pd-chip">{{ statutLabel(item.statut) }}</span>
                     </td>
                     <td>{{ item.motifCloture || '-' }}</td>
-                    <td class="actions">
-                      @if (canActiver() && item.statut === 'A_ACTIVER') {
-                        @if (manualEImpots()) {
-                          <a
-                            class="pd-btn pd-btn--ghost pd-btn--sm"
-                            [routerLink]="['/dashboard/ctf', item.demandeId]"
-                          >
-                            Enregistrer
-                          </a>
-                        } @else {
+                    <td class="pd-col-actions">
+                      <pdref-row-actions [label]="'Actions pour la demande ' + item.numeroDemande">
+                        <a
+                          class="pd-menu-item"
+                          role="menuitem"
+                          [routerLink]="['/dashboard/ctf', item.demandeId]"
+                        >
+                          <pdref-icon name="eye" size="sm" />Ouvrir l'autorisation
+                        </a>
+                        @if (canActiver() && item.statut === 'A_ACTIVER') {
+                          @if (manualEImpots()) {
+                            <a
+                              class="pd-menu-item"
+                              role="menuitem"
+                              [routerLink]="['/dashboard/ctf', item.demandeId]"
+                            >
+                              <pdref-icon name="key" size="sm" />Enregistrer l'autorisation
+                            </a>
+                          } @else {
+                            <button
+                              type="button"
+                              class="pd-menu-item"
+                              role="menuitem"
+                              [disabled]="isActivating(item.id)"
+                              (click)="activer(item)"
+                            >
+                              <pdref-icon name="key" size="sm" />{{
+                                isActivating(item.id) ? 'Activation...' : 'Activer'
+                              }}
+                            </button>
+                          }
+                        }
+                        @if (
+                          canRetour() &&
+                          (item.statut === 'ACTIVEE' || item.statut === 'CONTRIBUABLE_INFORME')
+                        ) {
                           <button
                             type="button"
-                            class="pd-btn pd-btn--primary pd-btn--sm"
-                            [disabled]="isActivating(item.id)"
-                            (click)="activer(item)"
+                            class="pd-menu-item"
+                            role="menuitem"
+                            [disabled]="isReturning(item.id)"
+                            (click)="retour(item)"
                           >
-                            {{ isActivating(item.id) ? 'Activation...' : 'Activer' }}
+                            <pdref-icon name="rotate-ccw" size="sm" />{{
+                              isReturning(item.id) ? 'Retour...' : 'Retour au GUDEF'
+                            }}
                           </button>
                         }
-                      }
-                      @if (
-                        canRetour() &&
-                        (item.statut === 'ACTIVEE' || item.statut === 'CONTRIBUABLE_INFORME')
-                      ) {
-                        <button
-                          type="button"
-                          class="pd-btn pd-btn--ghost pd-btn--sm"
-                          [disabled]="isReturning(item.id)"
-                          (click)="retour(item)"
-                        >
-                          {{ isReturning(item.id) ? 'Retour...' : 'Retour GUDEF' }}
-                        </button>
-                      }
+                      </pdref-row-actions>
                     </td>
                   </tr>
                 }

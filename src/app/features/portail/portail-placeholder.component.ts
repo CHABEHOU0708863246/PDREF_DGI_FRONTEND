@@ -12,7 +12,7 @@ import { StatePanelComponent } from '../../core/components/state-panel/state-pan
     <main class="pd-container pd-page">
       <pdref-page-header
         title="Espace contribuable"
-        subtitle="Le parcours de depot electronique sera disponible prochainement."
+        subtitle="Le parcours de dépôt electronique sera disponible prochainement."
       />
       <pdref-state-panel
         state="empty"

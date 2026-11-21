@@ -25,7 +25,7 @@ import { normalizeProblem } from '../../core/utils/problem';
         <pdref-state-panel
           state="error"
           [problem]="issue"
-          actionLabel="Reessayer"
+          actionLabel="Réessayer"
           (retry)="load()"
         />
       } @else if (loading()) {
@@ -39,7 +39,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dd>{{ contribuable.ncc }}</dd>
               <dt>Raison sociale</dt>
               <dd>{{ contribuable.raisonSociale }}</dd>
-              <dt>Systeme comptable</dt>
+              <dt>Système comptable</dt>
               <dd>{{ contribuable.systemeComptable }}</dd>
               <dt>Secteur</dt>
               <dd>{{ contribuable.secteur || '-' }}</dd>
@@ -54,7 +54,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <dl>
               <dt>Email</dt>
               <dd>{{ contribuable.email || contribuable.emailMasque || '-' }}</dd>
-              <dt>Telephone</dt>
+              <dt>Téléphone</dt>
               <dd>{{ contribuable.telephone || contribuable.telephoneMasque || '-' }}</dd>
             </dl>
             @if (canReveal() && (!contribuable.email || !contribuable.telephone)) {
@@ -81,11 +81,11 @@ import { normalizeProblem } from '../../core/utils/problem';
             </dl>
           </article>
           <article class="pd-card">
-            <h2>Qualite</h2>
+            <h2>Qualité</h2>
             <dl>
               <dt>Email</dt>
               <dd>{{ contribuable.emailManquant ? 'Manquant' : 'Renseigne' }}</dd>
-              <dt>Telephone</dt>
+              <dt>Téléphone</dt>
               <dd>{{ contribuable.telephoneManquant ? 'Manquant' : 'Renseigne' }}</dd>
               <dt>NCC hors format</dt>
               <dd>{{ contribuable.nccHorsFormat ? 'Oui' : 'Non' }}</dd>

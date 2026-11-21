@@ -15,6 +15,11 @@ import { RejetPiecesGateway } from '../../core/services/rejets/rejet-pieces.gate
 import { DepotRectifieGateway } from '../../core/services/ctf/depot-rectifie.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import {
+  demandeStatutLabel,
+  decisionLabel,
+  depotRectifieStatutLabel,
+} from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-espace-dossier-page',
@@ -25,6 +30,9 @@ import { normalizeProblem } from '../../core/utils/problem';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EspaceDossierPageComponent implements OnInit {
+  readonly demandeStatutLabel = demandeStatutLabel;
+  readonly decisionLabel = decisionLabel;
+  readonly depotRectifieStatutLabel = depotRectifieStatutLabel;
   private readonly gateway = inject(AdhesionGateway);
   private readonly rejetPieces = inject(RejetPiecesGateway);
   private readonly depotsRectifies = inject(DepotRectifieGateway);

@@ -17,7 +17,7 @@ import { StatePanelComponent } from '../../core/components/state-panel/state-pan
       <pdref-state-panel
         state="empty"
         title="Rien a afficher ici"
-        message="Verifiez l'adresse ou revenez au tableau de bord."
+        message="Vérifiez l'adresse ou revenez au tableau de bord."
       />
       <a class="pd-btn pd-btn--primary" routerLink="/dashboard">Retour au tableau de bord</a>
     </main>

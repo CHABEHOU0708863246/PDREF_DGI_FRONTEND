@@ -19,6 +19,14 @@ import { CorrelationService } from '../../core/services/correlation/correlation.
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import {
+  avisStatutLabel,
+  circuitStatutLabel,
+  decisionLabel,
+  demandeStatutLabel,
+  etapeLabel,
+  etapeStatutLabel,
+} from '../../core/utils/labels';
 
 const LIGHTHOUSE_DETAIL: DemandeDetail = {
   id: 'lh-demande-1',
@@ -185,7 +193,7 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
         <div class="detail-actions">
           @if (canVerify()) {
             <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
-              Verifier GUDEF
+              Vérifier GUDEF
             </button>
           }
           @if (canReject()) {
@@ -240,7 +248,8 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
                 ><strong>{{ demande.numero || 'Brouillon' }}</strong>
               </div>
               <div>
-                <span class="pd-label">Statut</span><strong>{{ demande.statut }}</strong>
+                <span class="pd-label">Statut</span
+                ><strong>{{ demandeStatutLabel(demande.statut) }}</strong>
                 @if (demande.pdfManquant) {
                   <span class="pd-chip pd-chip--danger">PDF a joindre</span>
                 }
@@ -337,9 +346,12 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
             <section class="pd-card">
               @if (demande.circuit; as circuit) {
                 <p>
-                  <strong>{{ circuit.code }}</strong> v{{ circuit.version }} — {{ circuit.statut }}
+                  Circuit : <strong>{{ circuitStatutLabel(circuit.statut) }}</strong
+                  >&nbsp;<span class="pd-muted"
+                    >({{ circuit.code }}, version {{ circuit.version }})</span
+                  >
                 </p>
-                <p>Étape courante : {{ circuit.etapeCourante || '-' }}</p>
+                <p>Étape courante : {{ etapeLabel(circuit.etapeCourante) }}</p>
                 <div class="table-wrap">
                   <table class="pd-table">
                     <thead>
@@ -352,8 +364,8 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
                     <tbody>
                       @for (step of circuitEntries(demande); track step[0]) {
                         <tr>
-                          <td>{{ step[0] }}</td>
-                          <td>{{ step[1].statut }}</td>
+                          <td>{{ etapeLabel(step[0]) }}</td>
+                          <td>{{ etapeStatutLabel(step[1].statut) }}</td>
                           <td>{{ step[1].echeance | abidjanDate }}</td>
                         </tr>
                       }
@@ -370,9 +382,9 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
                   <div class="avis-grid">
                     @for (avis of dossier.avis; track avis.id) {
                       <article class="avis-card">
-                        <strong>{{ avis.etapeCode }}</strong>
-                        <span class="pd-chip">{{ avis.statut }}</span>
-                        <span>{{ avis.decision || 'En attente' }}</span>
+                        <strong>{{ etapeLabel(avis.etapeCode) }}</strong>
+                        <span class="pd-chip">{{ avisStatutLabel(avis.statut) }}</span>
+                        <span>{{ decisionLabel(avis.decision, 'Décision en attente') }}</span>
                         <span class="pd-muted">{{ avis.directionCode }}</span>
                       </article>
                     }
@@ -441,6 +453,12 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
   styleUrl: './demandes-page.component.scss',
 })
 export class DemandeDetailPageComponent {
+  readonly demandeStatutLabel = demandeStatutLabel;
+  readonly etapeLabel = etapeLabel;
+  readonly etapeStatutLabel = etapeStatutLabel;
+  readonly avisStatutLabel = avisStatutLabel;
+  readonly circuitStatutLabel = circuitStatutLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(DemandesGateway);
   private readonly suivisGateway = inject(SuivisGateway);
   private readonly rejets = inject(RejetGateway);

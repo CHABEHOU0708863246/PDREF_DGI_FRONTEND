@@ -18,7 +18,7 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
     <pdref-auth-layout
       eyebrow="Premiere connexion"
       title="Activer la double authentification"
-      subtitle="Scannez le code QR avec votre application d'authentification, puis saisissez le premier code genere."
+      subtitle="Scannez le code QR avec votre application d'authentification, puis saisissez le premier code généré."
     >
       <section class="pd-card auth-card mfa-card" aria-live="polite">
         @if (error(); as problem) {

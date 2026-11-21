@@ -193,6 +193,129 @@ import type { IconName } from '../../models/common/icon.model';
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21a8 8 0 0 1 16 0" />
         }
+        @case ('more-vertical') {
+          <circle cx="12" cy="5" r="1" />
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="12" cy="19" r="1" />
+        }
+        @case ('inbox') {
+          <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+          <path
+            d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z"
+          />
+        }
+        @case ('pen-tool') {
+          <path d="M12 19l7-7 3 3-7 7-3-3Z" />
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z" />
+          <path d="M2 2l7.6 7.6" />
+          <circle cx="11" cy="11" r="2" />
+        }
+        @case ('file-text') {
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+          <path d="M14 2v6h6" />
+          <path d="M16 13H8M16 17H8M10 9H8" />
+        }
+        @case ('activity') {
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        }
+        @case ('x-circle') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="m15 9-6 6M9 9l6 6" />
+        }
+        @case ('key') {
+          <circle cx="7.5" cy="15.5" r="4.5" />
+          <path d="m10.7 12.3 9.8-9.8" />
+          <path d="m16 7 3 3" />
+          <path d="m19 4 2 2" />
+        }
+        @case ('users') {
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.9" />
+          <path d="M16 3.1a4 4 0 0 1 0 7.8" />
+        }
+        @case ('building') {
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <path d="M9 22v-4h6v4" />
+          <path
+            d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"
+          />
+        }
+        @case ('sliders') {
+          <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3" />
+          <path d="M1 14h6M9 8h6M17 16h6" />
+        }
+        @case ('list') {
+          <path d="M8 6h13M8 12h13M8 18h13" />
+          <path d="M3 6h.01M3 12h.01M3 18h.01" />
+        }
+        @case ('git-branch') {
+          <path d="M6 3v12" />
+          <circle cx="18" cy="6" r="3" />
+          <circle cx="6" cy="18" r="3" />
+          <path d="M18 9a9 9 0 0 1-9 9" />
+        }
+        @case ('folder') {
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+        }
+        @case ('bar-chart') {
+          <path d="M3 3v18h18" />
+          <path d="M8 17v-5M13 17V8M18 17v-9" />
+        }
+        @case ('shield-check') {
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+          <path d="m9 12 2 2 4-4" />
+        }
+        @case ('user-plus') {
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M19 8v6M22 11h-6" />
+        }
+        @case ('help-circle') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+          <path d="M12 17h.01" />
+        }
+        @case ('globe') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18" />
+          <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z" />
+        }
+        @case ('palette') {
+          <path
+            d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-1.8a1.7 1.7 0 0 0-1.2 2.9 1.7 1.7 0 0 1-1.2 2.9Z"
+          />
+          <circle cx="7.5" cy="10.5" r="1" />
+          <circle cx="11" cy="7" r="1" />
+          <circle cx="16" cy="8" r="1" />
+        }
+        @case ('briefcase') {
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+          <path d="M2 13h20" />
+        }
+        @case ('send') {
+          <path d="m22 2-7 20-4-9-9-4Z" />
+          <path d="M22 2 11 13" />
+        }
+        @case ('archive') {
+          <rect x="2" y="3" width="20" height="5" rx="1" />
+          <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+          <path d="M10 12h4" />
+        }
+        @case ('check-circle') {
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 3 3 5-6" />
+        }
+        @case ('rotate-ccw') {
+          <path d="M3 12a9 9 0 1 0 3-6.7" />
+          <path d="M3 3v6h6" />
+        }
+        @case ('stamp') {
+          <path d="M5 22h14" />
+          <path d="M19.3 14.3A2.4 2.4 0 0 0 17.6 13H6.4a2.4 2.4 0 0 0-1.7 1.3L4 18h16Z" />
+          <path d="M9 13V9.5a3 3 0 1 1 6 0V13" />
+        }
       }
     </svg>
   `,

@@ -7,6 +7,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
+import { etapeLabel, decisionLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-suivi-correction-page',
@@ -16,24 +17,24 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header
       [title]="'Correction - ' + (item()?.numero || '')"
-      subtitle="Correction append-only d'une decision emise."
+      subtitle="Correction append-only d'une décision emise."
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement des decisions" />
     } @else if (item(); as detail) {
       <section class="pd-card">
         <form class="form" (ngSubmit)="submit()">
           <label class="pd-field">
-            <span class="pd-label">Decision a corriger</span>
+            <span class="pd-label">Décision a corriger</span>
             <select class="pd-input" [(ngModel)]="cible" name="cible" (ngModelChange)="onCible()">
               <option value="">Selectionner</option>
               @for (avis of detail.avis; track avis.id) {
                 @if (avis.statut === 'EMIS') {
                   <option [value]="'AVIS|' + avis.id + '|' + avis.decision">
-                    {{ avis.etapeCode }} - {{ avis.decision }}
+                    {{ etapeLabel(avis.etapeCode) }} - {{ decisionLabel(avis.decision) }}
                   </option>
                 }
               }
@@ -52,20 +53,20 @@ import { normalizeProblem } from '../../core/utils/problem';
             </select>
           </label>
           <label class="pd-field">
-            <span class="pd-label">Nouvelle decision</span>
+            <span class="pd-label">Nouvelle décision</span>
             <select class="pd-input" [(ngModel)]="nouvelleDecision" name="nouvelleDecision">
               <option value="FAVORABLE">Favorable</option>
               <option value="NON_FAVORABLE">Non favorable</option>
             </select>
           </label>
-          <section class="compare" aria-label="Comparaison avant apres">
+          <section class="compare" aria-label="Comparaison avant après">
             <div>
               <span class="pd-label">Avant</span>
               <strong>{{ ancienneDecision() || '-' }}</strong>
               <span class="pd-muted">{{ cibleLabel() || 'Selectionner une decision' }}</span>
             </div>
             <div>
-              <span class="pd-label">Apres</span>
+              <span class="pd-label">Après</span>
               <strong>{{ nouvelleDecision }}</strong>
               <span class="pd-muted">{{ motif || 'Motif a saisir' }}</span>
             </div>
@@ -109,6 +110,8 @@ import { normalizeProblem } from '../../core/utils/problem';
   ],
 })
 export class SuiviCorrectionPageComponent {
+  readonly etapeLabel = etapeLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(SuivisGateway);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

@@ -31,11 +31,11 @@
     </div>
 
     <div class="pd-field">
-      <label class="pd-label" for="audit-result">Resultat</label>
+      <label class="pd-label" for="audit-result">Résultat</label>
       <select id="audit-result" class="pd-input" formControlName="result">
         <option value="">Tous</option>
         <option value="SUCCESS">Succes</option>
-        <option value="FAILURE">Echec</option>
+        <option value="FAILURE">Échec</option>
         <option value="DENIED">Refuse</option>
         <option value="IGNORED">Ignore</option>
       </select>
@@ -63,12 +63,12 @@
 
     <div class="audit-actions">
       <button type="submit" class="pd-btn pd-btn--primary" [disabled]="loading()">Appliquer</button>
-      <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Réinitialiser</button>
       <button type="button" class="pd-btn pd-btn--ghost" (click)="loadChronology()">
         Chronologie du dossier
       </button>
       <button type="button" class="pd-btn pd-btn--ghost" (click)="verifyIntegrity()">
-        Verifier l'integrite
+        Vérifier l'integrite
       </button>
       @if (canExport()) {
         <button
@@ -86,7 +86,7 @@
 
 @if (integrity(); as result) {
   <section class="audit-card pd-card" aria-live="polite">
-    <h2>Integrite de la periode filtree</h2>
+    <h2>Integrite de la période filtree</h2>
     <p>
       {{ result.total }} empreinte(s) controlee(s) : {{ result.valid }} valide(s),
       {{ result.invalid }} invalide(s).
@@ -107,7 +107,7 @@
             <strong>{{ item.eventCode }}</strong>
             <span>{{ item.result }}</span>
             <button type="button" class="pd-btn pd-btn--ghost" (click)="openDetail(item)">
-              Detail
+              Détail
             </button>
           </li>
         }
@@ -147,10 +147,10 @@
           <tr>
             <th scope="col">Date</th>
             <th scope="col">Evenement</th>
-            <th scope="col">Resultat</th>
+            <th scope="col">Résultat</th>
             <th scope="col">Acteur</th>
             <th scope="col">Element vise</th>
-            <th scope="col">Detail</th>
+            <th scope="col">Détail</th>
           </tr>
         </thead>
         <tbody>
@@ -199,7 +199,7 @@
 @if (detail(); as item) {
   <pdref-side-panel
     [open]="true"
-    title="Detail de l'evenement"
+    title="Détail de l'evenement"
     size="lg"
     (closeRequested)="closeDetail()"
   >
@@ -226,13 +226,13 @@
       <dd>{{ item.reason || '-' }}</dd>
     </dl>
 
-    <h3>Avant / apres</h3>
+    <h3>Avant / après</h3>
     @if (changes(item).length === 0) {
       <p class="pd-muted">Aucun changement technique enregistre.</p>
     } @else {
       <table class="audit-table">
         <caption>
-          Changements masques a l'ecriture
+          Changements masqués a l'ecriture
         </caption>
         <thead>
           <tr>

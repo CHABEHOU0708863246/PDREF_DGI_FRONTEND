@@ -41,7 +41,7 @@
       </div>
     }
     <div class="pd-field">
-      <label class="pd-label" for="admin-active">Etat</label>
+      <label class="pd-label" for="admin-active">État</label>
       <select
         id="admin-active"
         class="pd-input"
@@ -55,7 +55,7 @@
     </div>
   </div>
   <div class="pd-actions">
-    <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Reinitialiser</button>
+    <button type="button" class="pd-btn pd-btn--ghost" (click)="reset()">Réinitialiser</button>
     @if (canManage()) {
       <button type="button" class="pd-btn pd-btn--primary" (click)="openCreate()">Ajouter</button>
     }
@@ -66,7 +66,7 @@
   <pdref-state-panel
     state="error"
     [problem]="currentProblem"
-    actionLabel="Reessayer"
+    actionLabel="Réessayer"
     (retry)="load()"
   />
 } @else if (loading()) {
@@ -90,35 +90,43 @@
           @switch (screen) {
             @case ('directions') {
               <th scope="col">Code</th>
-              <th scope="col">Libelle</th>
+              <th scope="col">Libellé</th>
               <th scope="col">Fonction</th>
-              <th scope="col">Etat</th>
+              <th scope="col">État</th>
               <th scope="col">Provenance</th>
-              <th scope="col">Actions</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             }
             @case ('exercices') {
-              <th scope="col">Annee</th>
-              <th scope="col">Libelle</th>
+              <th scope="col">Année</th>
+              <th scope="col">Libellé</th>
               <th scope="col">Ouverture</th>
-              <th scope="col">Cloture</th>
-              <th scope="col">Etat</th>
-              <th scope="col">Actions</th>
+              <th scope="col">Clôture</th>
+              <th scope="col">État</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             }
             @case ('listes-valeurs') {
               <th scope="col">Liste</th>
               <th scope="col">Code</th>
-              <th scope="col">Libelle</th>
+              <th scope="col">Libellé</th>
               <th scope="col">Ordre</th>
-              <th scope="col">Selection</th>
-              <th scope="col">Actions</th>
+              <th scope="col">Sélection</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             }
             @case ('parametres') {
               <th scope="col">Cle</th>
-              <th scope="col">Libelle</th>
+              <th scope="col">Libellé</th>
               <th scope="col">Type</th>
               <th scope="col">Valeur courante</th>
-              <th scope="col">Etat</th>
-              <th scope="col">Actions</th>
+              <th scope="col">État</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             }
             @case ('modeles-notifications') {
               <th scope="col">Code</th>
@@ -126,7 +134,9 @@
               <th scope="col">Langue</th>
               <th scope="col">Sujet</th>
               <th scope="col">Statut</th>
-              <th scope="col">Actions</th>
+              <th scope="col" class="pd-col-actions">
+                <span class="pd-visually-hidden">Actions</span>
+              </th>
             }
           }
         </tr>
@@ -149,22 +159,31 @@
                     <span class="pd-chip pd-chip--warning">Provisoire</span>
                   }
                 </td>
-                <td class="admin-actions">
+                <td class="pd-col-actions">
                   @if (canManage()) {
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="edit(item)"
+                    <pdref-row-actions
+                      [label]="'Actions pour ' + ($any(item).libelle || $any(item).code)"
                     >
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="toggle(item)"
-                    >
-                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
-                    </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        (click)="edit(item)"
+                      >
+                        <pdref-icon name="edit" size="sm" />Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        [class.pd-menu-item--danger]="$any(item).isActive"
+                        (click)="toggle(item)"
+                      >
+                        <pdref-icon name="power" size="sm" />{{
+                          $any(item).isActive ? 'Désactiver' : 'Activer'
+                        }}
+                      </button>
+                    </pdref-row-actions>
                   }
                 </td>
               }
@@ -178,22 +197,31 @@
                     $any(item).isActive ? 'Actif' : 'Inactif'
                   }}</span>
                 </td>
-                <td class="admin-actions">
+                <td class="pd-col-actions">
                   @if (canManage()) {
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="edit(item)"
+                    <pdref-row-actions
+                      [label]="'Actions pour ' + ($any(item).libelle || $any(item).code)"
                     >
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="toggle(item)"
-                    >
-                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
-                    </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        (click)="edit(item)"
+                      >
+                        <pdref-icon name="edit" size="sm" />Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        [class.pd-menu-item--danger]="$any(item).isActive"
+                        (click)="toggle(item)"
+                      >
+                        <pdref-icon name="power" size="sm" />{{
+                          $any(item).isActive ? 'Désactiver' : 'Activer'
+                        }}
+                      </button>
+                    </pdref-row-actions>
                   }
                 </td>
               }
@@ -211,22 +239,31 @@
                     }}</span>
                   }
                 </td>
-                <td class="admin-actions">
+                <td class="pd-col-actions">
                   @if (canManage()) {
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="edit(item)"
+                    <pdref-row-actions
+                      [label]="'Actions pour ' + ($any(item).libelle || $any(item).code)"
                     >
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="toggle(item)"
-                    >
-                      {{ $any(item).isActive ? 'Desactiver' : 'Activer' }}
-                    </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        (click)="edit(item)"
+                      >
+                        <pdref-icon name="edit" size="sm" />Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        [class.pd-menu-item--danger]="$any(item).isActive"
+                        (click)="toggle(item)"
+                      >
+                        <pdref-icon name="power" size="sm" />{{
+                          $any(item).isActive ? 'Désactiver' : 'Activer'
+                        }}
+                      </button>
+                    </pdref-row-actions>
                   }
                 </td>
               }
@@ -242,15 +279,22 @@
                     <span class="pd-chip pd-chip--warning">Provisoire</span>
                   }
                 </td>
-                <td class="admin-actions">
+                <td class="pd-col-actions">
                   @if (canManage()) {
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="edit(item)"
+                    <pdref-row-actions
+                      [label]="
+                        'Actions pour ' + ($any(item).libelle || $any(item).code || $any(item).cle)
+                      "
                     >
-                      Nouvelle version
-                    </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        (click)="edit(item)"
+                      >
+                        <pdref-icon name="plus" size="sm" />Nouvelle version de la valeur
+                      </button>
+                    </pdref-row-actions>
                   }
                 </td>
               }
@@ -260,15 +304,22 @@
                 <td>{{ $any(item).langue }}</td>
                 <td>{{ $any(item).sujet }}</td>
                 <td>{{ $any(item).statut }}</td>
-                <td class="admin-actions">
+                <td class="pd-col-actions">
                   @if (canManage()) {
-                    <button
-                      type="button"
-                      class="pd-btn pd-btn--ghost pd-btn--sm"
-                      (click)="edit(item)"
+                    <pdref-row-actions
+                      [label]="
+                        'Actions pour ' + ($any(item).libelle || $any(item).code || $any(item).cle)
+                      "
                     >
-                      Modifier
-                    </button>
+                      <button
+                        type="button"
+                        class="pd-menu-item"
+                        role="menuitem"
+                        (click)="edit(item)"
+                      >
+                        <pdref-icon name="edit" size="sm" />Modifier
+                      </button>
+                    </pdref-row-actions>
                   }
                 </td>
               }
@@ -288,7 +339,7 @@
         [disabled]="page() === 1"
         (click)="previousPage()"
       >
-        Precedent
+        Précédent
       </button>
       <button
         type="button"
@@ -319,7 +370,7 @@
               ><input class="pd-input" formControlName="code" required
             /></label>
             <label class="pd-field"
-              ><span class="pd-label">Libelle</span
+              ><span class="pd-label">Libellé</span
               ><input class="pd-input" formControlName="libelle" required
             /></label>
             <label class="pd-field"
@@ -349,7 +400,7 @@
               ><input class="pd-input" type="email" formControlName="email"
             /></label>
             <label class="pd-field"
-              ><span class="pd-label">Telephone</span
+              ><span class="pd-label">Téléphone</span
               ><input class="pd-input" formControlName="telephone"
             /></label>
             <label class="pd-field"
@@ -361,11 +412,11 @@
         @case ('exercices') {
           <div class="admin-form__grid">
             <label class="pd-field"
-              ><span class="pd-label">Annee</span
+              ><span class="pd-label">Année</span
               ><input class="pd-input" type="number" formControlName="annee" required
             /></label>
             <label class="pd-field"
-              ><span class="pd-label">Libelle</span
+              ><span class="pd-label">Libellé</span
               ><input class="pd-input" formControlName="libelle" required
             /></label>
             <label class="pd-field"
@@ -373,7 +424,7 @@
               ><input class="pd-input" type="date" formControlName="dateOuverture" required
             /></label>
             <label class="pd-field"
-              ><span class="pd-label">Cloture</span
+              ><span class="pd-label">Clôture</span
               ><input class="pd-input" type="date" formControlName="dateCloture" required
             /></label>
           </div>
@@ -393,7 +444,7 @@
               ><input class="pd-input" formControlName="code" required
             /></label>
             <label class="pd-field"
-              ><span class="pd-label">Libelle</span
+              ><span class="pd-label">Libellé</span
               ><input class="pd-input" formControlName="libelle" required
             /></label>
             <label class="pd-field"

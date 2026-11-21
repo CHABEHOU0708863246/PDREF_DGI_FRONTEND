@@ -9,6 +9,7 @@ import { ThemeToggleComponent } from '../../core/components/theme-toggle/theme-t
 import { PublicSuiviGateway } from '../../core/services/public-suivi/public-suivi.gateway';
 import { isLighthouseEnabled } from '../../core/utils/lighthouse';
 import { normalizeProblem } from '../../core/utils/problem';
+import { demandeStatutLabel, decisionLabel } from '../../core/utils/labels';
 
 const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
   trouve: true,
@@ -97,7 +98,7 @@ const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
           </button>
         </form>
 
-        <section aria-live="polite" aria-label="Resultat du suivi">
+        <section aria-live="polite" aria-label="Résultat du suivi">
           @if (mode() === 'loading') {
             <pdref-state-panel state="loading" title="Recherche du dossier" />
           } @else if (blocked()) {
@@ -110,22 +111,24 @@ const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
             <pdref-state-panel
               state="error"
               [problem]="issue"
-              actionLabel="Reessayer"
+              actionLabel="Réessayer"
               (retry)="submit()"
             />
           } @else if (mode() === 'done' && result(); as data) {
             @if (!data.trouve) {
               <pdref-state-panel state="empty" title="Aucun dossier" [message]="data.message" />
             } @else {
-              <h2>Dossiers trouves</h2>
+              <h2>Dossiers trouvés</h2>
               @for (dossier of data.dossiers; track dossier.numero) {
                 <article class="pd-card dossier">
                   <div class="dossier__head">
                     <h3>{{ dossier.numero }}</h3>
-                    <span class="pd-chip">{{ dossier.statut }}</span>
+                    <span class="pd-chip">{{ demandeStatutLabel(dossier.statut) }}</span>
                   </div>
                   @if (dossier.decisionFinale) {
-                    <p><strong>Decision finale :</strong> {{ dossier.decisionFinale }}</p>
+                    <p>
+                      <strong>Décision finale :</strong> {{ decisionLabel(dossier.decisionFinale) }}
+                    </p>
                   }
                   @if (dossier.motifRejet) {
                     <p><strong>Motif de rejet :</strong> {{ dossier.motifRejet }}</p>
@@ -160,6 +163,8 @@ const LIGHTHOUSE_RESULT: PublicSuiviResponse = {
   styleUrl: './portail-public.component.scss',
 })
 export class PortailPublicComponent {
+  readonly demandeStatutLabel = demandeStatutLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(PublicSuiviGateway);
   readonly ncc = signal('');
   readonly email = signal('');

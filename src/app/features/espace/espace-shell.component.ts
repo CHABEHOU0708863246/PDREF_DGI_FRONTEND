@@ -27,7 +27,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
           >
             Mes dossiers
           </a>
-          <a routerLink="/espace/depots/nouveau" routerLinkActive="is-active"> Nouveau depot </a>
+          <a routerLink="/espace/depots/nouveau" routerLinkActive="is-active"> Nouveau dépôt </a>
         </nav>
         <pdref-local-clock />
         <span class="espace-user">{{ auth.currentUser()?.displayName }}</span>

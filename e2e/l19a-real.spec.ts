@@ -123,7 +123,7 @@ async function rejeterParAgent(page: Page, demandeId: string): Promise<string> {
 async function verifierGudef(page: Page, demandeId: string): Promise<void> {
   await loginAs(page, 'agent.gudef');
   await page.goto(`/dashboard/demandes/${demandeId}`);
-  const button = page.getByRole('button', { name: 'Verifier GUDEF' });
+  const button = page.getByRole('button', { name: 'Vérifier GUDEF' });
   await expect(button).toBeVisible();
   const response = page.waitForResponse(
     (item) => item.url().includes('/verification-gudef') && item.request().method() === 'POST',
@@ -531,7 +531,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const visibleTable = await page.locator('table.audit-table').first().innerText();
     expect(visibleTable).not.toMatch(/[a-f0-9]{24}/);
     await page.getByRole('button', { name: 'Voir' }).first().click();
-    const panel = page.getByRole('dialog', { name: "Detail de l'evenement" });
+    const panel = page.getByRole('dialog', { name: "Détail de l'evenement" });
     await expect(panel).toBeVisible();
     await expect(panel.getByText('Informations techniques')).toHaveCount(0);
     const visibleDetail = await panel.locator('dl.audit-detail').first().innerText();
@@ -669,7 +669,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
     await expect(page.getByRole('heading', { name: 'Courriers a signer' })).toBeVisible();
-    await page.getByRole('link', { name: 'Deposer le PDF signe' }).first().click();
+    await page.getByRole('link', { name: 'Déposer le PDF signe' }).first().click();
     await page.waitForURL(/\/dashboard\/courriers\/[a-f0-9]{24}/);
     const courrierId = new URL(page.url()).pathname.split('/').pop();
     if (!courrierId) {
@@ -677,7 +677,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     }
     const section = page
       .locator('section.pd-card')
-      .filter({ hasText: 'Deposer le courrier signe' });
+      .filter({ hasText: 'Déposer le courrier signe' });
     await section.getByLabel('Signataire declare').fill('Directeur General');
     const signature = page.waitForResponse(
       (item) => item.url().includes('/signature') && item.request().method() === 'POST',
@@ -737,11 +737,11 @@ test.describe('L19a - recette sur la vraie pile', () => {
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: 'Chronologie du dossier' }) });
     await expect(chronology.locator('li').first()).toBeVisible();
-    await chronology.getByRole('button', { name: 'Detail' }).first().click();
-    await expect(page.getByRole('heading', { name: "Detail de l'evenement" })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Avant / apres' })).toBeVisible();
+    await chronology.getByRole('button', { name: 'Détail' }).first().click();
+    await expect(page.getByRole('heading', { name: "Détail de l'evenement" })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Avant / après' })).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog', { name: "Detail de l'evenement" })).toBeHidden();
+    await expect(page.getByRole('dialog', { name: "Détail de l'evenement" })).toBeHidden();
     await page.getByRole('button', { name: "Verifier l'integrite" }).click();
     await expect(page.getByText(/0 invalide/)).toBeVisible();
 
@@ -816,7 +816,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(page.getByRole('heading', { name: 'Rejets' })).toBeVisible();
     const row = page.locator('tr').filter({ hasText: numero }).first();
     await expect(row).toBeVisible();
-    await row.getByRole('button', { name: 'Reprendre' }).click();
+    await row.getByRole('button', { name: /^Actions pour le rejet/ }).click();
+    await row.getByRole('menuitem', { name: 'Reprendre le dossier' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     const reprise = page.waitForResponse(
@@ -937,8 +938,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Filtrer' }).click();
     const row = page.locator('tr').filter({ hasText: matricule }).first();
     await expect(row).toBeVisible();
-    await row.locator('summary').click();
-    await row.getByRole('button', { name: 'Reinitialiser la double authentification' }).click();
+    await row.getByRole('button', { name: /^Actions pour / }).click();
+    await row.getByRole('menuitem', { name: 'Réinitialiser la double authentification' }).click();
     const resetDialog = page.getByRole('dialog');
     await expect(resetDialog).toBeVisible();
     await resetDialog.getByLabel('Motif obligatoire').fill('Telephone perdu');
@@ -953,11 +954,11 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(userPage).toHaveURL(/\/auth\/mfa\/enrollment/, { timeout: 30_000 });
     await enrollNewUser(userPage);
     page.once('dialog', (dialog) => dialog.accept());
-    await row.locator('summary').click();
+    await row.getByRole('button', { name: /^Actions pour / }).click();
     const deactivated = page.waitForResponse(
       (item) => item.url().includes('/deactivate') && item.request().method() === 'POST',
     );
-    await row.getByRole('button', { name: 'Desactiver' }).click();
+    await row.getByRole('menuitem', { name: 'Désactiver le compte' }).click();
     expect((await deactivated).ok()).toBe(true);
 
     await userPage.goto('/dashboard/suivis');
@@ -1005,11 +1006,11 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
-    await page.getByRole('link', { name: 'Deposer le PDF signe' }).first().click();
+    await page.getByRole('link', { name: 'Déposer le PDF signe' }).first().click();
     await page.waitForURL(/\/dashboard\/courriers\/[a-f0-9]{24}/);
     const signatureSection = page
       .locator('section.pd-card')
-      .filter({ hasText: 'Deposer le courrier signe' });
+      .filter({ hasText: 'Déposer le courrier signe' });
     await signatureSection.getByLabel('Signataire declare').fill('Directeur General');
     const signature = page.waitForResponse(
       (item) => item.url().includes('/signature') && item.request().method() === 'POST',
@@ -1033,7 +1034,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByLabel('E-mail', { exact: true }).fill(email);
     await page.getByLabel('Telephone', { exact: true }).fill('+2250700000022');
     await page.getByRole('button', { name: 'Envoyer la demande' }).click();
-    await expect(page.getByText('Verifiez votre boite e-mail')).toBeVisible();
+    await expect(page.getByText('Vérifiez votre boite e-mail')).toBeVisible();
 
     const adhesionLink = await waitForMailpitLink(
       request,
@@ -1041,7 +1042,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
       /http:\/\/localhost:4200\/adhesion\?token=[^"<\s]+/,
     );
     await page.goto(adhesionLink);
-    await expect(page.getByRole('heading', { name: 'Pieces a joindre' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pièces a joindre' })).toBeVisible();
     await page.getByLabel(/Autorisation sign/).setInputFiles({
       name: 'autorisation.pdf',
       mimeType: 'application/pdf',
@@ -1071,7 +1072,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
       .first();
     await expect(adhesionRow).toBeVisible();
     await adhesionRow.click();
-    await expect(page.getByRole('heading', { name: 'Detail de la demande' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Détail de la demande' })).toBeVisible();
     const accept = page.waitForResponse(
       (item) => item.url().includes('/accepter') && item.request().method() === 'POST',
     );
@@ -1113,7 +1114,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await userPage.getByRole('link', { name: numero }).click();
     await expect(userPage.getByRole('heading', { name: `Dossier ${numero}` })).toBeVisible();
     const download = userPage.waitForEvent('download', { timeout: 30_000 });
-    await userPage.getByRole('button', { name: 'Telecharger le courrier de reponse' }).click();
+    await userPage.getByRole('button', { name: 'Télécharger le courrier de réponse' }).click();
     const fichier = await download;
     expect(fichier.suggestedFilename()).toMatch(/courrier.*\.pdf$/i);
     await userPage.goto('/espace/dossiers/0123456789abcdef01234567');
@@ -1150,7 +1151,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(page.getByRole('heading', { name: /Identification et exercices/ })).toBeVisible();
     await page.locator('.depot-choice input').first().check();
     await expect(page).toHaveURL(/\/espace\/depots\/[a-f0-9]{24}/, { timeout: 15_000 });
-    await page.getByRole('button', { name: 'Etape suivante' }).click();
+    await page.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(page.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
     await page.getByLabel('Toute la liasse').first().check();
     await page.waitForTimeout(2500);
@@ -1175,7 +1176,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(resumedPage.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
     await expect(resumedPage.getByLabel('Toute la liasse').first()).toBeChecked();
 
-    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await resumedPage.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Motifs/ })).toBeVisible();
     await expect(resumedPage.locator('.depot-save')).toContainText('Enregistre a', {
       timeout: 20_000,
@@ -1189,9 +1190,9 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await motif.click();
     await savedMotifs;
     await expect(motif).toBeChecked();
-    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await resumedPage.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Variables/ })).toBeVisible();
-    await resumedPage.getByRole('button', { name: 'Etape suivante' }).click();
+    await resumedPage.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(
       resumedPage.getByRole('heading', { name: /Pieces et recapitulatif/ }),
     ).toBeVisible();
@@ -1372,7 +1373,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginWithPassword(page, email, password);
     await page.goto(`/espace/dossiers/${demandeId}`);
-    await expect(page.getByRole('heading', { name: 'Pieces demandees' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pièces demandees' })).toBeVisible();
     const espaceUrl = decodeURIComponent(new URL(page.url()).pathname + new URL(page.url()).search);
     expect(espaceUrl).not.toContain(ncc);
     expect(espaceUrl).not.toContain(email);
@@ -1402,7 +1403,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
         item.url().includes(`/espace/dossiers/${demandeId}/pieces-demandees`) &&
         item.request().method() === 'POST',
     );
-    await page.getByRole('button', { name: 'Envoyer les pieces' }).click();
+    await page.getByRole('button', { name: 'Envoyer les pièces' }).click();
     expect((await envoi).ok()).toBe(true);
     await expect(page.getByText('preuve.pdf')).toBeVisible();
     await logout(page);

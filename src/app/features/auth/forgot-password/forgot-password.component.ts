@@ -17,12 +17,12 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
     <pdref-auth-layout
       eyebrow="Recuperation"
       title="Mot de passe oublie"
-      subtitle="Saisissez votre identifiant. Pour des raisons de securite, la reponse est identique que le compte existe ou non."
+      subtitle="Saisissez votre identifiant. Pour des raisons de sécurité, la réponse est identique que le compte existe ou non."
     >
       <form class="pd-card auth-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         @if (sent()) {
           <p class="auth-message auth-message--success" role="status">
-            Si un compte correspond, un email de reinitialisation a ete envoye. Verifiez votre boite
+            Si un compte correspond, un email de reinitialisation a ete envoye. Vérifiez votre boite
             de reception.
           </p>
         }

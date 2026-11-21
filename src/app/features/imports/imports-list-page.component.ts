@@ -66,7 +66,7 @@ const LIGHTHOUSE_ITEMS: ImportJob[] = [
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card upload">
         <div class="head">
@@ -77,7 +77,7 @@ const LIGHTHOUSE_ITEMS: ImportJob[] = [
             </p>
           </div>
           <button type="button" class="pd-btn pd-btn--ghost" (click)="downloadTemplate()">
-            Telecharger le template
+            Télécharger le template
           </button>
         </div>
         @if (canExecute()) {
@@ -92,10 +92,10 @@ const LIGHTHOUSE_ITEMS: ImportJob[] = [
             (filesSelected)="onFiles($event)"
           />
           @if (uploading()) {
-            <p class="pd-muted" role="status">Import en cours de creation...</p>
+            <p class="pd-muted" role="status">Import en cours de création...</p>
           }
         } @else {
-          <p class="pd-muted">Vous avez uniquement un acces en lecture aux imports.</p>
+          <p class="pd-muted">Vous avez uniquement un accès en lecture aux imports.</p>
         }
       </section>
 

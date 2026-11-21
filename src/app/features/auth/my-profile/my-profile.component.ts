@@ -31,7 +31,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   template: `
     <pdref-auth-layout
       eyebrow="Mon compte"
-      title="Profil et securite"
+      title="Profil et sécurité"
       subtitle="Consultez votre identite, vos roles et vos permissions. Le changement de mot de passe est journalise."
     >
       @if (user(); as current) {
@@ -39,7 +39,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
           <h2 id="identity-title">Identite</h2>
           @if (mustChange()) {
             <p class="auth-message auth-message--info" role="status">
-              Votre mot de passe initial doit etre change avant de continuer.
+              Votre mot de passe initial doit être change avant de continuer.
             </p>
           }
           <dl class="auth-meta">

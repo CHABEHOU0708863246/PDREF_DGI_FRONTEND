@@ -135,7 +135,7 @@ const LIGHTHOUSE_WORKFLOWS: WorkflowDefinition[] = [
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else {
       <section class="pd-card workflows-card">
         <form class="filters" (ngSubmit)="load()">
@@ -212,8 +212,8 @@ const LIGHTHOUSE_WORKFLOWS: WorkflowDefinition[] = [
                   <dd>{{ workflow.createdAt | abidjanDate }}</dd>
                 </dl>
 
-                <h3>Etapes</h3>
-                <div class="table-wrap" tabindex="0" role="region" aria-label="Etapes du workflow">
+                <h3>Étapes</h3>
+                <div class="table-wrap" tabindex="0" role="region" aria-label="Étapes du workflow">
                   <table class="pd-table">
                     <thead>
                       <tr>
@@ -221,7 +221,7 @@ const LIGHTHOUSE_WORKFLOWS: WorkflowDefinition[] = [
                         <th>Code</th>
                         <th>Nom</th>
                         <th>Type</th>
-                        <th>Delai</th>
+                        <th>Délai</th>
                         <th>Roles</th>
                       </tr>
                     </thead>

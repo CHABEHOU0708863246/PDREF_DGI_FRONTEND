@@ -237,8 +237,8 @@ test.describe('suivis', () => {
       await page.setViewportSize(viewport);
       await page.goto('/dashboard/suivis/lh-demande-1/corriger');
       await expect(page.getByRole('heading', { name: /Correction/ })).toBeVisible();
-      await expect(page.getByText('Decision a corriger')).toBeVisible();
-      await expect(page.getByLabel('Comparaison avant apres')).toBeVisible();
+      await expect(page.getByText('Décision a corriger')).toBeVisible();
+      await expect(page.getByLabel('Comparaison avant après')).toBeVisible();
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

@@ -13,7 +13,7 @@ export const DASHBOARD_ROUTES: Routes = [
         path: '',
         loadComponent: () =>
           import('./home/dashboard-home.component').then((module) => module.DashboardHomeComponent),
-        title: 'PDREF - Fondations',
+        title: 'Tableau de bord - PDREF',
       },
       {
         path: 'mon-travail',

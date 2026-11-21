@@ -2,6 +2,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { SidePanelComponent } from '../../core/components/side-panel/side-panel.component';
 import { StatePanelComponent } from '../../core/components/state-panel/state-panel.component';
@@ -33,7 +35,9 @@ type AdminItem =
   imports: [
     SlicePipe,
     ReactiveFormsModule,
+    IconComponent,
     PageHeaderComponent,
+    RowActionsComponent,
     SidePanelComponent,
     StatePanelComponent,
   ],

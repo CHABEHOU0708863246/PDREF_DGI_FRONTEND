@@ -10,6 +10,8 @@ import { CorrelationService } from '../../core/services/correlation/correlation.
 import { FilesGateway } from '../../core/services/files/files.gateway';
 import { UploadProgressService } from '../../core/services/upload/upload-progress.service';
 import { normalizeProblem } from '../../core/utils/problem';
+import { IconComponent } from '../../core/components/icon/icon.component';
+import { RowActionsComponent } from '../../core/components/row-actions/row-actions.component';
 
 @Component({
   selector: 'pdref-files-page',
@@ -20,6 +22,8 @@ import { normalizeProblem } from '../../core/utils/problem';
     UploadFieldComponent,
     UploadProgressComponent,
     SecureDownloadDirective,
+    IconComponent,
+    RowActionsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './files-page.component.html',

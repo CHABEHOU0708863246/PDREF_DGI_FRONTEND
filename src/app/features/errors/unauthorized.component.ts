@@ -11,7 +11,7 @@ import { PageHeaderComponent } from '../../core/components/page-header/page-head
   template: `
     <main class="pd-container pd-page">
       <pdref-page-header
-        title="Acces refuse"
+        title="Accès refuse"
         subtitle="Votre role ou votre perimetre ne permet pas cette action."
       />
       <div class="pd-card unauthorized">

@@ -11,7 +11,7 @@
   <div class="public-shell__body">
     <pdref-page-header
       title="Demande d'adhesion contribuable"
-      subtitle="Un compte n'est actif qu'apres verification de votre e-mail et validation par un agent de la DGI."
+      subtitle="Un compte n'est actif qu'après vérification de votre e-mail et validation par un agent de la DGI."
     />
 
     @if (problem(); as issue) {
@@ -78,7 +78,7 @@
             />
           </label>
           <label class="pd-field">
-            <span class="pd-label">Telephone</span>
+            <span class="pd-label">Téléphone</span>
             <div class="phone-input">
               <span class="phone-input__prefix">+225</span>
               <input
@@ -93,7 +93,7 @@
                 required
               />
             </div>
-            <span class="pd-help">Le numero est enregistre avec l'indicatif +225.</span>
+            <span class="pd-help">Le numéro est enregistre avec l'indicatif +225.</span>
           </label>
         </div>
 
@@ -109,19 +109,19 @@
     @if (step() === 'sent') {
       <pdref-state-panel
         state="empty"
-        title="Verifiez votre boite e-mail"
-        message="Votre demande est enregistree. Vous recevrez un e-mail. Le lien de verification est valable 24 heures."
+        title="Vérifiez votre boite e-mail"
+        message="Votre demande est enregistrée. Vous recevrez un e-mail. Le lien de vérification est valable 24 heures."
       />
     }
 
     @if (step() === 'pieces' && !problem()) {
       <section class="adhesion-card pd-card" aria-labelledby="pieces-title">
-        <h2 id="pieces-title">Pieces a joindre</h2>
+        <h2 id="pieces-title">Pièces a joindre</h2>
         <p class="pd-help">Adresse e-mail verifiee : {{ emailMasque() }}</p>
 
         <a class="pd-btn pd-btn--ghost" [href]="modeleHref()" target="_blank" rel="noopener">
           <pdref-icon name="file" size="sm" />
-          Telecharger le modele d'autorisation
+          Télécharger le modèle d'autorisation
         </a>
 
         <div class="adhesion-pieces">

@@ -21,7 +21,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header [title]="isEdit() ? 'Modifier le contribuable' : 'Nouveau contribuable'" />
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement de la fiche" />
     } @else {
@@ -44,7 +44,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <p class="pd-warning" role="status">
               {{ centresProblem() }}
               <button type="button" class="pd-btn pd-btn--ghost" (click)="loadCentres()">
-                Reessayer
+                Réessayer
               </button>
             </p>
           }
@@ -73,7 +73,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                   required
               /></label>
               <label class="pd-field"
-                ><span class="pd-label">Systeme comptable *</span
+                ><span class="pd-label">Système comptable *</span
                 ><input
                   class="pd-input"
                   [(ngModel)]="form.systemeComptable"
@@ -116,7 +116,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 ><input class="pd-input" type="email" [(ngModel)]="form.email" name="email"
               /></label>
               <label class="pd-field">
-                <span class="pd-label">Telephone</span>
+                <span class="pd-label">Téléphone</span>
                 <div class="phone-input">
                   <span class="phone-input__prefix">+225</span>
                   <input
@@ -128,7 +128,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                     placeholder="01 02 03 04 05"
                   />
                 </div>
-                <span class="pd-help">Le numero est enregistre avec l'indicatif +225.</span>
+                <span class="pd-help">Le numéro est enregistre avec l'indicatif +225.</span>
               </label>
             </div>
             <div class="pd-actions">

@@ -20,6 +20,7 @@ import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { PermissionsService } from '../../core/services/permissions/permissions.service';
 import { SuivisGateway } from '../../core/services/suivis/suivis.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
+import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-suivi-detail-page',
@@ -40,14 +41,14 @@ import { normalizeProblem } from '../../core/utils/problem';
     />
 
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement du suivi" />
     } @else if (item(); as detail) {
       <div class="actions">
         @if (canVerify()) {
           <button type="button" class="pd-btn pd-btn--primary" (click)="verify()">
-            Verifier GUDEF
+            Vérifier GUDEF
           </button>
         }
         @if (canReject()) {
@@ -66,7 +67,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             class="pd-btn pd-btn--ghost"
             [routerLink]="['/dashboard/suivis', detail.demandeId, 'corriger']"
           >
-            Corriger une decision
+            Corriger une décision
           </a>
         }
         @if (canSign() && detail.validationGlobale?.signatureStatut === 'EN_ATTENTE') {
@@ -139,7 +140,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <article class="avis-card" [class.avis-card--done]="avis.statut === 'EMIS'">
               <header>
                 <strong>{{ stepLabel(avis.etapeCode) }}</strong>
-                <span class="pd-chip">{{ avis.statut }}</span>
+                <span class="pd-chip">{{ avisStatutLabel(avis.statut) }}</span>
               </header>
               <p class="pd-muted">{{ avis.directionCode }}</p>
               @if (avis.decision) {
@@ -147,7 +148,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                   <span
                     class="pd-chip"
                     [class.pd-chip--danger]="avis.decision === 'NON_FAVORABLE'"
-                    >{{ avis.decision }}</span
+                    >{{ decisionLabel(avis.decision) }}</span
                   >
                 </p>
                 <p class="pd-muted">Emis le {{ avis.emisLe | abidjanDate }}</p>
@@ -176,7 +177,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 </div>
               } @else if (avis.statut === 'EN_ATTENTE' && canAvis(avis)) {
                 <label class="pd-field">
-                  <span class="pd-label">Decision</span>
+                  <span class="pd-label">Décision</span>
                   <select
                     class="pd-input"
                     [(ngModel)]="draft[avis.etapeCode].decision"
@@ -223,11 +224,11 @@ import { normalizeProblem } from '../../core/utils/problem';
                     </p>
                   } @else if (draft[avis.etapeCode].motifCode === 'AUTRE') {
                     <p class="pd-help">
-                      Le motif Autre exige une precision dans le champ ci-dessous.
+                      Le motif Autre exige une précision dans le champ ci-dessous.
                     </p>
                   }
                   <label class="pd-field">
-                    <span class="pd-label">Precision</span>
+                    <span class="pd-label">Précision</span>
                     <textarea
                       class="pd-input"
                       rows="2"
@@ -259,7 +260,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <span class="pd-label">Statut</span><strong>{{ validation.statut || '-' }}</strong>
             </div>
             <div>
-              <span class="pd-label">Decision</span
+              <span class="pd-label">Décision</span
               ><strong>{{ validation.decision || '-' }}</strong>
             </div>
             <div>
@@ -267,11 +268,11 @@ import { normalizeProblem } from '../../core/utils/problem';
               ><strong>{{ validation.signatureStatut || '-' }}</strong>
             </div>
             <div>
-              <span class="pd-label">Depot</span
+              <span class="pd-label">Dépôt</span
               ><strong>{{ validation.depotEImpotsStatut || '-' }}</strong>
             </div>
             <div>
-              <span class="pd-label">Reference depot</span
+              <span class="pd-label">Référence dépôt</span
               ><strong>{{ validation.referenceDepotEImpots || '-' }}</strong>
             </div>
             <div>
@@ -448,6 +449,8 @@ import { normalizeProblem } from '../../core/utils/problem';
   ],
 })
 export class SuiviDetailPageComponent {
+  readonly avisStatutLabel = avisStatutLabel;
+  readonly decisionLabel = decisionLabel;
   private readonly gateway = inject(SuivisGateway);
   private readonly rejets = inject(RejetGateway);
   private readonly router = inject(Router);

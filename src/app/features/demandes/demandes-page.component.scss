@@ -186,3 +186,8 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
 }
+
+/* Le badge de statut garde sa taille naturelle au lieu de s'etirer sur toute la carte. */
+.avis-card .pd-chip {
+  justify-self: start;
+}

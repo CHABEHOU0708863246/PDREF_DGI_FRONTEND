@@ -1,6 +1,6 @@
 ﻿<pdref-page-header
   title="Adhesions a valider"
-  subtitle="Verifiez les pieces, l'e-mail et le NCC avant de creer un compte contribuable."
+  subtitle="Vérifiez les pièces, l'e-mail et le NCC avant de créer un compte contribuable."
 />
 
 @if (notice()) {
@@ -82,7 +82,7 @@
   @if (detail()) {
     <pdref-side-panel
       [open]="true"
-      title="Detail de la demande"
+      title="Détail de la demande"
       size="lg"
       (closeRequested)="closeDetail()"
     >
@@ -94,7 +94,7 @@
           <dd>{{ item.prenom }} {{ item.nom }} - {{ item.fonction }}</dd>
           <dt>E-mail</dt>
           <dd>{{ item.email }}</dd>
-          <dt>Telephone</dt>
+          <dt>Téléphone</dt>
           <dd>{{ item.telephone }}</dd>
           <dt>Statut</dt>
           <dd>{{ statutLabel(item.statut) }}</dd>
@@ -108,9 +108,9 @@
           }
         </dl>
 
-        <h3>Pieces</h3>
+        <h3>Pièces</h3>
         @if (item.pieces.length === 0) {
-          <p class="pd-help">Aucune piece fournie.</p>
+          <p class="pd-help">Aucune pièce fournie.</p>
         } @else {
           <ul class="adhesions-pieces">
             @for (piece of item.pieces; track piece.versionId) {
@@ -121,7 +121,7 @@
                   type="button"
                   (click)="downloadPiece(piece.versionId, piece.fileName)"
                 >
-                  Telecharger
+                  Télécharger
                 </button>
               </li>
             }

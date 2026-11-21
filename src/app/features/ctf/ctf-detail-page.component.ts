@@ -16,6 +16,7 @@ import { FilesGateway } from '../../core/services/files/files.gateway';
 import { IntegrationGateway } from '../../core/services/integrations/integration.gateway';
 import { normalizeProblem } from '../../core/utils/problem';
 import { ctfStatutLabel } from './ctf-status';
+import { depotRectifieStatutLabel } from '../../core/utils/labels';
 
 @Component({
   selector: 'pdref-ctf-detail-page',
@@ -39,7 +40,7 @@ import { ctfStatutLabel } from './ctf-status';
         <pdref-state-panel
           state="error"
           [problem]="issue"
-          actionLabel="Reessayer"
+          actionLabel="Réessayer"
           (retry)="load()"
         />
       } @else if (loading()) {
@@ -51,12 +52,12 @@ import { ctfStatutLabel } from './ctf-status';
 
         @if (depots().length > 0) {
           <section class="pd-card">
-            <h2>Depots rectifies</h2>
+            <h2>Dépôts rectifies</h2>
             <ul>
               @for (depot of depots(); track depot.id) {
                 <li>
                   Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | abidjanDate }} -
-                  <strong>{{ depot.statut }}</strong>
+                  <strong>{{ depotRectifieStatutLabel(depot.statut) }}</strong>
                   @if (depot.motifCode) {
                     <span> - motif : {{ motifLabel(depot.motifCode) }}</span>
                   }
@@ -136,7 +137,7 @@ import { ctfStatutLabel } from './ctf-status';
           @if (canActiver() && detail.statut === 'A_ACTIVER') {
             @if (manualEImpots()) {
               <label class="pd-field">
-                <span class="pd-label">Reference d autorisation (facultative)</span>
+                <span class="pd-label">Référence d autorisation (facultative)</span>
                 <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
               </label>
               <label class="pd-field">
@@ -195,7 +196,7 @@ import { ctfStatutLabel } from './ctf-status';
             !detail.dateDepotRectifie
           ) {
             <label class="pd-field">
-              <span class="pd-label">Reference du depot rectifie</span>
+              <span class="pd-label">Référence du dépôt rectifie</span>
               <input
                 class="pd-input"
                 [value]="referenceDepot()"
@@ -203,7 +204,7 @@ import { ctfStatutLabel } from './ctf-status';
               />
             </label>
             <label class="pd-field">
-              <span class="pd-label">Date du depot</span>
+              <span class="pd-label">Date du dépôt</span>
               <input
                 class="pd-input"
                 type="date"
@@ -217,7 +218,7 @@ import { ctfStatutLabel } from './ctf-status';
               [disabled]="busy()"
               (click)="declarerDepot()"
             >
-              Enregistrer le depot rectifie
+              Enregistrer le dépôt rectifie
             </button>
           }
           @if (
@@ -256,18 +257,18 @@ import { ctfStatutLabel } from './ctf-status';
             ><strong>{{ detail.echeanceActivation | abidjanDate }}</strong>
           </div>
           <div>
-            <span class="pd-label">Depot</span
+            <span class="pd-label">Dépôt</span
             ><strong>{{ detail.echeanceDepot | abidjanDate }}</strong>
           </div>
           <div>
-            <span class="pd-label">Delai depot</span
+            <span class="pd-label">Délai dépôt</span
             ><strong>{{ detail.joursRestantsDepot }} JO</strong>
           </div>
           <div>
             <span class="pd-label">Dossier</span><strong>{{ detail.numeroDemande }}</strong>
           </div>
           <div>
-            <span class="pd-label">Reference activation</span
+            <span class="pd-label">Référence activation</span
             ><strong>{{ detail.referenceActivation || '-' }}</strong>
           </div>
           <div>
@@ -275,7 +276,7 @@ import { ctfStatutLabel } from './ctf-status';
             ><strong>{{ detail.dateRetourGudef | abidjanDate }}</strong>
           </div>
           <div>
-            <span class="pd-label">Cloture</span
+            <span class="pd-label">Clôture</span
             ><strong>{{ detail.dateCloture | abidjanDate }}</strong>
           </div>
           <div>
@@ -315,6 +316,7 @@ import { ctfStatutLabel } from './ctf-status';
   ],
 })
 export class CtfDetailPageComponent {
+  readonly depotRectifieStatutLabel = depotRectifieStatutLabel;
   private readonly gateway = inject(CtfGateway);
   private readonly depotsGateway = inject(DepotRectifieGateway);
   private readonly integrations = inject(IntegrationGateway);

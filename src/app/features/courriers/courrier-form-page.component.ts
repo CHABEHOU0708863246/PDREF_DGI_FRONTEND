@@ -27,7 +27,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   template: `
     <pdref-page-header [title]="isEdit() ? 'Modifier le courrier' : 'Nouveau courrier'" />
     @if (problem(); as issue) {
-      <pdref-state-panel state="error" [problem]="issue" actionLabel="Reessayer" (retry)="load()" />
+      <pdref-state-panel state="error" [problem]="issue" actionLabel="Réessayer" (retry)="load()" />
     } @else if (loading()) {
       <pdref-state-panel state="loading" title="Chargement du courrier" />
     } @else {
@@ -60,18 +60,18 @@ import { normalizeProblem } from '../../core/utils/problem';
                 </select>
               </label>
               <label class="pd-field">
-                <span class="pd-label">Numero *</span>
+                <span class="pd-label">Numéro *</span>
                 <input
                   class="pd-input"
                   [(ngModel)]="form.numero"
                   name="numero"
                   [disabled]="true"
-                  placeholder="Genere automatiquement"
+                  placeholder="Généré automatiquement"
                   required
                 />
                 <span class="pd-help">
-                  Numero attribue automatiquement a l'enregistrement, au format
-                  COUR-annee-00001-expediteur.
+                  Numéro attribue automatiquement a l'enregistrement, au format
+                  COUR-année-00001-expéditeur.
                 </span>
               </label>
               @if (isEdit()) {
@@ -93,7 +93,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 </label>
               } @else {
                 <label class="pd-field">
-                  <span class="pd-label">Date d emission *</span>
+                  <span class="pd-label">Date d émission *</span>
                   <input
                     class="pd-input"
                     type="date"
@@ -104,7 +104,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 </label>
               }
               <label class="pd-field">
-                <span class="pd-label">Expediteur *</span>
+                <span class="pd-label">Expéditeur *</span>
                 <input
                   class="pd-input"
                   list="expediteurs"
@@ -124,7 +124,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                 <input class="pd-input" [(ngModel)]="form.objet" name="objet" required />
               </label>
               <label class="pd-field full">
-                <span class="pd-label">References</span>
+                <span class="pd-label">Références</span>
                 <textarea
                   class="pd-input"
                   [(ngModel)]="form.references"

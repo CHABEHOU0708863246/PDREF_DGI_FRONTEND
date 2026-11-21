@@ -10,21 +10,38 @@
     </a>
 
     <nav class="nav" aria-label="Navigation principale">
-      <ul>
-        @for (item of navigation(); track item.route) {
-          <li>
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="is-active"
-              [routerLinkActiveOptions]="{ exact: item.exact }"
-              (click)="closeMobile()"
-            >
-              <pdref-icon [name]="item.icon" />
-              <span class="nav__label">{{ item.label }}</span>
-            </a>
-          </li>
-        }
-      </ul>
+      @for (group of navigation(); track group.id) {
+        <section class="nav__group" [class.nav__group--closed]="!isGroupOpen(group.id)">
+          <button
+            type="button"
+            class="nav__group-title"
+            [attr.aria-expanded]="isGroupOpen(group.id)"
+            [attr.aria-controls]="'nav-group-' + group.id"
+            (click)="toggleGroup(group.id)"
+          >
+            <span>{{ group.label }}</span>
+            <pdref-icon name="chevron-down" size="sm" />
+          </button>
+          @if (isGroupOpen(group.id) || collapsed()) {
+            <ul [id]="'nav-group-' + group.id">
+              @for (item of group.items; track item.route) {
+                <li>
+                  <a
+                    [routerLink]="item.route"
+                    routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+                    [attr.title]="collapsed() ? item.label : null"
+                    (click)="closeMobile()"
+                  >
+                    <pdref-icon [name]="item.icon" />
+                    <span class="nav__label">{{ item.label }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
     </nav>
   </aside>
 

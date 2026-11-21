@@ -531,8 +531,8 @@ test.describe('L19a - recette navigateur', () => {
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
     await expect(page.getByRole('heading', { name: 'Courriers a signer' })).toBeVisible();
-    await page.getByRole('link', { name: 'Deposer le PDF signe' }).click();
-    await expect(page.getByRole('heading', { name: 'Deposer le courrier signe' })).toBeVisible();
+    await page.getByRole('link', { name: 'Déposer le PDF signe' }).click();
+    await expect(page.getByRole('heading', { name: 'Déposer le courrier signe' })).toBeVisible();
     await page.setInputFiles('input[type="file"]', {
       name: 'signe.pdf',
       mimeType: 'application/pdf',
@@ -563,7 +563,11 @@ test.describe('L19a - recette navigateur', () => {
     await loginAs(page, 'agent.gudef');
     await page.goto('/dashboard/rejets');
     await expect(page.getByRole('heading', { name: 'Rejets' })).toBeVisible();
-    await page.getByRole('button', { name: 'Reprendre' }).first().click();
+    await page
+      .getByRole('button', { name: /^Actions pour le rejet/ })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Reprendre le dossier' }).first().click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await dialog.getByRole('button', { name: 'Reprendre' }).click();
