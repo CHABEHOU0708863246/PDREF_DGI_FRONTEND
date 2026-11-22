@@ -1,12 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects": [
-    {
-      "source": "/((?!maintenance\\.html$|assets/|fonts/|icons/|favicon\\.svg$|ngsw-worker\\.js$|safety-worker\\.js$|ngsw\\.json$).*)",
-      "destination": "/maintenance.html",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/:path*",
