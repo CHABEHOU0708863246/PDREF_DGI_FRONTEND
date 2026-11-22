@@ -54,7 +54,7 @@ export interface RejetDialogValue {
             (ngModelChange)="motifCode.set($event); invalid.set(false)"
             required
           >
-            <option value="">Selectionner un motif</option>
+            <option value="">Sélectionner un motif</option>
             @for (motif of motifs(); track motif.code) {
               @if (motif.selectionnable && !motif.legacy) {
                 <option [value]="motif.code">{{ motif.libelle }}</option>
@@ -64,7 +64,7 @@ export interface RejetDialogValue {
         </label>
 
         <label class="pd-field">
-          <span class="pd-label">Commentaire obligatoire (10 caracteres minimum)</span>
+          <span class="pd-label">Commentaire obligatoire (10 caractères minimum)</span>
           <textarea
             class="pd-input"
             name="commentaire"
@@ -82,7 +82,7 @@ export interface RejetDialogValue {
             [ngModel]="pieceComplementaireRequise()"
             (ngModelChange)="pieceComplementaireRequise.set($event)"
           />
-          <span class="pd-label">Piece complementaire requise</span>
+          <span class="pd-label">Pièce complémentaire requise</span>
         </label>
 
         @if (invalid()) {

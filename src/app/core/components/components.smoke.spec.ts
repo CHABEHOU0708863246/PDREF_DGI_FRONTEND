@@ -95,7 +95,7 @@ describe('composants core — smoke', () => {
     const fixture = TestBed.createComponent(StatusBadgeComponent);
     fixture.componentRef.setInput('status', 'DEMO_SUCCESS');
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Termine');
+    expect(fixture.nativeElement.textContent).toContain('Terminé');
   });
 
   it('EmptyIllustration, Skeleton et ErrorFooter', () => {

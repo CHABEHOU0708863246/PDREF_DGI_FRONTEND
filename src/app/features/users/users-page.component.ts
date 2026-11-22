@@ -196,7 +196,7 @@ export class UsersPageComponent {
           roleKeys: this.selectedRoles(),
         })
         .subscribe({
-          next: () => this.complete('Compte cree. Invitation envoyee.'),
+          next: () => this.complete('Compte créé. Invitation envoyée.'),
           error: (error: unknown) => this.fail(error),
         });
       return;

@@ -2,7 +2,7 @@
   <section class="espace-empty pd-card" role="alert">
     <h1>Dossier introuvable</h1>
     <p>Ce dossier n'existe pas ou n'est pas rattache a votre compte.</p>
-    <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour a mes dossiers</a>
+    <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour à mes dossiers</a>
   </section>
 } @else if (loading()) {
   <pdref-state-panel state="loading" title="Chargement du dossier" />
@@ -54,7 +54,7 @@
             Envoi {{ depot.numeroEnvoi }} du {{ depot.dateDepot | date: 'dd/MM/yyyy HH:mm' }} -
             <strong>{{ depotRectifieStatutLabel(depot.statut) }}</strong>
             @if (depot.motifCode) {
-              <span> - motif : {{ depot.motifCode }}</span>
+              <span> - motif : {{ motifText(depot.motifCode) }}</span>
             }
           </li>
         }
@@ -65,7 +65,7 @@
       <p class="pd-error" role="alert">{{ rectifiedError() }}</p>
     }
     <label class="pd-field">
-      <span class="pd-label">Nouveau dépôt rectifie (PDF, JPEG ou PNG)</span>
+      <span class="pd-label">Nouveau dépôt rectifié (PDF, JPEG ou PNG)</span>
       <input
         class="pd-input"
         type="file"
@@ -75,8 +75,8 @@
       />
     </label>
     <p class="pd-help">
-      {{ rectifiedFiles().length }} fichier(s) selectionne(s), maximum 2 Mo par fichier et 5 Mo au
-      total. Le delai de 15 jours ouvrables part de l autorisation et n est pas prolonge.
+      {{ rectifiedFiles().length }} fichier(s) sélectionné(s), maximum 2 Mo par fichier et 5 Mo au
+      total. Le délai de dépôt court à partir de l’autorisation et n’est pas prolongé.
     </p>
     <button
       class="pd-btn pd-btn--primary"
@@ -84,7 +84,7 @@
       [disabled]="rectifiedBusy() || rectifiedFiles().length === 0"
       (click)="sendRectified()"
     >
-      Transmettre le dépôt rectifie
+      Transmettre le dépôt rectifié
     </button>
   </section>
 
@@ -124,7 +124,7 @@
           />
         </label>
         <p class="pd-help">
-          {{ selectedFiles().length }} fichier(s) selectionne(s), maximum 10 fichiers, 2 Mo par
+          {{ selectedFiles().length }} fichier(s) sélectionné(s), maximum 10 fichiers, 2 Mo par
           fichier et 5 Mo par envoi.
         </p>
         <label class="pd-field">
@@ -152,12 +152,12 @@
   <section class="espace-card pd-card" aria-labelledby="dossier-chronologie">
     <h2 id="dossier-chronologie">Chronologie</h2>
     @if (item.chronologie.length === 0) {
-      <p class="pd-help">Aucune etape terminee pour le moment.</p>
+      <p class="pd-help">Aucune étape terminée pour le moment.</p>
     } @else {
       <ol class="espace-timeline">
         @for (etape of item.chronologie; track etape.code + etape.date) {
           <li>
-            <strong>{{ etape.code }}</strong>
+            <strong>{{ etapeText(etape.code) }}</strong>
             <span>{{ etape.date | date: 'dd/MM/yyyy HH:mm' }}</span>
           </li>
         }
@@ -165,5 +165,5 @@
     }
   </section>
 
-  <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour a mes dossiers</a>
+  <a class="pd-btn pd-btn--ghost" routerLink="/espace">Retour à mes dossiers</a>
 }

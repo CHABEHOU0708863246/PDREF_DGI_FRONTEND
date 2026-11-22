@@ -161,7 +161,7 @@ export class ComparisonBarChartComponent {
   readonly series = input<readonly ComparisonDatum[]>([]);
   readonly title = input('Evolution');
   readonly currentLabel = input('Periode');
-  readonly previousLabel = input('Annee precedente');
+  readonly previousLabel = input('Année precedente');
 
   readonly maxValue = computed(() =>
     Math.max(1, ...this.series().flatMap((item) => [item.courant, item.precedent])),

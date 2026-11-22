@@ -51,7 +51,7 @@ describe('NotificationService', () => {
     service.success('OK', 'Fait');
     service.info('Info', 'Information');
     service.warning('Attention', 'Verifier');
-    service.error('Erreur', 'Echec');
+    service.error('Erreur', 'Échec');
     expect(service.toasts()).toHaveLength(4);
     expect(service.toasts()[3]?.sticky).toBe(true);
 

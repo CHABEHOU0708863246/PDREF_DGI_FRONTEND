@@ -11,8 +11,8 @@
     />
   } @else if (deposited(); as done) {
     <section class="depot-confirmation pd-card" aria-live="polite">
-      <h2>Demande deposee</h2>
-      <p class="depot-confirmation__numero">Numero {{ done.demande.numero ?? done.demande.id }}</p>
+      <h2>Demande déposée</h2>
+      <p class="depot-confirmation__numero">Numéro {{ done.demande.numero ?? done.demande.id }}</p>
       <p>Votre demande a ete enregistrée et transmise au service GUDEF.</p>
       <div class="depot-actions">
         <button class="pd-btn pd-btn--primary" type="button" (click)="downloadAccuse()">
@@ -43,7 +43,7 @@
           @if (saving()) {
             Enregistrement...
           } @else if (lastSaved(); as saved) {
-            Enregistre a {{ saved | date: 'HH:mm:ss' }}
+            Enregistré à {{ saved | date: 'HH:mm:ss' }}
           } @else {
             Aucun enregistrement
           }
@@ -242,7 +242,7 @@
             </label>
           </section>
           <section class="depot-fieldset">
-            <h3>Recapitulatif</h3>
+            <h3>Récapitulatif</h3>
             @for (exercice of state().exercices; track exercice.annee) {
               <p>
                 Exercice {{ exercice.annee }} :

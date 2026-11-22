@@ -443,7 +443,7 @@ async function loginAs(page: Page, login: string): Promise<void> {
 }
 
 async function logout(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Se deconnecter' }).click();
+  await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await expect(page).toHaveURL(/\/auth\/login/);
 }
 
@@ -456,7 +456,7 @@ async function avis(page: Page, login: string, step: string): Promise<void> {
   const posted = page.waitForResponse(
     (response) => response.url().includes('/avis/') && response.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: "Emettre l'avis" }).first().click();
+  await page.getByRole('button', { name: "Émettre l'avis" }).first().click();
   await posted;
 }
 
@@ -517,7 +517,7 @@ test.describe('L19a - recette navigateur', () => {
     const posted = page.waitForResponse(
       (response) => response.url().includes('/avis/') && response.request().method() === 'POST',
     );
-    await page.getByRole('button', { name: "Emettre l'avis" }).first().click();
+    await page.getByRole('button', { name: "Émettre l'avis" }).first().click();
     await posted;
     await logout(page);
 
@@ -530,9 +530,9 @@ test.describe('L19a - recette navigateur', () => {
 
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
-    await expect(page.getByRole('heading', { name: 'Courriers a signer' })).toBeVisible();
-    await page.getByRole('link', { name: 'Déposer le PDF signe' }).click();
-    await expect(page.getByRole('heading', { name: 'Déposer le courrier signe' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Courriers à signer' })).toBeVisible();
+    await page.getByRole('link', { name: 'Déposer le PDF signé' }).click();
+    await expect(page.getByRole('heading', { name: 'Déposer le courrier signé' })).toBeVisible();
     await page.setInputFiles('input[type="file"]', {
       name: 'signe.pdf',
       mimeType: 'application/pdf',
@@ -540,7 +540,7 @@ test.describe('L19a - recette navigateur', () => {
     });
     await page.getByLabel('Canal').selectOption('REMISE_PAPIER');
     await page.getByLabel('Reference', { exact: true }).last().fill('REM-1');
-    await page.getByRole('button', { name: 'Declarer la remise' }).click();
+    await page.getByRole('button', { name: 'Déclarer la remise' }).click();
     await page.goto('/suivi');
     await page.getByLabel('NCC').fill('7654321B');
     await page.getByLabel('E-mail').fill('garage@example.test');

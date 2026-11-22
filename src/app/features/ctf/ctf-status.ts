@@ -1,10 +1,10 @@
 export const CTF_STATUTS = [
-  { value: 'A_ACTIVER', label: 'A activer' },
-  { value: 'ACTIVATION_DEMANDEE', label: 'Activation demandee' },
-  { value: 'ACTIVEE', label: 'Activee' },
-  { value: 'ECHEC_ACTIVATION', label: 'Echec activation' },
-  { value: 'CONTRIBUABLE_INFORME', label: 'Contribuable informe' },
-  { value: 'CLOTUREE', label: 'Cloturee' },
+  { value: 'A_ACTIVER', label: 'À activer' },
+  { value: 'ACTIVATION_DEMANDEE', label: 'Activation demandée' },
+  { value: 'ACTIVEE', label: 'Activée' },
+  { value: 'ECHEC_ACTIVATION', label: 'Échec d’activation' },
+  { value: 'CONTRIBUABLE_INFORME', label: 'Contribuable informé' },
+  { value: 'CLOTUREE', label: 'Clôturée' },
 ] as const;
 
 export function ctfStatutLabel(statut: string): string {

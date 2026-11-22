@@ -24,10 +24,10 @@ import { normalizeProblem } from '../../core/utils/problem';
 
 const ETAPES = [
   'Identification et exercices',
-  'Etats financiers',
+  'États financiers',
   'Motifs',
   'Variables',
-  'Pieces et recapitulatif',
+  'Pièces et récapitulatif',
 ];
 
 @Component({
@@ -516,7 +516,7 @@ export class DepotWizardPageComponent implements OnInit {
       ],
       etatsFinanciers: [
         { code: 'BILAN', libelle: 'Bilan' },
-        { code: 'COMPTE_RESULTAT', libelle: 'Compte de resultat' },
+        { code: 'COMPTE_RESULTAT', libelle: 'Compte de résultat' },
       ],
       motifs: [
         { code: 'FOND_ERREUR_SAISIE', libelle: 'Erreur de saisie' },

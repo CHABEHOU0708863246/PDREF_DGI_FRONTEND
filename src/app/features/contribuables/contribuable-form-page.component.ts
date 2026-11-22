@@ -128,7 +128,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                     placeholder="01 02 03 04 05"
                   />
                 </div>
-                <span class="pd-help">Le numéro est enregistre avec l'indicatif +225.</span>
+                <span class="pd-help">Le numéro est enregistré avec l'indicatif +225.</span>
               </label>
             </div>
             <div class="pd-actions">

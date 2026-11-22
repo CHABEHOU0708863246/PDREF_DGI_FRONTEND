@@ -22,7 +22,7 @@ const LIGHTHOUSE_DETAIL: RejetDetail = {
   famille: 'PAR_AGENT',
   motifCode: 'PIECE_JUSTIFICATIVE_MANQUANTE',
   motifLibelle: 'Piece justificative manquante',
-  commentaire: 'Piece complementaire requise pour instruction.',
+  commentaire: 'Pièce complémentaire requise pour instruction.',
   statut: 'EN_ATTENTE_CORRECTION',
   pieceComplementaireRequise: true,
   pieceComplementaireFileId: null,

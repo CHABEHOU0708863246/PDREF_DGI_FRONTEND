@@ -1,4 +1,5 @@
 ﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { instructionLabel } from '../../core/utils/labels';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -32,15 +33,15 @@ import { normalizeProblem } from '../../core/utils/problem';
       }
 
       @if (canImpute()) {
-        <section class="pd-card distribuer" aria-label="A distribuer">
+        <section class="pd-card distribuer" aria-label="À distribuer">
           <div class="head">
             <div>
-              <h2>A distribuer</h2>
+              <h2>À distribuer</h2>
               <p class="pd-muted">{{ page().nonAttribues }} dossier(s) sans attribution.</p>
             </div>
             <label class="pd-field inline">
               <input type="checkbox" [checked]="aDistribuer()" (change)="onADistribuer($event)" />
-              <span class="pd-label">A distribuer uniquement</span>
+              <span class="pd-label">À distribuer uniquement</span>
             </label>
           </div>
         </section>
@@ -53,7 +54,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <label class="pd-field">
               <span class="pd-label">Agent</span>
               <select class="pd-input" [value]="agentId()" (change)="onAgent($event)">
-                <option value="">Selectionner</option>
+                <option value="">Sélectionner</option>
                 @for (agent of agents(); track agent.userId) {
                   <option [value]="agent.userId">{{ agent.displayName }}</option>
                 }
@@ -64,7 +65,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               <select class="pd-input" [value]="instruction()" (change)="onInstruction($event)">
                 <option value="">Aucune</option>
                 @for (item of instructions(); track item) {
-                  <option [value]="item">{{ item }}</option>
+                  <option [value]="item">{{ instructionText(item) }}</option>
                 }
               </select>
             </label>
@@ -86,7 +87,7 @@ import { normalizeProblem } from '../../core/utils/problem';
       <section class="pd-card">
         <div class="head">
           <div>
-            <h2>{{ canImpute() ? 'Dossiers de verification' : 'Mes dossiers a verifier' }}</h2>
+            <h2>{{ canImpute() ? 'Dossiers de vérification' : 'Mes dossiers à vérifier' }}</h2>
             <p class="pd-muted">{{ page().totalCount }} dossier(s)</p>
           </div>
           <button type="button" class="pd-btn pd-btn--ghost" (click)="load()">Actualiser</button>
@@ -129,8 +130,8 @@ import { normalizeProblem } from '../../core/utils/problem';
                       <div class="pd-muted">{{ item.ncc }}</div>
                     </td>
                     <td>{{ item.echeance ? (item.echeance | date: 'dd/MM/yyyy') : '-' }}</td>
-                    <td>{{ item.assigneeName || 'A distribuer' }}</td>
-                    <td>{{ item.instruction || '-' }}</td>
+                    <td>{{ item.assigneeName || 'À distribuer' }}</td>
+                    <td>{{ instructionText(item.instruction) }}</td>
                     <td>
                       @if (canImpute()) {
                         <button
@@ -194,6 +195,7 @@ export class ImputationPageComponent {
   });
   readonly agents = signal<ImputationAgent[]>([]);
   readonly instructions = signal<string[]>([]);
+  readonly instructionText = instructionLabel;
   readonly selected = signal<ImputationItem | null>(null);
   readonly agentId = signal('');
   readonly instruction = signal('');

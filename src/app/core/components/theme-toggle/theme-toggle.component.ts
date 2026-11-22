@@ -11,7 +11,7 @@ import { ThemeService } from '../../services/theme/theme.service';
     <button
       type="button"
       class="pd-icon-btn theme-toggle"
-      [attr.aria-label]="theme.isDark() ? 'Passer en theme clair' : 'Passer en theme sombre'"
+      [attr.aria-label]="theme.isDark() ? 'Passer en thème clair' : 'Passer en thème sombre'"
       [attr.aria-pressed]="theme.isDark()"
       (click)="theme.toggle()"
     >

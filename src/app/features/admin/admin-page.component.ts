@@ -75,9 +75,9 @@ export class AdminPageComponent {
       case 'listes-valeurs':
         return 'Listes de valeurs';
       case 'parametres':
-        return 'Parametres';
+        return 'Paramètres';
       case 'modeles-notifications':
-        return 'Modeles de notification';
+        return 'Modèles de notification';
     }
   });
 
@@ -86,7 +86,7 @@ export class AdminPageComponent {
       case 'directions':
         return 'Une seule direction active par fonction GUDEF, DERAR, DVFN, CTF et DG.';
       case 'exercices':
-        return 'Plusieurs exercices peuvent etre actifs simultanement.';
+        return 'Plusieurs exercices peuvent être actifs en même temps.';
       case 'listes-valeurs':
         return 'Les valeurs legacy restent visibles mais ne sont pas selectionnables.';
       case 'parametres':

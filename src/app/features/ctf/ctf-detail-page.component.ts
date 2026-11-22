@@ -52,7 +52,7 @@ import { depotRectifieStatutLabel } from '../../core/utils/labels';
 
         @if (depots().length > 0) {
           <section class="pd-card">
-            <h2>Dépôts rectifies</h2>
+            <h2>Dépôts rectifiés</h2>
             <ul>
               @for (depot of depots(); track depot.id) {
                 <li>
@@ -137,7 +137,7 @@ import { depotRectifieStatutLabel } from '../../core/utils/labels';
           @if (canActiver() && detail.statut === 'A_ACTIVER') {
             @if (manualEImpots()) {
               <label class="pd-field">
-                <span class="pd-label">Référence d autorisation (facultative)</span>
+                <span class="pd-label">Référence d’autorisation (facultative)</span>
                 <input class="pd-input" [value]="reference()" (input)="onReference($event)" />
               </label>
               <label class="pd-field">
@@ -192,11 +192,12 @@ import { depotRectifieStatutLabel } from '../../core/utils/labels';
             canActiver() &&
             manualEImpots() &&
             detail.statut !== 'A_ACTIVER' &&
+            detail.statut !== 'CLOTUREE' &&
             detail.dateRetourGudef &&
             !detail.dateDepotRectifie
           ) {
             <label class="pd-field">
-              <span class="pd-label">Référence du dépôt rectifie</span>
+              <span class="pd-label">Référence du dépôt rectifié</span>
               <input
                 class="pd-input"
                 [value]="referenceDepot()"
@@ -218,7 +219,7 @@ import { depotRectifieStatutLabel } from '../../core/utils/labels';
               [disabled]="busy()"
               (click)="declarerDepot()"
             >
-              Enregistrer le dépôt rectifie
+              Enregistrer le dépôt rectifié
             </button>
           }
           @if (
@@ -280,7 +281,8 @@ import { depotRectifieStatutLabel } from '../../core/utils/labels';
             ><strong>{{ detail.dateCloture | abidjanDate }}</strong>
           </div>
           <div>
-            <span class="pd-label">Motif</span><strong>{{ detail.motifCloture || '-' }}</strong>
+            <span class="pd-label">Motif</span
+            ><strong>{{ motifClotureLabel(detail.motifCloture) }}</strong>
           </div>
           <div>
             <span class="pd-label">Tentatives</span><strong>{{ detail.tentatives }}</strong>
@@ -586,6 +588,25 @@ export class CtfDetailPageComponent {
         this.problem.set(normalizeProblem(error, null));
       },
     });
+  }
+
+  motifClotureLabel(code: string | null | undefined): string {
+    if (!code) {
+      return '-';
+    }
+    const labels: Record<string, string> = {
+      DEPOT_EFFECTUE: 'États corrigés conformes',
+      DELAI_EXPIRE: 'Délai de dépôt dépassé',
+      DELAI_DEPOT_EXPIRE: 'Délai de dépôt dépassé',
+      DEPOT_RECTIFIE_NON_CONFORME: 'États corrigés non conformes',
+    };
+    return (
+      labels[code] ??
+      code
+        .replaceAll('_', ' ')
+        .toLowerCase()
+        .replace(/^./, (c) => c.toUpperCase())
+    );
   }
 
   statutLabel(statut: string): string {

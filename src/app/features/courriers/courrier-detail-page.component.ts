@@ -1,4 +1,5 @@
 ﻿import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { AbidjanDatePipe } from '../../core/pipes/abidjan-date.pipe';
 import { RouterLink } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ApiProblemDetails } from '../../core/models/common/api-problem.model';
@@ -16,7 +17,7 @@ import { normalizeProblem } from '../../core/utils/problem';
 @Component({
   selector: 'pdref-courrier-detail-page',
   standalone: true,
-  imports: [RouterLink, SidePanelComponent, StatePanelComponent],
+  imports: [RouterLink, SidePanelComponent, StatePanelComponent, AbidjanDatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-side-panel
@@ -46,7 +47,13 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dt>Sens</dt>
               <dd>{{ courrier.sens === 'ENTRANT' ? 'Entrant' : 'Sortant' }}</dd>
               <dt>Date</dt>
-              <dd>{{ courrier.dateArrivee || courrier.dateEmission || '-' }}</dd>
+              <dd>
+                {{
+                  courrier.dateArrivee || courrier.dateEmission
+                    ? (courrier.dateArrivee || courrier.dateEmission | abidjanDate)
+                    : '-'
+                }}
+              </dd>
               <dt>Imputation</dt>
               <dd>{{ courrier.imputation }}</dd>
               <dt>Expéditeur</dt>
@@ -55,7 +62,7 @@ import { normalizeProblem } from '../../core/utils/problem';
           </article>
 
           <article class="pd-card">
-            <h2>Objet et references</h2>
+            <h2>Objet et références</h2>
             <dl>
               <dt>Objet</dt>
               <dd>{{ courrier.objet }}</dd>
@@ -94,13 +101,13 @@ import { normalizeProblem } from '../../core/utils/problem';
               <dt>Demande</dt>
               <dd>
                 @if (courrier.demandeId) {
-                  <span>{{ courrier.referenceDepot || 'Dossier lie' }}</span>
+                  <span>{{ courrier.referenceDepot || 'Dossier lié' }}</span>
                 } @else {
                   <span class="pd-muted">Disponible.</span>
                 }
               </dd>
               <dt>Statut</dt>
-              <dd>{{ courrier.estLie ? 'Lie' : 'Non lie' }}</dd>
+              <dd>{{ courrier.estLie ? 'Lié' : 'Non lié' }}</dd>
             </dl>
           </article>
 
@@ -126,9 +133,9 @@ import { normalizeProblem } from '../../core/utils/problem';
         }
         @if (canSigner() && manualSignature()) {
           <section class="pd-card">
-            <h2>Déposer le courrier signe</h2>
+            <h2>Déposer le courrier signé</h2>
             <label class="pd-field">
-              <span class="pd-label">Signataire declare</span>
+              <span class="pd-label">Signataire déclaré</span>
               <input class="pd-input" [value]="signataire()" (input)="onSignataire($event)" />
             </label>
             <label class="pd-field">
@@ -141,14 +148,14 @@ import { normalizeProblem } from '../../core/utils/problem';
               />
             </label>
             <label class="pd-btn pd-btn--ghost">
-              Choisir le PDF signe
+              Choisir le PDF signé
               <input type="file" accept="application/pdf" hidden (change)="signer($event)" />
             </label>
           </section>
         }
         @if (canDeclarerRemise()) {
           <section class="pd-card">
-            <h2>Declarer la remise</h2>
+            <h2>Déclarer la remise</h2>
             <label class="pd-field">
               <span class="pd-label">Canal</span>
               <select class="pd-input" [value]="canal()" (change)="onCanal($event)">
@@ -172,10 +179,10 @@ import { normalizeProblem } from '../../core/utils/problem';
                 [value]="referenceRemise()"
                 (input)="onReferenceRemise($event)"
               />
-              <span class="pd-help">Référence proposee automatiquement, modifiable.</span>
+              <span class="pd-help">Référence proposée automatiquement, modifiable.</span>
             </label>
             <button type="button" class="pd-btn pd-btn--primary" (click)="declarerRemise()">
-              Declarer la remise
+              Déclarer la remise
             </button>
           </section>
         }
@@ -374,7 +381,12 @@ export class CourrierDetailPageComponent {
   }
 
   loadRemiseReference(): void {
-    if (this.item()?.remiseStatut === 'REMIS' || this.referenceRemise()) {
+    // Seul le profil autorise a declarer la remise (SD GUDEF) peut obtenir la reference.
+    if (
+      !this.canDeclarerRemise() ||
+      this.item()?.remiseStatut === 'REMIS' ||
+      this.referenceRemise()
+    ) {
       return;
     }
     this.gateway.remiseReference(this.id).subscribe({

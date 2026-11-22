@@ -1,8 +1,8 @@
 export const IMPORT_STATUTS = [
   { value: 'EN_ATTENTE', label: 'En attente' },
   { value: 'EN_COURS', label: 'En cours' },
-  { value: 'TERMINE', label: 'Termine' },
-  { value: 'ECHEC', label: 'Echec' },
+  { value: 'TERMINE', label: 'Terminé' },
+  { value: 'ECHEC', label: 'Échec' },
 ] as const;
 
 export function importStatutLabel(statut: string): string {

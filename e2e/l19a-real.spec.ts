@@ -75,7 +75,7 @@ async function logout(page: Page): Promise<void> {
     await page.keyboard.press('Escape');
     await expect(closePanel).toBeHidden();
   }
-  await page.getByRole('button', { name: 'Se deconnecter' }).click();
+  await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await expect(page).toHaveURL(/\/auth\/login/);
 }
 
@@ -146,26 +146,26 @@ async function emettreAvis(
   await expect(page.getByRole('heading', { name: 'Avis des directions' })).toBeVisible();
   const card = page
     .locator('article.avis-card')
-    .filter({ has: page.getByRole('button', { name: "Emettre l'avis" }) })
+    .filter({ has: page.getByRole('button', { name: "Émettre l'avis" }) })
     .first();
   await expect(card).toBeVisible();
 
   if (decision === 'NON_FAVORABLE') {
     await card.getByRole('combobox', { name: 'Decision' }).selectOption('NON_FAVORABLE');
     const motif = card.getByRole('combobox', { name: 'Motif' });
-    await expect(motif.locator('option', { hasText: 'Insuffisance de meme nature' })).toHaveCount(
+    await expect(motif.locator('option', { hasText: 'Insuffisance de même nature' })).toHaveCount(
       1,
     );
     await motif.selectOption('INSUFFISANCE_MEME_NATURE_3ANS');
     await card
-      .getByRole('combobox', { name: /Insuffisance de meme nature/i })
+      .getByRole('combobox', { name: /Insuffisance de même nature/i })
       .selectOption({ label: 'Oui' });
   }
 
   const response = page.waitForResponse(
     (item) => item.url().includes('/avis/') && item.request().method() === 'POST',
   );
-  await card.getByRole('button', { name: "Emettre l'avis" }).click();
+  await card.getByRole('button', { name: "Émettre l'avis" }).click();
   const posted = await response;
   expect(posted.ok()).toBe(true);
   await logout(page);
@@ -193,7 +193,7 @@ async function activerCtfEtCloturer(page: Page, demandeId: string): Promise<void
   );
   await page.getByRole('button', { name: "Declarer l'activation" }).click();
   expect((await activation).ok()).toBe(true);
-  await expect(page.getByText('Contribuable informe', { exact: true })).toBeVisible();
+  await expect(page.getByText('Contribuable informé', { exact: true })).toBeVisible();
 
   await page.goto(`/dashboard/ctf/${demandeId}`);
   const retour = page.waitForResponse(
@@ -455,7 +455,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Envoyer le test' }).click();
     const posted = await response;
     expect(posted.ok()).toBe(true);
-    await expect(page.getByText('E-mail de test envoye.')).toBeVisible();
+    await expect(page.getByText('E-mail de test envoyé.')).toBeVisible();
 
     await expect
       .poll(
@@ -490,11 +490,11 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.getByRole('button', { name: 'Nouvel utilisateur' }).click();
     const panel = page.getByRole('dialog', { name: 'Nouvel utilisateur' });
     await expect(panel).toBeVisible();
-    await expect(panel.getByLabel('Prenom', { exact: true })).toBeFocused();
+    await expect(panel.getByLabel('Prénom', { exact: true })).toBeFocused();
     await expect(panel.locator('form')).toHaveCount(1);
     await expect(page.locator('table + .users-form')).toHaveCount(0);
 
-    await panel.getByLabel('Prenom', { exact: true }).fill('Test panneau');
+    await panel.getByLabel('Prénom', { exact: true }).fill('Test panneau');
     await page.keyboard.press('Escape');
     const confirmation = page.getByRole('dialog', { name: 'Modifications non enregistrees' });
     await expect(confirmation).toBeVisible();
@@ -668,8 +668,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
-    await expect(page.getByRole('heading', { name: 'Courriers a signer' })).toBeVisible();
-    await page.getByRole('link', { name: 'Déposer le PDF signe' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Courriers à signer' })).toBeVisible();
+    await page.getByRole('link', { name: 'Déposer le PDF signé' }).first().click();
     await page.waitForURL(/\/dashboard\/courriers\/[a-f0-9]{24}/);
     const courrierId = new URL(page.url()).pathname.split('/').pop();
     if (!courrierId) {
@@ -677,8 +677,8 @@ test.describe('L19a - recette sur la vraie pile', () => {
     }
     const section = page
       .locator('section.pd-card')
-      .filter({ hasText: 'Déposer le courrier signe' });
-    await section.getByLabel('Signataire declare').fill('Directeur General');
+      .filter({ hasText: 'Déposer le courrier signé' });
+    await section.getByLabel('Signataire déclaré').fill('Directeur General');
     const signature = page.waitForResponse(
       (item) => item.url().includes('/signature') && item.request().method() === 'POST',
     );
@@ -697,7 +697,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const remise = page.waitForResponse(
       (item) => item.url().includes('/remise') && item.request().method() === 'POST',
     );
-    await page.getByRole('button', { name: 'Declarer la remise' }).click();
+    await page.getByRole('button', { name: 'Déclarer la remise' }).click();
     expect((await remise).ok()).toBe(true);
     await logout(page);
 
@@ -844,7 +844,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.goto('/dashboard/admin/utilisateurs');
     await page.getByRole('button', { name: 'Nouvel utilisateur' }).click();
     const form = page.getByRole('dialog', { name: 'Nouvel utilisateur' });
-    await form.getByLabel('Prenom', { exact: true }).fill('Agent');
+    await form.getByLabel('Prénom', { exact: true }).fill('Agent');
     await form.getByLabel('Nom', { exact: true }).fill('DVFN');
     await form.getByLabel('Email', { exact: true }).fill(email);
     await form.getByLabel('Matricule', { exact: true }).fill(matricule);
@@ -1006,12 +1006,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await loginAs(page, 'dg');
     await page.goto('/dashboard/courriers/a-signer');
-    await page.getByRole('link', { name: 'Déposer le PDF signe' }).first().click();
+    await page.getByRole('link', { name: 'Déposer le PDF signé' }).first().click();
     await page.waitForURL(/\/dashboard\/courriers\/[a-f0-9]{24}/);
     const signatureSection = page
       .locator('section.pd-card')
-      .filter({ hasText: 'Déposer le courrier signe' });
-    await signatureSection.getByLabel('Signataire declare').fill('Directeur General');
+      .filter({ hasText: 'Déposer le courrier signé' });
+    await signatureSection.getByLabel('Signataire déclaré').fill('Directeur General');
     const signature = page.waitForResponse(
       (item) => item.url().includes('/signature') && item.request().method() === 'POST',
     );
@@ -1025,11 +1025,11 @@ test.describe('L19a - recette sur la vraie pile', () => {
 
     await page.goto('/adhesion');
     await expect(
-      page.getByRole('heading', { name: "Demande d'adhesion contribuable" }),
+      page.getByRole('heading', { name: "Demande d'adhésion contribuable" }),
     ).toBeVisible();
     await page.getByLabel('NCC', { exact: true }).fill('7654321B');
     await page.getByLabel('Nom', { exact: true }).fill('Diallo');
-    await page.getByLabel('Prenom', { exact: true }).fill('Awa');
+    await page.getByLabel('Prénom', { exact: true }).fill('Awa');
     await page.getByLabel('Fonction', { exact: true }).fill('Gerante');
     await page.getByLabel('E-mail', { exact: true }).fill(email);
     await page.getByLabel('Telephone', { exact: true }).fill('+2250700000022');
@@ -1152,7 +1152,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await page.locator('.depot-choice input').first().check();
     await expect(page).toHaveURL(/\/espace\/depots\/[a-f0-9]{24}/, { timeout: 15_000 });
     await page.getByRole('button', { name: 'Étape suivante' }).click();
-    await expect(page.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /États financiers/ })).toBeVisible();
     await page.getByLabel('Toute la liasse').first().check();
     await page.waitForTimeout(2500);
 
@@ -1173,12 +1173,12 @@ test.describe('L19a - recette sur la vraie pile', () => {
     const draft = resumedPage.locator('.espace-drafts li').filter({ hasText: 'Exercice' }).first();
     await expect(draft).toBeVisible();
     await draft.getByRole('link', { name: 'Reprendre' }).click();
-    await expect(resumedPage.getByRole('heading', { name: /Etats financiers/ })).toBeVisible();
+    await expect(resumedPage.getByRole('heading', { name: /États financiers/ })).toBeVisible();
     await expect(resumedPage.getByLabel('Toute la liasse').first()).toBeChecked();
 
     await resumedPage.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(resumedPage.getByRole('heading', { name: /Motifs/ })).toBeVisible();
-    await expect(resumedPage.locator('.depot-save')).toContainText('Enregistre a', {
+    await expect(resumedPage.locator('.depot-save')).toContainText('Enregistré à', {
       timeout: 20_000,
     });
     const motif = resumedPage.getByRole('checkbox', { name: 'Erreur de saisie' });
@@ -1194,7 +1194,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     await expect(resumedPage.getByRole('heading', { name: /Variables/ })).toBeVisible();
     await resumedPage.getByRole('button', { name: 'Étape suivante' }).click();
     await expect(
-      resumedPage.getByRole('heading', { name: /Pieces et recapitulatif/ }),
+      resumedPage.getByRole('heading', { name: /Pièces et récapitulatif/ }),
     ).toBeVisible();
 
     const draftId = new URL(resumedPage.url()).pathname.split('/').pop();
@@ -1212,7 +1212,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     expect(upload.ok(), await upload.text()).toBe(true);
     await resumedPage.reload();
     await expect(
-      resumedPage.getByRole('heading', { name: /Pieces et recapitulatif/ }),
+      resumedPage.getByRole('heading', { name: /Pièces et récapitulatif/ }),
     ).toBeVisible();
     await expect(resumedPage.getByText('depot.pdf')).toBeVisible();
     const deposit = resumedPage.waitForResponse(
@@ -1220,7 +1220,7 @@ test.describe('L19a - recette sur la vraie pile', () => {
     );
     await resumedPage.getByRole('button', { name: 'Deposer la demande' }).click();
     expect((await deposit).ok()).toBe(true);
-    await expect(resumedPage.getByRole('heading', { name: 'Demande deposee' })).toBeVisible();
+    await expect(resumedPage.getByRole('heading', { name: 'Demande déposée' })).toBeVisible();
     const numero = (await resumedPage.locator('.depot-confirmation__numero').innerText()).replace(
       /^Numero\s+/,
       '',

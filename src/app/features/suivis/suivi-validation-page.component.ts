@@ -35,7 +35,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                 <th>Direction</th>
                 <th>Statut</th>
                 <th>Décision</th>
-                <th>Emis le</th>
+                <th>Émis le</th>
               </tr>
             </thead>
             <tbody>

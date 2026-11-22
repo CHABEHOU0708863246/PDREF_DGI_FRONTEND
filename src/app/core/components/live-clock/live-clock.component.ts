@@ -15,7 +15,7 @@ import type { OnDestroy } from '@angular/core';
         >{{ formattedDate() }}</time
       >
       <span class="live-clock__refresh" data-testid="dashboard-refresh-counter">
-        Donnees actualisees il y a {{ elapsedSeconds() }} s
+        Données actualisées il y a {{ elapsedSeconds() }} s
       </span>
     </div>
   `,

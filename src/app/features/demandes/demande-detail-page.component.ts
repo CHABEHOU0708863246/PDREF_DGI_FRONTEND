@@ -24,8 +24,10 @@ import {
   circuitStatutLabel,
   decisionLabel,
   demandeStatutLabel,
+  champLabel,
   etapeLabel,
   etapeStatutLabel,
+  motifLabel,
 } from '../../core/utils/labels';
 
 const LIGHTHOUSE_DETAIL: DemandeDetail = {
@@ -331,12 +333,17 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
 
           @case ('conformite') {
             <section class="pd-card">
-              <p><span class="pd-label">Statut</span> {{ demande.conformite.statut }}</p>
+              <p>
+                <span class="pd-label">Statut</span>
+                {{ demandeStatutText(demande.conformite.statut) }}
+              </p>
               @if (demande.conformite.motifRejetCode) {
-                <p class="pd-error">Motif de rejet : {{ demande.conformite.motifRejetCode }}</p>
+                <p class="pd-error">
+                  Motif de rejet : {{ motifText(demande.conformite.motifRejetCode) }}
+                </p>
               }
               @if (demande.conformite.champsManquants.length > 0) {
-                <p>Champs manquants : {{ demande.conformite.champsManquants.join(', ') }}</p>
+                <p>Champs manquants : {{ champsText(demande.conformite.champsManquants) }}</p>
               }
               <p class="pd-muted">Vérifiée le {{ demande.conformite.verifieLe | abidjanDate }}</p>
             </section>
@@ -454,6 +461,9 @@ const LIGHTHOUSE_SUIVI: SuiviDetail = {
 })
 export class DemandeDetailPageComponent {
   readonly demandeStatutLabel = demandeStatutLabel;
+  readonly demandeStatutText = demandeStatutLabel;
+  readonly motifText = motifLabel;
+  readonly champsText = (champs: readonly string[]): string => champs.map(champLabel).join(', ');
   readonly etapeLabel = etapeLabel;
   readonly etapeStatutLabel = etapeStatutLabel;
   readonly avisStatutLabel = avisStatutLabel;

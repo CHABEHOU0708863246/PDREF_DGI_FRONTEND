@@ -115,8 +115,8 @@ export const DASHBOARD_ROUTES: Routes = [
         loadComponent: () =>
           import('../admin/admin-page.component').then((module) => module.AdminPageComponent),
         canActivate: [accessGuard],
-        data: { permissions: ['Parametres_Read'], screen: 'parametres', breadcrumb: 'Parametres' },
-        title: 'Parametres - Administration PDREF',
+        data: { permissions: ['Parametres_Read'], screen: 'parametres', breadcrumb: 'Paramètres' },
+        title: 'Paramètres - Administration PDREF',
       },
       {
         path: 'admin/emails',
@@ -180,9 +180,9 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [accessGuard],
         data: {
           permissions: ['Courriers_DeposerSigne'],
-          breadcrumb: 'Courriers a signer',
+          breadcrumb: 'Courriers à signer',
         },
-        title: 'Courriers a signer - PDREF',
+        title: 'Courriers à signer - PDREF',
       },
       {
         path: 'courriers/:id/modifier',
@@ -219,8 +219,8 @@ export const DASHBOARD_ROUTES: Routes = [
             (module) => module.CtfAActiverPageComponent,
           ),
         canActivate: [accessGuard],
-        data: { permissions: ['Ctf_Read'], breadcrumb: 'Autorisations a activer' },
-        title: 'Autorisations a activer - PDREF',
+        data: { permissions: ['Ctf_Read'], breadcrumb: 'Autorisations à activer' },
+        title: 'Autorisations à activer - PDREF',
       },
       {
         path: 'ctf/suivi',

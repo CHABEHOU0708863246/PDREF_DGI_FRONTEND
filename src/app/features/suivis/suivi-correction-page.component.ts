@@ -72,7 +72,7 @@ import { etapeLabel, decisionLabel } from '../../core/utils/labels';
             </div>
           </section>
           <label class="pd-field">
-            <span class="pd-label">Motif (10 caracteres minimum)</span>
+            <span class="pd-label">Motif (10 caractères minimum)</span>
             <textarea class="pd-input" rows="3" [(ngModel)]="motif" name="motif"></textarea>
           </label>
           <div class="pd-actions">

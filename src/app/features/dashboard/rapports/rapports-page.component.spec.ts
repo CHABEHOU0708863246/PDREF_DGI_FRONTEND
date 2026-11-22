@@ -12,7 +12,7 @@ import { RapportsPageComponent } from './rapports-page.component';
 
 const stats: RapportStatistiques = {
   type: 'ANNUEL',
-  libelle: 'Annee 2026',
+  libelle: 'Année 2026',
   dateDu: '2026-01-01',
   dateAu: '2026-12-31',
   dateDuPrecedent: '2025-01-01',
@@ -33,7 +33,7 @@ const stats: RapportStatistiques = {
   sections: [
     {
       code: 'SYSTEME_COMPTABLE',
-      titre: 'Repartition par systeme comptable',
+      titre: 'Répartition par système comptable',
       lignes: [
         { code: 'NORMAL', libelle: 'Normal/OHADA', courant: 8, precedent: 3, ecart: 5 },
         { code: 'TOTAL', libelle: 'Total', courant: 8, precedent: 3, ecart: 5, estTotal: true },

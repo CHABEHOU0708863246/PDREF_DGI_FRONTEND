@@ -112,3 +112,55 @@ export function decisionLabel(code: string | null | undefined, fallback = '-'): 
   }
   return DECISIONS[code] ?? code;
 }
+
+const INSTRUCTION_LABELS: Record<string, string> = {
+  ACCEPTE_POUR_TRAITEMENT: 'Accepté pour traitement',
+  VERIFICATION_SIMPLE: 'Vérification simple',
+  VERIFICATION_APPROFONDIE: 'Vérification approfondie',
+};
+
+export function instructionLabel(value: string | null | undefined, fallback = '-'): string {
+  if (!value) {
+    return fallback;
+  }
+  if (INSTRUCTION_LABELS[value]) {
+    return INSTRUCTION_LABELS[value];
+  }
+  const readable = value.replaceAll('_', ' ').toLowerCase();
+  return readable.charAt(0).toUpperCase() + readable.slice(1);
+}
+
+const MOTIFS: Readonly<Record<string, string>> = {
+  PIECES_MANQUANTES: 'Pièces manquantes',
+  PIECE_ILLISIBLE: 'Pièce illisible',
+  FORMAT_INCORRECT: 'Format incorrect',
+  MONTANT_INCOHERENT: 'Montant incohérent',
+  CONFORMITE_INCOMPLETE: 'Fiche contribuable incomplète',
+  AUTRE: 'Autre',
+};
+
+const CHAMPS: Readonly<Record<string, string>> = {
+  ncc: 'NCC',
+  raisonSociale: 'Raison sociale',
+  centreRattachement: 'Centre de rattachement',
+  telephone: 'Téléphone',
+  email: 'E-mail',
+};
+
+function humanize(code: string): string {
+  const readable = code.replaceAll('_', ' ').toLowerCase();
+  return readable.charAt(0).toUpperCase() + readable.slice(1);
+}
+
+/** Libelle d'un motif (rejet, non-conformite) : PIECES_MANQUANTES -> Pièces manquantes. */
+export function motifLabel(code: string | null | undefined, fallback = '-'): string {
+  if (!code) {
+    return fallback;
+  }
+  return MOTIFS[code] ?? humanize(code);
+}
+
+/** Libelle d'un champ de fiche contribuable : telephone -> Téléphone. */
+export function champLabel(code: string): string {
+  return CHAMPS[code] ?? code;
+}

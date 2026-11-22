@@ -106,6 +106,18 @@ describe('CourrierDetailPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Instruction C3');
   });
 
+  it('ne demande pas la reference de remise a un profil sans droit de remise (DG)', () => {
+    const { fixture, gateway } = setup(true, false);
+    fixture.detectChanges();
+    expect(gateway.remiseReference).not.toHaveBeenCalled();
+  });
+
+  it('propose la reference de remise au Sous-Directeur GUDEF', () => {
+    const { fixture, gateway } = setup();
+    fixture.detectChanges();
+    expect(gateway.remiseReference).toHaveBeenCalledWith('cr1');
+  });
+
   it('ferme le panneau vers la liste', () => {
     const { fixture } = setup();
     fixture.detectChanges();

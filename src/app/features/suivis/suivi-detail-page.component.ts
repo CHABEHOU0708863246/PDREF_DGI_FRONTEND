@@ -75,7 +75,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
             Signer le courrier
           </button>
         }
-        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/suivis">Retour a la liste</a>
+        <a class="pd-btn pd-btn--ghost" routerLink="/dashboard/suivis">Retour à la liste</a>
       </div>
 
       <section class="pd-card">
@@ -132,7 +132,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
         <div class="section-head">
           <h2>Avis des directions</h2>
           @if (detail.avisRecus === detail.avisTotal) {
-            <span class="pd-chip">Jointure complete</span>
+            <span class="pd-chip">Tous les avis sont reçus</span>
           }
         </div>
         <div class="avis-grid">
@@ -151,7 +151,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                     >{{ decisionLabel(avis.decision) }}</span
                   >
                 </p>
-                <p class="pd-muted">Emis le {{ avis.emisLe | abidjanDate }}</p>
+                <p class="pd-muted">Émis le {{ avis.emisLe | abidjanDate }}</p>
                 @if (avis.motifCode) {
                   <p><strong>Motif :</strong> {{ motifLabel(avis.motifCode) }}</p>
                 }
@@ -171,7 +171,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                     {{ article24Value(avis.article24?.avisVerificationComptabilite) }}</span
                   >
                   <span
-                    >Verification approfondie :
+                    >Vérification approfondie :
                     {{ article24Value(avis.article24?.verificationApprofondieEnCours) }}</span
                   >
                 </div>
@@ -188,7 +188,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                   </select>
                 </label>
                 <fieldset class="article24">
-                  <legend>Controles article 24</legend>
+                  <legend>Contrôles article 24</legend>
                   @for (control of article24Controls; track control.key) {
                     <label class="pd-field">
                       <span class="pd-label">{{ control.label }}</span>
@@ -197,7 +197,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                         [(ngModel)]="draft[avis.etapeCode].article24[control.key]"
                         [name]="'article24-' + avis.id + '-' + control.key"
                       >
-                        <option [ngValue]="null">Non renseigne</option>
+                        <option [ngValue]="null">Non renseigné</option>
                         <option [ngValue]="true">Oui</option>
                         <option [ngValue]="false">Non</option>
                       </select>
@@ -242,7 +242,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
                   class="pd-btn pd-btn--primary pd-btn--sm"
                   (click)="decide(avis)"
                 >
-                  Emettre l'avis
+                  Émettre l'avis
                 </button>
               } @else {
                 <p class="pd-muted">Aucune action disponible.</p>
@@ -290,7 +290,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
           <h2>Transmettre le suivi</h2>
           <form class="transmission" (ngSubmit)="transmit()">
             <label class="pd-field">
-              <span class="pd-label">Destinataires (userId, separes par une virgule, 1 a 5)</span>
+              <span class="pd-label">Destinataires (userId, séparés par une virgule, 1 a 5)</span>
               <input
                 class="pd-input"
                 [(ngModel)]="transmission.destinataires"
@@ -298,7 +298,7 @@ import { avisStatutLabel, decisionLabel } from '../../core/utils/labels';
               />
             </label>
             <label class="pd-field">
-              <span class="pd-label">Commentaire interne (jamais transmis a l'exterieur)</span>
+              <span class="pd-label">Commentaire interne (jamais transmis à l'extérieur)</span>
               <textarea
                 class="pd-input"
                 rows="2"
@@ -466,10 +466,10 @@ export class SuiviDetailPageComponent {
   readonly rejetMotifs = signal<readonly RejetMotif[]>([]);
   readonly rejetBusy = signal(false);
   readonly article24Controls = [
-    { key: 'insuffisanceMemeNature3Ans', label: 'Insuffisance de meme nature dans les 3 ans' },
+    { key: 'insuffisanceMemeNature3Ans', label: 'Insuffisance de même nature dans les 3 ans' },
     { key: 'engagementRedressementEnCours', label: 'Engagement de redressement en cours' },
-    { key: 'avisVerificationComptabilite', label: 'Avis de verification de comptabilite' },
-    { key: 'verificationApprofondieEnCours', label: 'Verification approfondie en cours' },
+    { key: 'avisVerificationComptabilite', label: 'Avis de vérification de comptabilité' },
+    { key: 'verificationApprofondieEnCours', label: 'Vérification approfondie en cours' },
   ] as const;
   readonly draft: Record<
     string,
@@ -697,16 +697,16 @@ export class SuiviDetailPageComponent {
   motifRequirement(code: string): string | null {
     return (
       {
-        INSUFFISANCE_MEME_NATURE_3ANS: 'Insuffisance de meme nature dans les 3 ans',
+        INSUFFISANCE_MEME_NATURE_3ANS: 'Insuffisance de même nature dans les 3 ans',
         ENGAGEMENT_REDRESSEMENT_EN_COURS: 'Engagement de redressement en cours',
-        AVIS_VERIFICATION_COMPTABILITE: 'Avis de verification de comptabilite',
-        VERIFICATION_APPROFONDIE_EN_COURS: 'Verification approfondie en cours',
+        AVIS_VERIFICATION_COMPTABILITE: 'Avis de vérification de comptabilité',
+        VERIFICATION_APPROFONDIE_EN_COURS: 'Vérification approfondie en cours',
       }[code] ?? null
     );
   }
 
   article24Value(value: boolean | null | undefined): string {
-    return value === true ? 'Oui' : value === false ? 'Non' : 'Non renseigne';
+    return value === true ? 'Oui' : value === false ? 'Non' : 'Non renseigné';
   }
 
   private emptyArticle24(avis: AvisDirection): Article24Controles {

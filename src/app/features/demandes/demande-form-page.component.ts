@@ -286,7 +286,7 @@ const LIGHTHOUSE_FORM: DemandeFormulaire = {
           <section class="pd-card">
             <h2>4. Conformité et engagements</h2>
             <p class="pd-muted">
-              La conformité est contrôlée automatiquement Ã  partir de la fiche contribuable. Un
+              La conformité est contrôlée automatiquement à partir de la fiche contribuable. Un
               dossier non conforme est rejeté et notifié.
             </p>
             <ul class="conformite-list">

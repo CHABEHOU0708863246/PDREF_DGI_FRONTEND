@@ -35,7 +35,7 @@ function setup(manage = true) {
     list: vi.fn(() => of(page)),
     retry: vi.fn(() => of(void 0)),
     sendTest: vi.fn(() =>
-      of({ success: true, errorCode: null, message: 'E-mail de test envoye.' }),
+      of({ success: true, errorCode: null, message: 'E-mail de test envoyé.' }),
     ),
   };
   const permissions = new PermissionsService();

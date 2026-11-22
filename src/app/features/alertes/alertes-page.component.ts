@@ -97,7 +97,7 @@ const LIGHTHOUSE_STATS: AlerteStats = {
         <div class="head">
           <h2>Volume d'alertes</h2>
           <label class="pd-field granularity">
-            <span class="pd-label">Granularite</span>
+            <span class="pd-label">Granularité</span>
             <select class="pd-input" [value]="granularity()" (change)="onGranularity($event)">
               <option value="semaine">Par semaine</option>
               <option value="mois">Par mois</option>
@@ -278,10 +278,10 @@ export class AlertesPageComponent {
   readonly filters = { dateDu: '', dateAu: '', directionId: '', type: '', etape: '' };
   readonly directions = ['GUDEF', 'DERAR', 'DVFN', 'RATTACHEMENT', 'CTF'];
   readonly types = [
-    { value: 'ECHEANCE', label: 'Echeance' },
+    { value: 'ECHEANCE', label: 'Échéance' },
     { value: 'RETARD', label: 'Retard' },
     { value: 'PLAFOND_30JO', label: 'Plafond 30 JO' },
-    { value: 'LEGACY_PREALERTE', label: 'Legacy pre-alerte' },
+    { value: 'LEGACY_PREALERTE', label: 'Ancienne pré-alerte' },
     { value: 'LEGACY_ALERTE', label: 'Legacy alerte' },
   ];
   readonly chartData = signal<BarChartDatum[]>([]);

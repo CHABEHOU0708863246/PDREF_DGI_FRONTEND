@@ -38,7 +38,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
-      title="Autorisations a activer"
+      title="Autorisations à activer"
       subtitle="Autorisations de rectification en attente d'activation."
     />
 
@@ -56,7 +56,7 @@ const LIGHTHOUSE_ITEMS: CtfListItem[] = [
     } @else {
       <section class="pd-card">
         <div class="head">
-          <h2>Dossiers a autoriser</h2>
+          <h2>Dossiers à autoriser</h2>
           <div class="head-actions">
             <span class="pd-muted">{{ items().length }} dossier(s)</span>
             <a class="pd-btn pd-btn--ghost pd-btn--sm" routerLink="/dashboard/ctf/suivi">

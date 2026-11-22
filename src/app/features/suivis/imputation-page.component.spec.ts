@@ -48,7 +48,7 @@ describe('ImputationPageComponent', () => {
     const fixture = TestBed.createComponent(ImputationPageComponent);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.textContent).toContain('A distribuer');
+    expect(element.textContent).toContain('À distribuer');
     expect(element.textContent).toContain('2026-0001');
     expect(gateway.agents).toHaveBeenCalled();
   });

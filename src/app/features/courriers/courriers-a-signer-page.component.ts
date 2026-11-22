@@ -16,7 +16,7 @@ import { normalizeProblem } from '../../core/utils/problem';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pdref-page-header
-      title="Courriers a signer"
+      title="Courriers à signer"
       subtitle="Courriers de refus en attente de signature et de dépôt du PDF signe."
     />
 
@@ -42,7 +42,7 @@ import { normalizeProblem } from '../../core/utils/problem';
         } @else if (items().length === 0) {
           <pdref-state-panel
             state="empty"
-            title="Aucun courrier a signer"
+            title="Aucun courrier à signer"
             message="Aucun courrier de refus n'attend de signature."
           />
         } @else {
@@ -77,7 +77,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                       <a
                         class="pd-btn pd-btn--primary pd-btn--sm"
                         [routerLink]="['/dashboard/courriers', item.courrierId]"
-                        >Déposer le PDF signe</a
+                        >Déposer le PDF signé</a
                       >
                     </td>
                   </tr>

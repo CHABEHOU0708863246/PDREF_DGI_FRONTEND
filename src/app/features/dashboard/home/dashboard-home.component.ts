@@ -708,7 +708,7 @@ export class DashboardHomeComponent implements OnDestroy {
         NON_FAVORABLE: 'Avis non favorable',
         REJETE: 'Rejete',
         CLOTURE: 'Cloture',
-        ABANDONNE: 'Abandonne',
+        ABANDONNE: 'Abandonné',
       }[statut] ?? statut
     );
   }

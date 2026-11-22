@@ -16,7 +16,7 @@ const formulaire: DemandeFormulaire = {
   ],
   etatsFinanciers: [
     { code: 'BILAN', libelle: 'Bilan' },
-    { code: 'COMPTE_RESULTAT', libelle: 'Compte de resultat' },
+    { code: 'COMPTE_RESULTAT', libelle: 'Compte de résultat' },
   ],
   motifs: [
     { code: 'FOND_ERREUR_SAISIE', libelle: 'Erreur de saisie' },

@@ -376,7 +376,7 @@
             <label class="pd-field"
               ><span class="pd-label">Type</span>
               <select class="pd-input" formControlName="type">
-                <option value="">Non renseigne</option>
+                <option value="">Non renseigné</option>
                 <option value="CENTRALE">Centrale</option>
                 <option value="REGIONALE">Regionale</option>
                 <option value="SERVICE">Service</option>
@@ -385,7 +385,7 @@
             <label class="pd-field"
               ><span class="pd-label">Fonction circuit</span>
               <select class="pd-input" formControlName="fonctionCircuit">
-                <option value="">Non renseignee</option>
+                <option value="">Non renseignée</option>
                 @for (item of functions; track item) {
                   <option [value]="item">{{ item }}</option>
                 }

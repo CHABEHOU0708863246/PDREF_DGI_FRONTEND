@@ -33,7 +33,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
         <span class="espace-user">{{ auth.currentUser()?.displayName }}</span>
         <pdref-theme-toggle />
         <button class="pd-btn pd-btn--ghost" type="button" (click)="logout()">
-          Se deconnecter
+          Se déconnecter
         </button>
       </header>
       <main class="espace-shell__body">

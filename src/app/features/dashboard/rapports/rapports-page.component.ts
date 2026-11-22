@@ -24,7 +24,7 @@ import { normalizeProblem } from '../../../core/utils/problem';
 
 const LIGHTHOUSE_STATS: RapportStatistiques = {
   type: 'ANNUEL',
-  libelle: 'Annee 2026',
+  libelle: 'Année 2026',
   dateDu: '2026-01-01',
   dateAu: '2026-12-31',
   dateDuPrecedent: '2025-01-01',
@@ -51,7 +51,7 @@ const LIGHTHOUSE_STATS: RapportStatistiques = {
   sections: [
     {
       code: 'SYSTEME_COMPTABLE',
-      titre: 'Repartition par systeme comptable',
+      titre: 'Répartition par système comptable',
       lignes: [
         { code: 'NORMAL', libelle: 'Normal/OHADA', courant: 8, precedent: 3, ecart: 5 },
         { code: 'SMT', libelle: 'SMT', courant: 3, precedent: 4, ecart: -1 },
@@ -61,7 +61,7 @@ const LIGHTHOUSE_STATS: RapportStatistiques = {
     },
     {
       code: 'SECTEUR',
-      titre: "Repartition par secteur d'activite",
+      titre: "Répartition par secteur d'activité",
       lignes: [
         { code: 'AGRICULTURE', libelle: 'AGRICULTURE', courant: 7, precedent: 2, ecart: 5 },
         { code: 'BTP', libelle: 'BTP', courant: 2, precedent: 2, ecart: 0 },
@@ -246,7 +246,7 @@ interface KpiView {
           [series]="evolutionSeries()"
           title="Évolution des demandes"
           [currentLabel]="data.libelle"
-          previousLabel="Annee precedente"
+          previousLabel="Année precedente"
         />
       </section>
 
@@ -298,7 +298,7 @@ interface KpiView {
 
       <section class="pd-card" aria-label="Avis emis par les directions">
         <div class="head">
-          <h2>Avis emis par les directions competentes</h2>
+          <h2>Avis émis par les directions compétentes</h2>
           <span class="pd-muted">{{ data.libelle }}</span>
         </div>
         @if (data.avis.length === 0) {
@@ -387,7 +387,7 @@ interface KpiView {
       </section>
 
       <section class="pd-card legend" aria-label="Definitions des indicateurs">
-        <h2>Definitions</h2>
+        <h2>Définitions</h2>
         @for (definition of data.legende; track definition) {
           <p class="pd-muted">{{ definition }}</p>
         }
@@ -563,7 +563,7 @@ export class RapportsPageComponent {
     { value: 'MENSUEL', label: 'Mensuel' },
     { value: 'TRIMESTRIEL', label: 'Trimestriel' },
     { value: 'ANNUEL', label: 'Annuel' },
-    { value: 'PERSONNALISE', label: 'Personnalise' },
+    { value: 'PERSONNALISE', label: 'Personnalisé' },
   ] as const;
   readonly formats = [
     { value: 'PDF', label: 'PDF' },
@@ -760,7 +760,7 @@ export class RapportsPageComponent {
     EN_ATTENTE: 'En attente',
     EN_PREPARATION: 'En preparation',
     PRET: 'Pret',
-    ECHEC: 'Echec',
+    ECHEC: 'Échec',
     PURGE: 'Purge',
   };
 

@@ -143,7 +143,7 @@ describe('Pages CTF', () => {
     expect(component.items()).toHaveLength(1);
     expect(component.canActiver()).toBe(false);
     expect(component.canRetour()).toBe(false);
-    expect(component.statutLabel('A_ACTIVER')).toBe('A activer');
+    expect(component.statutLabel('A_ACTIVER')).toBe('À activer');
   });
 
   it('couvre les evenements de filtre et les actions de suivi', () => {
@@ -230,7 +230,7 @@ describe('Pages CTF', () => {
     component.retour();
     expect(gateway.activationManuelle).toHaveBeenCalled();
     expect(gateway.depotRectifieManuel).toHaveBeenCalled();
-    expect(component.statutLabel('A_ACTIVER')).toBe('A activer');
+    expect(component.statutLabel('A_ACTIVER')).toBe('À activer');
     expect(gateway.get).toHaveBeenCalled();
   });
 

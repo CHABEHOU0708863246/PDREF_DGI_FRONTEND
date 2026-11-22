@@ -19,6 +19,8 @@ import {
   demandeStatutLabel,
   decisionLabel,
   depotRectifieStatutLabel,
+  etapeLabel,
+  motifLabel,
 } from '../../core/utils/labels';
 
 @Component({
@@ -30,6 +32,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EspaceDossierPageComponent implements OnInit {
+  readonly motifText = motifLabel;
+  readonly etapeText = etapeLabel;
   readonly demandeStatutLabel = demandeStatutLabel;
   readonly decisionLabel = decisionLabel;
   readonly depotRectifieStatutLabel = depotRectifieStatutLabel;

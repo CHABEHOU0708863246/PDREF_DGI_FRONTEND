@@ -26,7 +26,7 @@ export const STATUS_CATALOG: Readonly<Record<string, StatusDescriptor>> = {
   },
   DEMO_SUCCESS: {
     code: 'DEMO_SUCCESS',
-    label: 'Termine',
+    label: 'Terminé',
     tone: 'success',
     icon: 'check',
   },

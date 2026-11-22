@@ -70,7 +70,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                   required
                 />
                 <span class="pd-help">
-                  Numéro attribue automatiquement a l'enregistrement, au format
+                  Numéro attribué automatiquement à l'enregistrement, au format
                   COUR-année-00001-expéditeur.
                 </span>
               </label>
@@ -82,7 +82,7 @@ import { normalizeProblem } from '../../core/utils/problem';
               }
               @if (form.sens === 'ENTRANT') {
                 <label class="pd-field">
-                  <span class="pd-label">Date d arrivee *</span>
+                  <span class="pd-label">Date d’arrivée *</span>
                   <input
                     class="pd-input"
                     type="date"

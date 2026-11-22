@@ -89,7 +89,7 @@ export class MonTravailPageComponent implements OnInit {
   nextAction(item: SuiviDossier): string {
     const step = item.etapeCourante ?? '';
     if (step.includes('VERIF_GUDEF') || step === 'CONFORMITE_AUTO') return 'Verifier la demande';
-    if (step.startsWith('AVIS_')) return 'Emettre un avis';
+    if (step.startsWith('AVIS_')) return 'Émettre un avis';
     if (step.includes('VALIDATION')) return 'Decider la validation globale';
     if (step.includes('CTF')) return 'Autoriser la rectification';
     if (item.statut === 'VALIDATION_POSEE') return 'Signer le courrier';

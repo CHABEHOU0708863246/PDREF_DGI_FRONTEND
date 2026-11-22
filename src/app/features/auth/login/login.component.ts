@@ -73,7 +73,7 @@ import { AuthLayoutComponent } from '../components/auth-layout.component';
         />
 
         <div class="auth-links">
-          <a routerLink="/auth/forgot-password">Mot de passe oublie ?</a>
+          <a routerLink="/auth/forgot-password">Mot de passe oublié ?</a>
           <a routerLink="/adhesion">Entreprise : demander un compte / adhesion</a>
         </div>
 

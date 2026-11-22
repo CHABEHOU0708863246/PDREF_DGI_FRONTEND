@@ -143,7 +143,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
               </button>
               <a class="pd-btn pd-btn--ghost" routerLink="/dashboard">Retour</a>
               <button type="button" class="pd-btn pd-btn--ghost" (click)="logout()">
-                Se deconnecter
+                Se déconnecter
               </button>
             </div>
           </form>

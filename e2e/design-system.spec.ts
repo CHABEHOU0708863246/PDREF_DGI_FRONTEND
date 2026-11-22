@@ -53,7 +53,7 @@ test.describe('design system — accessibilite et responsive', () => {
     });
   }
 
-  test('theme clair, sombre et systeme', async ({ page }) => {
+  test('thème clair, sombre et systeme', async ({ page }) => {
     await page.goto('/design-system-demo');
     await page.waitForLoadState('networkidle');
 

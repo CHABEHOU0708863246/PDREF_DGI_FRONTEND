@@ -60,7 +60,7 @@ import { normalizeProblem } from '../../core/utils/problem';
             <option value="">Tous</option>
             <option value="EN_ATTENTE">En attente</option>
             <option value="EN_COURS">En cours</option>
-            <option value="ENVOYEE">Envoyee</option>
+            <option value="ENVOYEE">Envoyée</option>
             <option value="ECHEC">Échec</option>
             <option value="ECHEC_FINAL">Échec final</option>
           </select>
@@ -101,7 +101,7 @@ import { normalizeProblem } from '../../core/utils/problem';
                     <span class="pd-muted"> - {{ item.aggregateId }}</span>
                   }
                 </td>
-                <td>{{ item.recipientMasked ?? 'Non renseigne' }}</td>
+                <td>{{ item.recipientMasked ?? 'Non renseigné' }}</td>
                 <td>
                   <span
                     class="email-status"
@@ -322,9 +322,9 @@ export class EmailAdminPageComponent {
       case 'EN_COURS':
         return 'En cours';
       case 'ENVOYEE':
-        return 'Envoyee';
+        return 'Envoyée';
       case 'ECHEC':
-        return 'Echec';
+        return 'Échec';
       case 'ECHEC_FINAL':
         return 'Echec final';
       default:

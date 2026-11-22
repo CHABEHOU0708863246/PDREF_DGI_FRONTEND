@@ -105,7 +105,7 @@ describe('Pages Imports', () => {
 
     expect(component.page().items).toHaveLength(1);
     expect(component.canExecute()).toBe(true);
-    expect(component.statutLabel('TERMINE')).toBe('Termine');
+    expect(component.statutLabel('TERMINE')).toBe('Terminé');
     const search = document.createElement('input');
     search.value = 'fichier';
     component.onSearch({ target: search } as unknown as Event);
@@ -189,6 +189,6 @@ describe('Pages Imports', () => {
     component.onMotif({ target: motif } as unknown as Event);
     component.downloadReport();
     expect(gateway.downloadReport).toHaveBeenCalledWith('i1');
-    expect(component.statutLabel('TERMINE')).toBe('Termine');
+    expect(component.statutLabel('TERMINE')).toBe('Terminé');
   });
 });

@@ -46,7 +46,7 @@ const LIGHTHOUSE_ITEMS: RejetListItem[] = [
     famille: 'PAR_AGENT',
     motifCode: 'PIECE_JUSTIFICATIVE_MANQUANTE',
     motifLibelle: 'Piece justificative manquante',
-    commentaire: 'Piece complementaire requise pour instruction.',
+    commentaire: 'Pièce complémentaire requise pour instruction.',
     statut: 'EN_ATTENTE_CORRECTION',
     pieceComplementaireRequise: true,
     dateCreation: '2026-11-05T00:00:00Z',
